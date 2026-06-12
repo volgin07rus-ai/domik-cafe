@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Домик — городская кофейня на Бахрушина</title>
+  <meta name="description" content="Уютная кофейня на Бахрушина — спешелти, свежая выпечка и веранда в тихом дворе. В трёх минутах от Павелецкой.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 4 4 14h3v14h18V14h3z' fill='%23CE9A45'/><rect x='13' y='19' width='6' height='9' fill='%23261F1A'/></svg>">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Lora:wght@500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css?v=19">
+  <script>
+    (function(){try{
+      var s=/[?&]static\b/.test(location.search);
+      if(s)document.documentElement.classList.add('static');
+      if(!s&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+        document.documentElement.classList.add('anim');
+        /* предохранитель: если main.js не загрузился — показать контент */
+        setTimeout(function(){
+          if(!window.__domikReady)document.documentElement.classList.remove('anim');
+        },3000);
+      }
+    }catch(e){document.documentElement.classList.remove('anim')}})()
+  </script>
+
+  <meta name="theme-color" content="#F7F1E6">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Домик — городская кофейня на Бахрушина">
+  <meta property="og:description" content="Уютная кофейня у Павелецкой: спешелти, свежая выпечка, веранда в тихом дворе. Бахрушина, 12, стр. 2 · ежедневно до 21:00.">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    "name": "Домик",
+    "description": "Городская кофейня: спешелти, свежая выпечка, веранда в тихом дворе.",
+    "telephone": "+7 (903) 724-62-83",
+    "priceRange": "₽",
+    "servesCuisine": "Кофе, выпечка, десерты",
+    "hasMap": "https://yandex.ru/maps/-/CPtBIB1H",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Москва",
+      "streetAddress": "ул. Бахрушина, 12, стр. 2"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "138"
+    },
+    "openingHoursSpecification": [
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "08:00", "closes": "21:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday","Sunday"], "opens": "09:00", "closes": "21:00" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <a class="skip-link" href="#top">К содержимому</a>
+
+  <!-- летающие зёрна: плывут вниз при скролле; одна сторона = одна скорость (не наезжают) -->
+  <div class="beans" aria-hidden="true">
+    <span class="bean f1" style="--r:-16deg" data-speed="0.26" data-top="0.08"></span>
+    <span class="bean f2" style="--r:20deg"  data-speed="0.26" data-top="0.45"></span>
+    <span class="bean f3" style="--r:-9deg"  data-speed="0.26" data-top="0.80"></span>
+    <span class="bean f4" style="--r:15deg"  data-speed="0.30" data-top="0.24"></span>
+    <span class="bean f5" style="--r:-22deg" data-speed="0.30" data-top="0.58"></span>
+    <span class="bean f6" style="--r:10deg"  data-speed="0.30" data-top="0.92"></span>
+  </div>
+
+  <!-- ШАПКА -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#top" class="logo" aria-label="Домик — на главную">Домик</a>
+
+      <nav class="nav" id="nav" aria-label="Основная навигация">
+        <a href="#menu" class="nav__link">Меню</a>
+        <a href="#bakery" class="nav__link">Выпечка</a>
+        <a href="#about" class="nav__link">О нас</a>
+        <a href="#gallery" class="nav__link">Галерея</a>
+        <a href="#contacts" class="nav__link">Контакты</a>
+      </nav>
+
+      <div class="header__actions">
+        <a href="tel:+79037246283" class="header__phone" aria-label="Позвонить">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.3 1z"/></svg>
+        </a>
+        <a href="#contacts" class="btn btn--ochre header__cta">Как добраться</a>
+        <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ОБЛОЖКА (HERO) -->
+  <main id="top">
+    <section class="hero" id="hero">
+      <div class="container hero__inner">
+
+        <div class="hero__content">
+          <p class="kicker kicker--hero reveal">спешелти-кофейня · Москва</p>
+          <h1 class="hero__title reveal" style="--d:.05s">Дом, где<br>варят <span class="squig">кофе<svg class="squig__line" viewBox="0 0 120 14" aria-hidden="true"><path pathLength="200" d="M4 10 Q 20 4 36 9 T 70 9 T 114 8" fill="none" stroke="#CE9A45" stroke-width="4.5" stroke-linecap="round"/></svg></span></h1>
+          <p class="hero__sub reveal" style="--d:.12s">
+            Уютная кофейня на Бахрушина — спешелти, свежая выпечка
+            и веранда в тихом дворе. В трёх минутах от Павелецкой.
+          </p>
+          <div class="hero__actions reveal" style="--d:.18s">
+            <a href="#menu" class="btn btn--ochre btn--lg">Посмотреть меню</a>
+            <a href="#contacts" class="link-arrow">Как добраться&nbsp;→</a>
+          </div>
+          <div class="trust reveal" style="--d:.24s">
+            <span class="trust__star" aria-hidden="true">★</span>
+            <a class="rating-link" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener"><b>4,9</b> на Яндекс&nbsp;Картах · 138&nbsp;отзывов</a>
+          </div>
+        </div>
+
+        <div class="hero__media reveal" style="--d:.1s">
+          <!-- полароид-коллаж: фото как на доске в кафе -->
+          <div class="collage">
+            <div class="polw polw--1" data-parallax="0.10">
+              <figure class="pol pol--1">
+                <div class="pol__ph pol__ph--sage">
+                  <img src="assets/plate.webp" alt="Капучино с латте-артом и круассан" width="900" height="823">
+                </div>
+                <figcaption>капучино с любовью</figcaption>
+              </figure>
+            </div>
+            <div class="polw polw--2" data-parallax="0.22">
+              <figure class="pol pol--2">
+                <div class="pol__ph pol__ph--cream">
+                  <img src="assets/syrniki.webp" alt="Сырники со сметаной и вареньем" width="800" height="732">
+                </div>
+                <figcaption>сырники по утрам</figcaption>
+              </figure>
+            </div>
+            <div class="polw polw--3" data-parallax="0.15">
+              <figure class="pol pol--3">
+                <div class="pol__ph pol__ph--tile">
+                  <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="14" width="32" height="24" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="26" r="7" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="18" y="9" width="12" height="6" rx="2" fill="currentColor"/></svg>
+                  <span>фото скоро</span>
+                </div>
+                <figcaption>наш тёплый зал</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="chip">
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5"/></svg>
+            Бахрушина, 12 · ежедневно до 21:00
+          </div>
+        </div>
+
+      </div>
+
+      <!-- зигзаг-мотив (со стойки) -->
+      <svg class="zigzag" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true">
+        <polyline points="0,12 25,2 50,12 75,2 100,12 125,2 150,12 175,2 200,12 225,2 250,12 275,2 300,12 325,2 350,12 375,2 400,12 425,2 450,12 475,2 500,12 525,2 550,12 575,2 600,12 625,2 650,12 675,2 700,12 725,2 750,12 775,2 800,12 825,2 850,12 875,2 900,12 925,2 950,12 975,2 1000,12 1025,2 1050,12 1075,2 1100,12 1125,2 1150,12 1175,2 1200,12" fill="none" stroke="#CE9A45" stroke-width="2.4"/>
+        <polyline points="0,2 25,12 50,2 75,12 100,2 125,12 150,2 175,12 200,2 225,12 250,2 275,12 300,2 325,12 350,2 375,12 400,2 425,12 450,2 475,12 500,2 525,12 550,2 575,12 600,2 625,12 650,2 675,12 700,2 725,12 750,2 775,12 800,2 825,12 850,2 875,12 900,2 925,12 950,2 975,12 1000,2 1025,12 1050,2 1075,12 1100,2 1125,12 1150,2 1175,12 1200,2" fill="none" stroke="#93A786" stroke-width="1.6"/>
+      </svg>
+    </section>
+
+    <!-- ВЫПЕЧКА -->
+    <section class="section bakery" id="bakery">
+      <div class="container">
+        <div class="sec-head">
+          <p class="kicker sr">Из печи каждое утро</p>
+          <h2 class="h2 sr">Свежая выпечка</h2>
+          <svg class="uline sr" viewBox="0 0 84 12" aria-hidden="true"><polyline points="2,10 16,3 30,10 44,3 58,10 72,3 82,8" fill="none" stroke="#CE9A45" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <p class="sec-sub sr">Выбирайте под настроение — печём каждый день из хороших продуктов.</p>
+        </div>
+
+        <div class="cards4">
+          <article class="pcard sr">
+            <div class="pcard__art pcard__art--cream">
+              <svg viewBox="0 0 120 90" class="ill" aria-hidden="true">
+                <path d="M34 52 C20 46 10 52 8 64 C18 68 32 64 38 56 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M86 52 C100 46 110 52 112 64 C102 68 88 64 82 56 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="52" rx="28" ry="20" fill="#CE9A45" stroke="#261F1A" stroke-width="3"/>
+                <path d="M48 34 C44 44 44 60 48 70" fill="none" stroke="#261F1A" stroke-width="3" stroke-linecap="round"/>
+                <path d="M72 34 C76 44 76 60 72 70" fill="none" stroke="#261F1A" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="pcard__name">Классический круассан</h3>
+            <p class="pcard__sub">хрустящий, на сливочном масле</p>
+            <div class="pcard__row"><span class="price">220 ₽</span></div>
+          </article>
+
+          <article class="pcard pcard--hit sr">
+            <div class="pcard__art pcard__art--sage">
+              <svg viewBox="0 0 120 90" class="ill" aria-hidden="true">
+                <path d="M34 52 C20 46 10 52 8 64 C18 68 32 64 38 56 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M86 52 C100 46 110 52 112 64 C102 68 88 64 82 56 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="52" rx="28" ry="20" fill="#CE9A45" stroke="#261F1A" stroke-width="3"/>
+                <ellipse cx="50" cy="42" rx="5" ry="3" transform="rotate(-22 50 42)" fill="#F7F1E6" stroke="#261F1A" stroke-width="2"/>
+                <ellipse cx="64" cy="38" rx="5" ry="3" transform="rotate(14 64 38)" fill="#F7F1E6" stroke="#261F1A" stroke-width="2"/>
+                <ellipse cx="72" cy="50" rx="5" ry="3" transform="rotate(-10 72 50)" fill="#F7F1E6" stroke="#261F1A" stroke-width="2"/>
+                <ellipse cx="55" cy="58" rx="5" ry="3" transform="rotate(20 55 58)" fill="#F7F1E6" stroke="#261F1A" stroke-width="2"/>
+                <circle cx="44" cy="52" r="1.6" fill="#F7F1E6"/><circle cx="62" cy="64" r="1.6" fill="#F7F1E6"/><circle cx="76" cy="40" r="1.6" fill="#F7F1E6"/>
+              </svg>
+            </div>
+            <h3 class="pcard__name">Миндальный круассан</h3>
+            <p class="pcard__sub">с кремом франжипан и лепестками</p>
+            <div class="pcard__row"><span class="price">320 ₽</span></div>
+          </article>
+
+          <article class="pcard sr">
+            <div class="pcard__art pcard__art--ochre">
+              <svg viewBox="0 0 120 90" class="ill" aria-hidden="true">
+                <path d="M34 50 C20 44 10 50 8 62 C18 66 32 62 38 54 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M86 50 C100 44 110 50 112 62 C102 66 88 62 82 54 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="50" rx="28" ry="19" fill="#CE9A45" stroke="#261F1A" stroke-width="3"/>
+                <path d="M40 64 Q50 72 60 64 T80 64" fill="none" stroke="#D98C82" stroke-width="6" stroke-linecap="round"/>
+                <path d="M44 70 Q54 77 64 70 T84 70" fill="none" stroke="#E0A52E" stroke-width="5" stroke-linecap="round"/>
+                <path d="M48 34 C45 43 45 57 48 66" fill="none" stroke="#261F1A" stroke-width="3" stroke-linecap="round"/>
+                <path d="M72 34 C75 43 75 57 72 66" fill="none" stroke="#261F1A" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="pcard__name">Круассан ветчина-сыр</h3>
+            <p class="pcard__sub">тёплый, с расплавленным сыром</p>
+            <div class="pcard__row"><span class="price">300 ₽</span></div>
+          </article>
+
+          <article class="pcard sr">
+            <div class="pcard__art pcard__art--terra">
+              <svg viewBox="0 0 120 90" class="ill" aria-hidden="true">
+                <rect x="34" y="24" width="52" height="48" rx="12" fill="#CE9A45" stroke="#261F1A" stroke-width="3"/>
+                <path d="M34 38 q13 9 26 0 q13 9 26 0" fill="none" stroke="#F2E3C8" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="48" cy="54" r="4.5" fill="#4F5A3F" stroke="#261F1A" stroke-width="2"/>
+                <circle cx="64" cy="60" r="4.5" fill="#4F5A3F" stroke="#261F1A" stroke-width="2"/>
+                <circle cx="72" cy="46" r="4.5" fill="#4F5A3F" stroke="#261F1A" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3 class="pcard__name">Слойка сыр-оливки</h3>
+            <p class="pcard__sub">солёная, к кофе и не только</p>
+            <div class="pcard__row"><span class="price">280 ₽</span></div>
+          </article>
+        </div>
+
+        <div class="sec-cta sr"><a href="#menu" class="link-arrow">Смотреть всё меню&nbsp;→</a></div>
+      </div>
+    </section>
+
+    <!-- ПОЧЕМУ ВОЗВРАЩАЮТСЯ -->
+    <section class="section why" id="about">
+      <div class="container">
+        <div class="sec-head">
+          <p class="kicker sr">О нас</p>
+          <h2 class="h2 sr">Почему гости возвращаются</h2>
+          <svg class="uline sr" viewBox="0 0 84 12" aria-hidden="true"><polyline points="2,10 16,3 30,10 44,3 58,10 72,3 82,8" fill="none" stroke="#93A786" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="why__grid">
+          <div class="why__item sr">
+            <div class="why__icon why__icon--ochre">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="10" y="22" width="22" height="16" rx="7" fill="#CE9A45" stroke="#261F1A" stroke-width="2.5"/>
+                <path d="M32 26 q9 1 7.5 8 q-1.5 6 -9 5" fill="none" stroke="#261F1A" stroke-width="2.5"/>
+                <path d="M17 16 q3 -4 0 -8" fill="none" stroke="#8A7F70" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M25 16 q3 -4 0 -8" fill="none" stroke="#8A7F70" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Отличный кофе</h3>
+            <p>Рожковая и фильтр, зерно от проверенных обжарщиков.</p>
+          </div>
+
+          <div class="why__item sr">
+            <div class="why__icon why__icon--sage">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M14 26 C8 24 4 27 3 32 C7 34 13 32 16 28 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M34 26 C40 24 44 27 45 32 C41 34 35 32 32 28 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="2" stroke-linejoin="round"/>
+                <ellipse cx="24" cy="27" rx="11" ry="8" fill="#CE9A45" stroke="#261F1A" stroke-width="2"/>
+                <path d="M20 20 c-1.5 4 -1.5 10 0 14" fill="none" stroke="#261F1A" stroke-width="2" stroke-linecap="round"/>
+                <path d="M28 20 c1.5 4 1.5 10 0 14" fill="none" stroke="#261F1A" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Свежая выпечка</h3>
+            <p>Печём каждый день из хороших продуктов.</p>
+          </div>
+
+          <div class="why__item sr">
+            <div class="why__icon why__icon--terra">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <line x1="24" y1="4" x2="24" y2="13" stroke="#261F1A" stroke-width="2.5"/>
+                <path d="M13 22 a11 11 0 0 1 22 0 Z" fill="#C0573B" stroke="#261F1A" stroke-width="2.5" stroke-linejoin="round"/>
+                <circle cx="24" cy="27" r="7" fill="#E3A434" opacity=".28"/>
+                <circle cx="24" cy="26" r="3" fill="#E3A434" stroke="#261F1A" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3>Уютная атмосфера</h3>
+            <p>Кирпич, дерево, тёплый свет и негромкая музыка.</p>
+          </div>
+
+          <div class="why__item sr">
+            <div class="why__icon why__icon--teal">
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <ellipse cx="22" cy="30" rx="9" ry="7" fill="#2F8A86" stroke="#261F1A" stroke-width="2.5"/>
+                <circle cx="13" cy="20" r="3.6" fill="#2F8A86" stroke="#261F1A" stroke-width="2"/>
+                <circle cx="22" cy="16" r="3.6" fill="#2F8A86" stroke="#261F1A" stroke-width="2"/>
+                <circle cx="31" cy="20" r="3.6" fill="#2F8A86" stroke="#261F1A" stroke-width="2"/>
+                <path d="M38 28 c2.6 -3 7 -.6 6 2.8 c-.8 2.6 -4 4.4 -6 5.4 c-2 -1 -5.2 -2.8 -6 -5.4 c-1 -3.4 3.4 -5.8 6 -2.8 Z" fill="#C0573B" stroke="#261F1A" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Рады каждому</h3>
+            <p>Можно с собакой, с ноутбуком или просто посидеть.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЧТО ПОПРОБОВАТЬ СЕГОДНЯ -->
+    <section class="section taste" id="menu">
+      <div class="container">
+        <div class="sec-head sec-head--row">
+          <div>
+            <p class="kicker sr">Сезонное и любимое</p>
+            <h2 class="h2 sr">Что попробовать сегодня</h2>
+            <svg class="uline sr" viewBox="0 0 84 12" aria-hidden="true"><polyline points="2,10 16,3 30,10 44,3 58,10 72,3 82,8" fill="none" stroke="#CE9A45" stroke-width="2.6" stroke-linecap="round"/></svg>
+          </div>
+          <div class="car__nav sr">
+            <button class="car__btn" id="carPrev" aria-label="Назад"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="car__btn" id="carNext" aria-label="Вперёд"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5 L16 12 L9 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+
+        <div class="car" id="car">
+          <div class="car__track" id="carTrack" tabindex="0" role="region" aria-label="Карусель «Что попробовать сегодня»">
+
+            <article class="ccard sr">
+              <div class="ccard__art ccard__art--cream">
+                <svg viewBox="0 0 120 110" class="ill" aria-hidden="true">
+                  <ellipse cx="60" cy="88" rx="30" ry="6" fill="#EDE3D3" stroke="#261F1A" stroke-width="2.5"/>
+                  <rect x="38" y="46" width="42" height="36" rx="11" fill="#F7F1E6" stroke="#261F1A" stroke-width="3"/>
+                  <path d="M80 52 q13 2 11 13 q-2 9 -13 7" fill="none" stroke="#261F1A" stroke-width="3"/>
+                  <ellipse cx="59" cy="46" rx="21" ry="7" fill="#E8D5C4" stroke="#261F1A" stroke-width="2.5"/>
+                  <path d="M59 44 c-2.4 -2.8 -6.6 -.4 -5.4 2.6 c.8 2 3.6 3.4 5.4 4.2 c1.8 -.8 4.6 -2.2 5.4 -4.2 c1.2 -3 -3 -5.4 -5.4 -2.6 Z" fill="#C0573B"/>
+                  <path d="M50 34 q4 -7 0 -13" fill="none" stroke="#8A7F70" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M66 34 q4 -7 0 -13" fill="none" stroke="#8A7F70" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h3 class="ccard__name">Капучино</h3>
+              <p class="ccard__sub">рожковая кофемашина</p>
+              <span class="price">от 300 ₽</span>
+            </article>
+
+            <article class="ccard sr">
+              <div class="ccard__art ccard__art--sage">
+                <svg viewBox="0 0 120 110" class="ill" aria-hidden="true">
+                  <path d="M42 34 h36 l-4 44 a14 9 0 0 1 -28 0 Z" fill="#EAD7C4" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                  <ellipse cx="60" cy="34" rx="18" ry="6" fill="#F7F1E6" stroke="#261F1A" stroke-width="2.5"/>
+                  <path d="M70 28 q8 -12 16 -16" fill="none" stroke="#6B7B5E" stroke-width="2.5" stroke-linecap="round"/>
+                  <ellipse cx="84" cy="13" rx="3.4" ry="2.2" transform="rotate(-30 84 13)" fill="#A98FC4"/>
+                  <ellipse cx="80" cy="17" rx="3.4" ry="2.2" transform="rotate(-30 80 17)" fill="#A98FC4"/>
+                  <ellipse cx="77" cy="21" rx="3.4" ry="2.2" transform="rotate(-30 77 21)" fill="#A98FC4"/>
+                  <ellipse cx="88" cy="16" rx="3.4" ry="2.2" transform="rotate(-30 88 16)" fill="#A98FC4"/>
+                </svg>
+              </div>
+              <h3 class="ccard__name">Раф лаванда</h3>
+              <p class="ccard__sub">авторский, нежный</p>
+              <span class="price">380 ₽</span>
+            </article>
+
+            <article class="ccard sr">
+              <div class="ccard__art ccard__art--ochre">
+                <svg viewBox="0 0 120 110" class="ill" aria-hidden="true">
+                  <path d="M30 46 L90 46 L84 76 L36 76 Z" fill="#F5E7C9" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                  <path d="M36 76 L84 76 L82 86 L38 86 Z" fill="#C28E4E" stroke="#261F1A" stroke-width="3" stroke-linejoin="round"/>
+                  <line x1="33" y1="54" x2="87" y2="54" stroke="#261F1A" stroke-width="2" opacity=".35"/>
+                  <circle cx="60" cy="38" r="7" fill="#C0573B" stroke="#261F1A" stroke-width="2.5"/>
+                  <path d="M64 31 q5 -5 9 -3 q-1 5 -7 6" fill="#93A786" stroke="#261F1A" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <h3 class="ccard__name">Чизкейк Нью-Йорк</h3>
+              <p class="ccard__sub">классика, печём сами</p>
+              <span class="price">360 ₽</span>
+            </article>
+
+            <article class="ccard sr">
+              <div class="ccard__art ccard__art--cream">
+                <svg viewBox="0 0 120 110" class="ill" aria-hidden="true">
+                  <rect x="42" y="40" width="36" height="46" rx="9" fill="#CFE0C2" stroke="#261F1A" stroke-width="3"/>
+                  <rect x="46" y="56" width="28" height="26" rx="6" fill="#8FAE78"/>
+                  <circle cx="60" cy="38" r="13" fill="#F7F1E6" stroke="#261F1A" stroke-width="3"/>
+                  <rect x="70" y="14" width="6" height="30" rx="3" transform="rotate(18 73 29)" fill="#C0573B" stroke="#261F1A" stroke-width="2"/>
+                </svg>
+              </div>
+              <h3 class="ccard__name">Матча-пломбир</h3>
+              <p class="ccard__sub">сезонное</p>
+              <span class="price">450 ₽</span>
+            </article>
+
+            <article class="ccard sr">
+              <div class="ccard__art ccard__art--sage">
+                <svg viewBox="0 0 120 110" class="ill" aria-hidden="true">
+                  <rect x="42" y="30" width="36" height="56" rx="9" fill="#F2E6D4" stroke="#261F1A" stroke-width="3"/>
+                  <path d="M44 52 q9 5 16 0 t16 0 L76 84 a7 7 0 0 1 -7 0 L51 84 a7 7 0 0 1 -7 0 Z" fill="#A4632F" opacity=".0"/>
+                  <rect x="45" y="33" width="30" height="20" rx="6" fill="#A4632F"/>
+                  <rect x="50" y="40" width="9" height="9" rx="2" transform="rotate(14 54 44)" fill="#FFFFFF" opacity=".75"/>
+                  <rect x="62" y="36" width="9" height="9" rx="2" transform="rotate(-12 66 40)" fill="#FFFFFF" opacity=".65"/>
+                  <rect x="66" y="10" width="6" height="28" rx="3" transform="rotate(14 69 24)" fill="#93A786" stroke="#261F1A" stroke-width="2"/>
+                </svg>
+              </div>
+              <h3 class="ccard__name">Айс-латте</h3>
+              <p class="ccard__sub">бодрит и освежает</p>
+              <span class="price">280 ₽</span>
+            </article>
+
+            <article class="ccard sr">
+              <div class="ccard__art ccard__art--ochre">
+                <svg viewBox="0 0 120 110" class="ill" aria-hidden="true">
+                  <rect x="42" y="30" width="36" height="56" rx="9" fill="#F6D98E" stroke="#261F1A" stroke-width="3"/>
+                  <rect x="46" y="34" width="28" height="48" rx="7" fill="#E3A434" opacity=".75"/>
+                  <circle cx="54" cy="70" r="2.4" fill="#FBF4E8"/><circle cx="63" cy="60" r="2" fill="#FBF4E8"/><circle cx="57" cy="48" r="2.4" fill="#FBF4E8"/><circle cx="67" cy="74" r="2" fill="#FBF4E8"/>
+                  <circle cx="76" cy="30" r="10" fill="#F2D24B" stroke="#261F1A" stroke-width="2.5"/>
+                  <path d="M76 22 a8 8 0 0 1 8 8 L76 30 Z" fill="#FBF4E8" stroke="#261F1A" stroke-width="1.6"/>
+                </svg>
+              </div>
+              <h3 class="ccard__name">Эспрессо-тоник</h3>
+              <p class="ccard__sub">игристый, с цитрусом</p>
+              <span class="price">400 ₽</span>
+            </article>
+
+          </div>
+        </div>
+
+        <div class="sec-cta sr"><a href="#bakery" class="btn btn--ghost" id="fullMenuBtn">Полное меню</a></div>
+      </div>
+    </section>
+
+    <!-- ЗЕРНО · ДЕСЕРТЫ · ПРОСТРАНСТВО (тёмный блок) -->
+    <section class="section dark" id="space">
+      <div class="lights" aria-hidden="true"></div>
+      <div class="container">
+        <div class="sec-head">
+          <p class="kicker kicker--gold sr">Вечером здесь ламповый свет</p>
+          <h2 class="h2 h2--cream sr">Зерно, десерты и место, где хорошо</h2>
+          <svg class="uline sr" viewBox="0 0 84 12" aria-hidden="true"><polyline points="2,10 16,3 30,10 44,3 58,10 72,3 82,8" fill="none" stroke="#E3A434" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="wide__grid">
+          <article class="wide sr">
+            <h3>Отборное зерно</h3>
+            <p>Спешелти от проверенных обжарщиков. Классику варим на рожковой, для ценителей — фильтр с новыми нотами каждый раз.</p>
+            <a href="#menu" class="link-arrow link-arrow--gold">Подробнее&nbsp;→</a>
+          </article>
+          <article class="wide sr">
+            <h3>Выпечка и десерты</h3>
+            <p>Круассаны, слойки, чизкейк и сезонные новинки — то, что хочется сфотографировать и тут же съесть.</p>
+            <a href="#bakery" class="link-arrow link-arrow--gold">Смотреть десерты&nbsp;→</a>
+          </article>
+          <article class="wide sr">
+            <h3>Пространство для вас</h3>
+            <p>Тёплый зал, веранда во дворе и розетки под рукой. Удобно работать, встречаться и отдыхать.</p>
+            <a href="#gallery" class="link-arrow link-arrow--gold">Заглянуть внутрь&nbsp;→</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ГАЛЕРЕЯ -->
+    <section class="section gallery" id="gallery">
+      <div class="container">
+        <div class="sec-head">
+          <p class="kicker sr">Загляните внутрь</p>
+          <h2 class="h2 sr">Галерея</h2>
+          <svg class="uline sr" viewBox="0 0 84 12" aria-hidden="true"><polyline points="2,10 16,3 30,10 44,3 58,10 72,3 82,8" fill="none" stroke="#2F8A86" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <p class="sec-sub sr">Совсем скоро здесь будут живые фото зала, двора и латте-арта.</p>
+        </div>
+
+        <div class="g__grid">
+          <div class="g__tile g__tile--t1 g__tile--tall sr"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="14" width="32" height="24" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="26" r="7" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="18" y="9" width="12" height="6" rx="2" fill="currentColor"/></svg></div>
+          <div class="g__tile g__tile--t2 sr"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="20" width="20" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M30 24 q8 1 6.5 7 q-1.5 5 -8 4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M17 15 q3 -4 0 -8 M24 15 q3 -4 0 -8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+          <div class="g__tile g__tile--t3 sr"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6 L6 20 h4 v18 h28 V20 h4 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><rect x="20" y="26" width="8" height="12" fill="currentColor"/></svg></div>
+          <div class="g__tile g__tile--t4 sr"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 40 C10 30 6 20 12 14 c5 -5 12 -1 12 4 c0 -5 7 -9 12 -4 c6 6 2 16 -12 26 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+          <div class="g__tile g__tile--t5 g__tile--wide sr"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38 q4 -22 14 -28 q10 6 14 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M24 10 v28 M15 24 q9 6 18 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span class="g__cap">скоро тут будут фото :)</span></div>
+          <div class="g__tile g__tile--t6 sr"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 l5.2 12.2 13.2 1 -10 8.7 3 12.9 -11.4 -6.9 -11.4 6.9 3 -12.9 -10 -8.7 13.2 -1 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA + ПОДПИСКА -->
+    <section class="cta">
+      <svg class="cta__zz" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true">
+        <polyline points="0,12 25,2 50,12 75,2 100,12 125,2 150,12 175,2 200,12 225,2 250,12 275,2 300,12 325,2 350,12 375,2 400,12 425,2 450,12 475,2 500,12 525,2 550,12 575,2 600,12 625,2 650,12 675,2 700,12 725,2 750,12 775,2 800,12 825,2 850,12 875,2 900,12 925,2 950,12 975,2 1000,12 1025,2 1050,12 1075,2 1100,12 1125,2 1150,12 1175,2 1200,12" fill="none" stroke="#F7F1E6" stroke-width="2.4" opacity=".5"/>
+      </svg>
+      <div class="container cta__inner">
+        <h2 class="cta__title sr">Приходите в гости!</h2>
+        <p class="cta__sub sr">Всегда рады видеть вас — заходите на чашку спешелти и свежую выпечку. Мы в трёх минутах от Павелецкой, на Бахрушина.</p>
+        <div class="cta__actions sr">
+          <a class="btn btn--cream" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">Построить маршрут</a>
+          <a class="cta__phone" href="tel:+79037246283">+7 (903) 724-62-83</a>
+        </div>
+        <p class="cta__hours sr">Бахрушина, 12, стр. 2 · ежедневно до 21:00</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ПОДВАЛ -->
+  <footer class="footer" id="contacts">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="#top" class="logo logo--footer">Домик</a>
+          <p>Городская кофейня в тихом дворе у&nbsp;Павелецкой.</p>
+          <div class="trust trust--footer"><span class="trust__star" aria-hidden="true">★</span><a class="rating-link" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener"><b>4,9</b> на Яндекс Картах · 138 отзывов</a></div>
+        </div>
+        <nav class="footer__nav" aria-label="Навигация в подвале">
+          <a href="#menu">Меню</a>
+          <a href="#bakery">Выпечка</a>
+          <a href="#about">О нас</a>
+          <a href="#gallery">Галерея</a>
+          <a href="#contacts">Контакты</a>
+        </nav>
+        <div class="footer__contacts">
+          <p>Москва, ул. Бахрушина, 12, стр. 2</p>
+          <p><a href="tel:+79037246283">+7 (903) 724-62-83</a></p>
+          <p class="footer__hours">Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00</p>
+          <a class="btn btn--ghost btn--ghost-cream" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">Построить маршрут</a>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 «Домик» · городская кофейня</span>
+        <span>Сделано с теплом ☕</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+  <script src="js/main.js?v=19" defer onerror="document.documentElement.classList.remove('anim')"></script>
+</body>
+</html>
