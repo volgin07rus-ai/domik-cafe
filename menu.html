@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Меню — кофейня «Домик» на Бахрушина</title>
+  <meta name="description" content="Полное меню кофейни «Домик»: спешелти-кофе, рафы, матча, авторские напитки, чай, свежая выпечка, десерты и бар. Москва, Бахрушина, 12.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 4 4 14h3v14h18V14h3z' fill='%23CE9A45'/><rect x='13' y='19' width='6' height='9' fill='%23261F1A'/></svg>">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Lora:wght@500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css?v=37">
+  <meta name="theme-color" content="#F7F1E6">
+</head>
+<body class="menu-page">
+
+  <a class="skip-link" href="#menu-top" data-ru="К меню" data-en="Skip to menu" data-zh="跳到菜单">К меню</a>
+
+  <!-- ШАПКА -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="index.html" class="logo" aria-label="Домик — на главную">Домик</a>
+
+      <nav class="menu-nav" aria-label="Разделы меню / Sections">
+        <a href="#coffee" data-ru="Кофе" data-en="Coffee" data-zh="咖啡">Кофе</a>
+        <a href="#cold" data-ru="Холодное" data-en="Cold" data-zh="冷饮">Холодное</a>
+        <a href="#tea" data-ru="Чай" data-en="Tea" data-zh="茶">Чай</a>
+        <a href="#food" data-ru="Выпечка" data-en="Bakery" data-zh="烘焙">Выпечка</a>
+        <a href="#bar" data-ru="Бар" data-en="Bar" data-zh="酒吧">Бар</a>
+      </nav>
+
+      <div class="header__actions">
+        <div class="lang-switch" role="group" aria-label="Язык / Language / 语言">
+          <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          <button type="button" data-lang="zh" aria-pressed="false" lang="zh">中</button>
+        </div>
+        <a href="index.html" class="link-arrow menu-back" data-ru="← На главную" data-en="← Home" data-zh="← 首页">← На главную</a>
+        <a href="index.html#contacts" class="btn btn--ochre header__cta" data-ru="Как добраться" data-en="Directions" data-zh="导航">Как добраться</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="menu-top">
+
+    <!-- ЗАГОЛОВОК -->
+    <section class="menu-head">
+      <div class="container">
+        <p class="kicker menu-head__kicker" data-ru="Кофейня «Домик» · Бахрушина, 12" data-en="Domik coffee house · Bakhrushina 12" data-zh="Domik 咖啡馆 · 巴赫鲁申街 12 号">Кофейня «Домик» · Бахрушина, 12</p>
+        <h1 class="menu-head__title" data-ru="Меню" data-en="Menu" data-zh="菜单">Меню</h1>
+        <svg class="menu-head__uline" viewBox="0 0 120 14" aria-hidden="true"><path d="M4 10 Q 20 4 36 9 T 70 9 T 114 8" fill="none" stroke="#CE9A45" stroke-width="4.5" stroke-linecap="round"/></svg>
+        <p class="menu-head__note" data-ru="Где указано несколько цен — это разные объёмы (S / M / L). Полное меню всегда есть в кофейне, цены могут меняться." data-en="Where several prices are shown, they are different sizes (S / M / L). The full menu is always available in the café; prices may change." data-zh="标有多个价格表示不同规格 (S / M / L)。店内备有完整菜单，价格可能有所变动。">Где указано несколько цен — это разные объёмы (S / M / L). Полное меню всегда есть в кофейне, цены могут меняться.</p>
+      </div>
+    </section>
+
+    <!-- КАТЕГОРИИ -->
+    <section class="menu-body">
+      <div class="container">
+
+        <div class="menu-group" id="coffee">
+          <div class="menu-group__head"><h2 class="menu-group__title" data-ru="Кофе" data-en="Coffee" data-zh="咖啡">Кофе</h2></div>
+          <div class="menu-group__grid">
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Чёрный кофе" data-en="Black coffee" data-zh="黑咖啡">Чёрный кофе</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Двойной эспрессо" data-en="Double espresso" data-zh="双份浓缩">Двойной эспрессо</span></span><span class="mi__lead"></span><span class="mi__price">280</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Американо" data-en="Americano" data-zh="美式咖啡">Американо</span> <span class="mi__vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升">200 / 300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">280 / 330 / 380</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Австралийский лунго" data-en="Australian lungo" data-zh="澳式长黑">Австралийский лунго</span> <span class="mi__vol" data-ru="250 мл" data-en="250 ml" data-zh="250 毫升">250 мл</span></span><span class="mi__lead"></span><span class="mi__price">280</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Фильтр" data-en="Filter" data-zh="滤泡咖啡">Фильтр</span> <span class="mi__vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升">200 / 300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350 / 400</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Кофе с молоком" data-en="Coffee with milk" data-zh="牛奶咖啡">Кофе с молоком</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Кортадо" data-en="Cortado" data-zh="可塔朵">Кортадо</span> <span class="mi__vol" data-ru="150 мл" data-en="150 ml" data-zh="150 毫升">150 мл</span></span><span class="mi__lead"></span><span class="mi__price">320</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Флэт уайт" data-en="Flat white" data-zh="馥芮白">Флэт уайт</span> <span class="mi__vol" data-ru="200 мл" data-en="200 ml" data-zh="200 毫升">200 мл</span></span><span class="mi__lead"></span><span class="mi__price">350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Капучино" data-en="Cappuccino" data-zh="卡布奇诺">Капучино</span> <span class="mi__vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升">200 / 300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">320 / 370 / 400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Латте" data-en="Latte" data-zh="拿铁">Латте</span> <span class="mi__vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升">300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">370 / 400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Латте с солёной карамелью" data-en="Salted caramel latte" data-zh="海盐焦糖拿铁">Латте с солёной карамелью</span> <span class="mi__vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升">300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">400 / 450</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Рафы" data-en="Raf coffees" data-zh="拉夫咖啡">Рафы</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Лавандовый раф" data-en="Lavender raf" data-zh="薰衣草拉夫">Лавандовый раф</span> <span class="mi__vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升">300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">400 / 450</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Цитрусовый раф" data-en="Citrus raf" data-zh="柑橘拉夫">Цитрусовый раф</span> <span class="mi__vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升">300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">400 / 450</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Ванильный раф" data-en="Vanilla raf" data-zh="香草拉夫">Ванильный раф</span> <span class="mi__vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升">300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">400 / 450</span></li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <div class="menu-group">
+          <div class="menu-group__head"><h2 class="menu-group__title" data-ru="Матча, какао и авторское" data-en="Matcha, cocoa &amp; signature" data-zh="抹茶、可可与招牌">Матча, какао и авторское</h2></div>
+          <div class="menu-group__grid">
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Какао и матча" data-en="Cocoa &amp; matcha" data-zh="可可与抹茶">Какао и матча</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Какао" data-en="Cocoa" data-zh="可可">Какао</span> <span class="mi__vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升">200 / 300 / 400 мл</span></span><span class="mi__lead"></span><span class="mi__price">320 / 370 / 420</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Матча-латте" data-en="Matcha latte" data-zh="抹茶拿铁">Матча-латте</span> <span class="mi__vol" data-ru="200 / 300 мл" data-en="200 / 300 ml" data-zh="200 / 300 毫升">200 / 300 мл</span></span><span class="mi__lead"></span><span class="mi__price">350 / 400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Горячий шоколад" data-en="Hot chocolate" data-zh="热巧克力">Горячий шоколад</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">450</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Авторские напитки" data-en="Signature drinks" data-zh="招牌饮品">Авторские напитки</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Чай юдзу с имбирём и мёдом" data-en="Yuzu tea with ginger &amp; honey" data-zh="柚子姜蜜茶">Чай юдзу с имбирём и мёдом</span> <span class="mi__vol" data-ru="500 мл" data-en="500 ml" data-zh="500 毫升">500 мл</span></span><span class="mi__lead"></span><span class="mi__price">450</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Чай манго-маракуйя" data-en="Mango–passion fruit tea" data-zh="芒果百香果茶">Чай манго-маракуйя</span> <span class="mi__vol" data-ru="500 мл" data-en="500 ml" data-zh="500 毫升">500 мл</span></span><span class="mi__lead"></span><span class="mi__price">450</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Пряный какао со сгущёнкой" data-en="Spiced cocoa with condensed milk" data-zh="香料炼乳可可">Пряный какао со сгущёнкой</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Апельсиновый какао" data-en="Orange cocoa" data-zh="香橙可可">Апельсиновый какао</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Арахисовый раф" data-en="Peanut raf" data-zh="花生拉夫">Арахисовый раф</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Spanish latte" data-en="Spanish latte" data-zh="西班牙拿铁">Spanish latte</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Бэйлис латте" data-en="Baileys latte" data-zh="百利甜拿铁">Бэйлис латте</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">550</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Раф с тёмным ромом и ванилью" data-en="Raf with dark rum &amp; vanilla" data-zh="黑朗姆香草拉夫">Раф с тёмным ромом и ванилью</span> <span class="mi__vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升">350 мл</span></span><span class="mi__lead"></span><span class="mi__price">650</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat" id="cold">
+              <h3 class="menu-cat__title" data-ru="Холодное" data-en="Cold" data-zh="冷饮">Холодное</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Айс-американо" data-en="Iced americano" data-zh="冰美式">Айс-американо</span></span><span class="mi__lead"></span><span class="mi__price">350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Айс-латте" data-en="Iced latte" data-zh="冰拿铁">Айс-латте</span></span><span class="mi__lead"></span><span class="mi__price">370</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Бамбл-кофе" data-en="Bumble coffee" data-zh="缤纷冰咖啡">Бамбл-кофе</span> <span class="mi__vol" data-ru="350 мл · апельсин / гранат" data-en="350 ml · orange / pomegranate" data-zh="350 毫升 · 橙子 / 石榴">350 мл · апельсин / гранат</span></span><span class="mi__lead"></span><span class="mi__price">490</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Фреш" data-en="Fresh juice" data-zh="鲜榨果汁">Фреш</span> <span class="mi__vol" data-ru="300 мл · апельсин / грейпфрут" data-en="300 ml · orange / grapefruit" data-zh="300 毫升 · 橙子 / 西柚">300 мл · апельсин / грейпфрут</span></span><span class="mi__lead"></span><span class="mi__price">400</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Эспрессо-тоник" data-en="Espresso tonic" data-zh="浓缩汤力">Эспрессо-тоник</span></span><span class="mi__lead"></span><span class="mi__price">490</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Матча-тоник" data-en="Matcha tonic" data-zh="抹茶汤力">Матча-тоник</span></span><span class="mi__lead"></span><span class="mi__price">450</span></li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <div class="menu-group" id="tea">
+          <div class="menu-group__head"><h2 class="menu-group__title" data-ru="Чай" data-en="Tea" data-zh="茶">Чай</h2></div>
+          <div class="menu-group__grid">
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Листовые чаи" data-en="Loose-leaf teas" data-zh="原叶茶">Листовые чаи</h3>
+              <p class="menu-cat__note" data-ru="300 мл / 500 мл" data-en="300 ml / 500 ml" data-zh="300 毫升 / 500 毫升">300 мл / 500 мл</p>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Сенча" data-en="Sencha" data-zh="煎茶">Сенча</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Те гуань инь" data-en="Tie Guan Yin" data-zh="铁观音">Те гуань инь</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Зелёный с жасмином" data-en="Jasmine green" data-zh="茉莉绿茶">Зелёный с жасмином</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Молочный улун" data-en="Milk oolong" data-zh="奶香乌龙">Молочный улун</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Ассам" data-en="Assam" data-zh="阿萨姆红茶">Ассам</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Чёрный копчёный" data-en="Smoked black" data-zh="烟熏红茶">Чёрный копчёный</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Чёрный с чабрецом" data-en="Black with thyme" data-zh="百里香红茶">Чёрный с чабрецом</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Эрл грей" data-en="Earl Grey" data-zh="伯爵红茶">Эрл грей</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Шу пуэр" data-en="Ripe pu-erh" data-zh="熟普洱">Шу пуэр</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Тизаны" data-en="Tisanes" data-zh="花草茶饮">Тизаны</h3>
+              <p class="menu-cat__note" data-ru="300 мл / 500 мл" data-en="300 ml / 500 ml" data-zh="300 毫升 / 500 毫升">300 мл / 500 мл</p>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Ромашка" data-en="Chamomile" data-zh="洋甘菊">Ромашка</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Гречиха" data-en="Buckwheat" data-zh="荞麦茶">Гречиха</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Гибискус" data-en="Hibiscus" data-zh="洛神花">Гибискус</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Айва" data-en="Quince" data-zh="榅桲">Айва</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Листья черники" data-en="Blueberry leaf" data-zh="蓝莓叶">Листья черники</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Чабрец" data-en="Thyme" data-zh="百里香">Чабрец</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Травяной сбор" data-en="Herbal blend" data-zh="草本茶">Травяной сбор</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Цветочный сбор" data-en="Floral blend" data-zh="花草茶">Цветочный сбор</span></span><span class="mi__lead"></span><span class="mi__price">300 / 350</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Дополнительно" data-en="Add-ons" data-zh="额外选项">Дополнительно</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Декаф" data-en="Decaf" data-zh="低因">Декаф</span></span><span class="mi__lead"></span><span class="mi__price">+90</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Альтернативное молоко" data-en="Alternative milk" data-zh="植物奶">Альтернативное молоко</span> <span class="mi__vol" data-ru="безлактозное, кокосовое, миндальное, овсяное, банановое" data-en="lactose-free, coconut, almond, oat, banana" data-zh="无乳糖、椰奶、杏仁奶、燕麦奶、香蕉奶">безлактозное, кокосовое, миндальное, овсяное, банановое</span></span><span class="mi__lead"></span><span class="mi__price">+90</span></li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <div class="menu-group" id="food">
+          <div class="menu-group__head"><h2 class="menu-group__title" data-ru="Выпечка, десерты и еда" data-en="Bakery, desserts &amp; food" data-zh="烘焙、甜点与轻食">Выпечка, десерты и еда</h2></div>
+          <div class="menu-group__grid">
+
+            <section class="menu-cat menu-cat--wide">
+              <h3 class="menu-cat__title" data-ru="Выпечка и десерты" data-en="Bakery &amp; desserts" data-zh="烘焙与甜点">Выпечка и десерты</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Круассан ветчина-сыр" data-en="Ham &amp; cheese croissant" data-zh="火腿芝士可颂">Круассан ветчина-сыр</span></span><span class="mi__lead"></span><span class="mi__price">300</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Круассан классический" data-en="Classic croissant" data-zh="经典可颂">Круассан классический</span></span><span class="mi__lead"></span><span class="mi__price">220</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Круассан миндальный" data-en="Almond croissant" data-zh="杏仁可颂">Круассан миндальный</span></span><span class="mi__lead"></span><span class="mi__price">320</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Круассан сырный" data-en="Cheese croissant" data-zh="芝士可颂">Круассан сырный</span></span><span class="mi__lead"></span><span class="mi__price">280</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Трубочка со сгущёнкой" data-en="Cream horn with condensed milk" data-zh="炼乳奶油卷">Трубочка со сгущёнкой</span></span><span class="mi__lead"></span><span class="mi__price">180</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Слойка с яблоком" data-en="Apple puff" data-zh="苹果酥">Слойка с яблоком</span></span><span class="mi__lead"></span><span class="mi__price">280</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Слойка сыр-оливки" data-en="Cheese &amp; olive puff" data-zh="芝士橄榄酥">Слойка сыр-оливки</span></span><span class="mi__lead"></span><span class="mi__price">280</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Пан-о-шоколя" data-en="Pain au chocolat" data-zh="巧克力可颂">Пан-о-шоколя</span></span><span class="mi__lead"></span><span class="mi__price">360</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Булочка карамель-пекан" data-en="Caramel-pecan bun" data-zh="焦糖山核桃面包">Булочка карамель-пекан</span></span><span class="mi__lead"></span><span class="mi__price">360</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Булочка с творожным кремом" data-en="Curd-cream bun" data-zh="奶酪奶油面包">Булочка с творожным кремом</span></span><span class="mi__lead"></span><span class="mi__price">360</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Вишнёвый пирог" data-en="Cherry pie" data-zh="樱桃派">Вишнёвый пирог</span></span><span class="mi__lead"></span><span class="mi__price">450</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Фермерский пирог с грушей" data-en="Farmhouse pear pie" data-zh="乡村梨子派">Фермерский пирог с грушей</span></span><span class="mi__lead"></span><span class="mi__price">350</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Кекс апельсиновый" data-en="Orange loaf cake" data-zh="香橙磅蛋糕">Кекс апельсиновый</span></span><span class="mi__lead"></span><span class="mi__price">270</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Кекс фисташковый" data-en="Pistachio loaf cake" data-zh="开心果磅蛋糕">Кекс фисташковый</span></span><span class="mi__lead"></span><span class="mi__price">370</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Чизкейк" data-en="Cheesecake" data-zh="芝士蛋糕">Чизкейк</span></span><span class="mi__lead"></span><span class="mi__price">400</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat">
+              <h3 class="menu-cat__title" data-ru="Еда" data-en="Food" data-zh="轻食">Еда</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Сэндвич" data-en="Sandwich" data-zh="三明治">Сэндвич</span> <span class="mi__vol" data-ru="в ассортименте" data-en="assorted" data-zh="多种口味">в ассортименте</span></span><span class="mi__lead"></span><span class="mi__price">550</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Салат" data-en="Salad" data-zh="沙拉">Салат</span> <span class="mi__vol" data-ru="в ассортименте" data-en="assorted" data-zh="多种口味">в ассортименте</span></span><span class="mi__lead"></span><span class="mi__price">550</span></li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <div class="menu-group" id="bar">
+          <div class="menu-group__head"><h2 class="menu-group__title" data-ru="Бар" data-en="Bar" data-zh="酒吧">Бар</h2><span class="menu-group__age">18+</span></div>
+          <div class="menu-group__grid menu-group__grid--2">
+
+            <section class="menu-cat menu-cat--bar">
+              <h3 class="menu-cat__title" data-ru="Крепкое" data-en="Spirits" data-zh="烈酒">Крепкое</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Aperol" data-en="Aperol" data-zh="Aperol">Aperol</span> <span class="mi__vol" data-ru="40 мл" data-en="40 ml" data-zh="40 毫升">40 мл</span></span><span class="mi__lead"></span><span class="mi__price">280</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Baileys" data-en="Baileys" data-zh="Baileys">Baileys</span> <span class="mi__vol" data-ru="40 мл" data-en="40 ml" data-zh="40 毫升">40 мл</span></span><span class="mi__lead"></span><span class="mi__price">300</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Legendario Elixir de Cuba" data-en="Legendario Elixir de Cuba" data-zh="Legendario Elixir de Cuba">Legendario Elixir de Cuba</span> <span class="mi__vol" data-ru="40 мл" data-en="40 ml" data-zh="40 毫升">40 мл</span></span><span class="mi__lead"></span><span class="mi__price">450</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Pierre Debect XO" data-en="Pierre Debect XO" data-zh="Pierre Debect XO">Pierre Debect XO</span> <span class="mi__vol" data-ru="50 мл" data-en="50 ml" data-zh="50 毫升">50 мл</span></span><span class="mi__lead"></span><span class="mi__price">700</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Macallan 12" data-en="Macallan 12" data-zh="Macallan 12">Macallan 12</span> <span class="mi__vol" data-ru="50 мл" data-en="50 ml" data-zh="50 毫升">50 мл</span></span><span class="mi__lead"></span><span class="mi__price">1000</span></li>
+              </ul>
+            </section>
+
+            <section class="menu-cat menu-cat--bar">
+              <h3 class="menu-cat__title" data-ru="Коктейли" data-en="Cocktails" data-zh="鸡尾酒">Коктейли</h3>
+              <ul class="menu-list">
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Aperol Spritz" data-en="Aperol Spritz" data-zh="Aperol Spritz">Aperol Spritz</span></span><span class="mi__lead"></span><span class="mi__price">850</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Джин-тоник" data-en="Gin &amp; tonic" data-zh="金汤力">Джин-тоник</span></span><span class="mi__lead"></span><span class="mi__price">650</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Игристое-тоник" data-en="Sparkling &amp; tonic" data-zh="气泡酒汤力">Игристое-тоник</span></span><span class="mi__lead"></span><span class="mi__price">750</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Эспрессо мартини" data-en="Espresso martini" data-zh="浓缩马提尼">Эспрессо мартини</span></span><span class="mi__lead"></span><span class="mi__price">850</span></li>
+                <li class="mi"><span class="mi__name"><span class="mi__label" data-ru="Cavatina Prosecco Brut" data-en="Cavatina Prosecco Brut" data-zh="Cavatina Prosecco Brut">Cavatina Prosecco Brut</span> <span class="mi__vol" data-ru="150 мл" data-en="150 ml" data-zh="150 毫升">150 мл</span></span><span class="mi__lead"></span><span class="mi__price">700</span></li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <p class="menu-foot-note" data-ru="Цены указаны в рублях и могут меняться. Актуальное меню — у бариста." data-en="Prices are in rubles and may change. Ask the barista for the current menu." data-zh="价格以卢布计，可能有所变动。最新菜单请咨询咖啡师。">Цены указаны в рублях и могут меняться. Актуальное меню — у бариста.</p>
+        <div class="menu-cta">
+          <a href="index.html" class="btn btn--ghost" data-ru="← Вернуться на сайт" data-en="← Back to site" data-zh="← 返回网站">← Вернуться на сайт</a>
+          <a href="index.html#contacts" class="btn btn--ochre btn--lg" data-ru="Построить маршрут" data-en="Get directions" data-zh="导航路线">Построить маршрут</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ПОДВАЛ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="logo logo--footer">Домик</a>
+          <p data-ru="Городская кофейня в тихом дворе у Павелецкой." data-en="A city coffee house in a quiet courtyard near Paveletskaya." data-zh="帕维列茨车站旁静谧庭院里的城市咖啡馆。">Городская кофейня в тихом дворе у Павелецкой.</p>
+          <div class="trust trust--footer"><span class="trust__star" aria-hidden="true">★</span><a class="rating-link" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener"><b>4,9</b> <span data-ru="на Яндекс Картах · 138 отзывов" data-en="on Yandex Maps · 138 reviews" data-zh="Yandex 地图 · 138 条评价">на Яндекс Картах · 138 отзывов</span></a></div>
+        </div>
+        <nav class="footer__nav" aria-label="Навигация в подвале">
+          <a href="index.html#menu" data-ru="Витрина" data-en="Highlights" data-zh="精选">Витрина</a>
+          <a href="index.html#bakery" data-ru="Выпечка" data-en="Bakery" data-zh="烘焙">Выпечка</a>
+          <a href="index.html#about" data-ru="О нас" data-en="About" data-zh="关于我们">О нас</a>
+          <a href="index.html#gallery" data-ru="Галерея" data-en="Gallery" data-zh="相册">Галерея</a>
+          <a href="index.html#contacts" data-ru="Контакты" data-en="Contacts" data-zh="联系我们">Контакты</a>
+        </nav>
+        <div class="footer__contacts">
+          <p data-ru="Москва, ул. Бахрушина, 12, стр. 2" data-en="Moscow, Bakhrushina St. 12, bldg. 2" data-zh="莫斯科巴赫鲁申街 12 号 2 座">Москва, ул. Бахрушина, 12, стр. 2</p>
+          <p><a href="tel:+79037246283">+7 (903) 724-62-83</a></p>
+          <p class="footer__hours"><span data-ru="Пн–Пт: 8:00–21:00" data-en="Mon–Fri: 8:00–21:00" data-zh="周一至周五 8:00–21:00">Пн–Пт: 8:00–21:00</span><br><span data-ru="Сб–Вс: 9:00–21:00" data-en="Sat–Sun: 9:00–21:00" data-zh="周六周日 9:00–21:00">Сб–Вс: 9:00–21:00</span></p>
+          <a class="btn btn--ghost btn--ghost-cream" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" data-ru="Построить маршрут" data-en="Get directions" data-zh="导航路线">Построить маршрут</a>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span data-ru="© 2026 «Домик» · городская кофейня" data-en="© 2026 Domik · city coffee house" data-zh="© 2026 Domik · 城市咖啡馆">© 2026 «Домик» · городская кофейня</span>
+        <span data-ru="Сделано с теплом ☕" data-en="Made with warmth ☕" data-zh="用心制作 ☕">Сделано с теплом ☕</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function(){
+    var TITLES = {"ru": "Меню — кофейня «Домик» на Бахрушина", "en": "Menu — Domik coffee house on Bakhrushina", "zh": "菜单 — 巴赫鲁申街 Domik 咖啡馆"};
+    var langs = ['ru','en','zh'];
+    var saved = localStorage.getItem('domik_lang');
+    var urlLang = new URLSearchParams(location.search).get('lang');
+    var lang = langs.indexOf(urlLang) >= 0 ? urlLang : (langs.indexOf(saved) >= 0 ? saved : 'ru');
+    var nodes = document.querySelectorAll('[data-en]');
+    var btns = document.querySelectorAll('.lang-switch button');
+    function apply(l){
+      document.documentElement.setAttribute('lang', l === 'zh' ? 'zh-Hans' : l);
+      for (var i = 0; i < nodes.length; i++){
+        var v = nodes[i].getAttribute('data-' + l);
+        if (v !== null) nodes[i].textContent = v;
+      }
+      if (TITLES[l]) document.title = TITLES[l];
+      for (var j = 0; j < btns.length; j++){
+        var on = btns[j].getAttribute('data-lang') === l;
+        btns[j].classList.toggle('is-active', on);
+        btns[j].setAttribute('aria-pressed', String(on));
+      }
+      try { localStorage.setItem('domik_lang', l); } catch(e){}
+    }
+    for (var k = 0; k < btns.length; k++){
+      btns[k].addEventListener('click', function(){ apply(this.getAttribute('data-lang')); });
+    }
+    apply(lang);
+  })();
+  </script>
+
+</body>
+</html>

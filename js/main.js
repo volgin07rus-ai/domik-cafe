@@ -45,6 +45,43 @@
     }
   });
 
+  /* ---------- переключатель языков (RU / EN / 中) ---------- */
+  (function () {
+    var btns = document.querySelectorAll('.lang-switch button');
+    var nodes = document.querySelectorAll('[data-en]');
+    if (!btns.length || !nodes.length) return;
+    var langs = ['ru', 'en', 'zh'];
+    var TITLES = {
+      ru: 'Домик — городская кофейня на Бахрушина',
+      en: 'Domik — city coffee house on Bakhrushina',
+      zh: 'Domik — 巴赫鲁申街城市咖啡馆'
+    };
+    var saved = null;
+    try { saved = localStorage.getItem('domik_lang'); } catch (e) {}
+    var urlLang = new URLSearchParams(location.search).get('lang');
+    var lang = langs.indexOf(urlLang) >= 0 ? urlLang : (langs.indexOf(saved) >= 0 ? saved : 'ru');
+    function apply(l) {
+      doc.setAttribute('lang', l === 'zh' ? 'zh-Hans' : l);
+      for (var i = 0; i < nodes.length; i++) {
+        var v = nodes[i].getAttribute('data-' + l);
+        if (v == null) continue;
+        if (nodes[i].getAttribute('data-html')) nodes[i].innerHTML = v;
+        else nodes[i].textContent = v;
+      }
+      if (TITLES[l]) document.title = TITLES[l];
+      for (var j = 0; j < btns.length; j++) {
+        var on = btns[j].getAttribute('data-lang') === l;
+        btns[j].classList.toggle('is-active', on);
+        btns[j].setAttribute('aria-pressed', String(on));
+      }
+      try { localStorage.setItem('domik_lang', l); } catch (e) {}
+    }
+    for (var k = 0; k < btns.length; k++) {
+      btns[k].addEventListener('click', function () { apply(this.getAttribute('data-lang')); });
+    }
+    apply(lang);
+  })();
+
   /* ---------- зёрна: дрейф вниз через весь сайт, закольцованы ---------- */
   var beans = Array.prototype.slice.call(document.querySelectorAll('.bean'));
   if (beans.length && !reduceMotion) {
@@ -212,6 +249,54 @@
   Array.prototype.slice.call(document.querySelectorAll('a[href^="#"]')).forEach(function (link) {
     link.addEventListener('click', function () { closeMenu(); });
   });
+
+  /* ---------- лайтбокс: клик по фото — открыть полностью ---------- */
+  (function () {
+    var imgs = Array.prototype.slice.call(document.querySelectorAll('.g__tile img, .pol__ph img'));
+    if (!imgs.length) return;
+    var lb, lbImg, lbClose, lastFocus;
+    function build() {
+      lb = document.createElement('div');
+      lb.className = 'lightbox';
+      lb.setAttribute('role', 'dialog');
+      lb.setAttribute('aria-modal', 'true');
+      lb.setAttribute('aria-label', 'Просмотр фото');
+      lb.hidden = true;
+      lb.innerHTML = '<button type="button" class="lightbox__close" aria-label="Закрыть">×</button><img class="lightbox__img" alt="">';
+      document.body.appendChild(lb);
+      lbImg = lb.querySelector('.lightbox__img');
+      lbClose = lb.querySelector('.lightbox__close');
+      lb.addEventListener('click', function (e) { if (e.target === lb || e.target === lbClose) closeLb(); });
+    }
+    function openLb(src, alt) {
+      if (!lb) build();
+      lbImg.setAttribute('src', src);
+      lbImg.setAttribute('alt', alt || '');
+      lb.hidden = false;
+      document.body.style.overflow = 'hidden';
+      lastFocus = document.activeElement;
+      lbClose.focus();
+      requestAnimationFrame(function () { lb.classList.add('is-open'); });
+    }
+    function closeLb() {
+      if (!lb) return;
+      lb.classList.remove('is-open');
+      document.body.style.overflow = '';
+      setTimeout(function () { lb.hidden = true; lbImg.removeAttribute('src'); }, 280);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    document.addEventListener('keydown', function (e) { if (lb && !lb.hidden && e.key === 'Escape') closeLb(); });
+    imgs.forEach(function (img) {
+      img.classList.add('is-zoomable');
+      img.setAttribute('tabindex', '0');
+      img.setAttribute('role', 'button');
+      img.setAttribute('aria-label', (img.alt || 'Фото') + ' — открыть полностью');
+      img.addEventListener('click', function () { openLb(img.currentSrc || img.src, img.alt); });
+      img.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLb(img.currentSrc || img.src, img.alt); }
+      });
+    });
+  })();
 
   /* ---------- GSAP: появления, параллакс, дорисовка линий ---------- */
   if (!hasGsap || reduceMotion) return;
