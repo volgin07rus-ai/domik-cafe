@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Домик — городская кофейня на Бахрушина</title>
+<meta name="description" content="Уютная кофейня на Бахрушина — спешелти, свежая выпечка и веранда в тихом дворе. В трёх минутах от Павелецкой.">
+<meta name="theme-color" content="#F7EFE1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#213D6B; --cream:#F7EFE1; --gold:#B98A3C; --sage:#93A786;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --dur:.7s;
+    --maxw:1200px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--ink);font-family:'Nunito Sans',system-ui,sans-serif;overflow-x:hidden}
+  img{max-width:100%;display:block}
+  a{color:inherit}
+
+  .skip{position:absolute;left:-9999px;top:0;background:var(--cream);padding:12px 18px;z-index:200;border-radius:0 0 10px 0}
+  .skip:focus{left:0}
+
+  /* ============ ШАПКА ============ */
+  .header{
+    position:fixed;top:0;left:0;right:0;z-index:60;
+    display:flex;align-items:center;gap:clamp(12px,2vw,28px);
+    padding:0 clamp(16px,4vw,44px);height:76px;
+    transition:height .3s var(--ease), background .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .header::before{
+    content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s var(--ease);
+    background:rgba(247,239,225,.94);backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(33,61,107,.08);
+  }
+  .header.is-scrolled{height:60px}
+  .header.is-scrolled::before{opacity:1}
+  .header > *{position:relative}
+  .hlogo{font-family:'Yeseva One',serif;font-size:clamp(20px,2vw,26px);color:var(--cream);text-shadow:0 1px 12px rgba(33,61,107,.45);text-decoration:none;transition:color .3s}
+  .header.is-scrolled .hlogo{color:var(--ink);text-shadow:none}
+  .hnav{display:flex;gap:clamp(10px,1.6vw,22px);margin-left:auto}
+  .hnav a{
+    font-size:14px;text-decoration:none;color:var(--cream);text-shadow:0 1px 10px rgba(33,61,107,.45);
+    padding:6px 2px;position:relative;transition:color .3s;
+  }
+  .header.is-scrolled .hnav a{color:var(--ink);text-shadow:none}
+  .hnav a::after{
+    content:'';position:absolute;left:0;right:100%;bottom:0;height:1.5px;background:currentColor;opacity:.6;
+    transition:right .4s var(--ease);
+  }
+  .hnav a:hover::after{right:0}
+  .langs{display:flex;gap:2px;align-items:center}
+  .langs button{
+    background:none;border:0;cursor:pointer;font:inherit;font-size:12.5px;letter-spacing:.04em;
+    color:var(--cream);opacity:.7;padding:5px 7px;border-radius:6px;transition:opacity .25s, background .25s, color .3s;
+    text-shadow:0 1px 10px rgba(33,61,107,.45);
+  }
+  .header.is-scrolled .langs button{color:var(--ink);text-shadow:none}
+  .langs button:hover{opacity:1}
+  .langs button[aria-pressed="true"]{opacity:1;background:rgba(185,138,60,.22);font-weight:700}
+  .hphone{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;color:var(--cream);transition:color .3s,background .25s}
+  .header.is-scrolled .hphone{color:var(--ink)}
+  .hphone:hover{background:rgba(185,138,60,.18)}
+  .burger{display:none;background:none;border:0;cursor:pointer;width:40px;height:40px;color:var(--cream)}
+  .header.is-scrolled .burger{color:var(--ink)}
+
+  /* ============ КНОПКИ ============ */
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;border:0;cursor:pointer;text-decoration:none;
+    font:inherit;font-weight:700;font-size:15px;padding:14px 26px;border-radius:999px;
+    transition:transform .3s var(--ease), box-shadow .3s var(--ease), background .3s;
+  }
+  .btn:active{transform:scale(.98)}
+  .btn--gold{background:var(--gold);color:#fff;box-shadow:0 8px 24px rgba(185,138,60,.32)}
+  .btn--gold:hover{box-shadow:0 12px 30px rgba(185,138,60,.42);transform:translateY(-2px)}
+  .btn--cream{background:var(--cream);color:var(--ink);box-shadow:0 8px 24px rgba(33,61,107,.18)}
+  .btn--cream:hover{transform:translateY(-2px)}
+  .btn--ghost{background:transparent;color:var(--cream);box-shadow:inset 0 0 0 1.5px rgba(247,239,225,.7)}
+  .btn--ghost:hover{background:rgba(247,239,225,.14)}
+  .btn--ghost-ink{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(33,61,107,.35)}
+  .btn--ghost-ink:hover{background:rgba(33,61,107,.06)}
+  .btn--lg{font-size:16px;padding:16px 32px}
+  .arrow{transition:transform .35s var(--ease)}
+  .btn:hover .arrow, .tlink:hover .arrow{transform:translateX(4px)}
+  .tlink{display:inline-flex;align-items:center;gap:7px;text-decoration:none;font-weight:600;font-size:15px}
+  .tlink u{text-decoration:none;box-shadow:inset 0 -1px 0 currentColor;padding-bottom:1px}
+
+  /* ============ СЦЕНА: hero → влёт → комната (ОДИН экран) ============ */
+  .hero{position:relative;height:100svh;min-height:560px;overflow:hidden;display:flex;align-items:center}
+  .hero video, .hero canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  /* canvas — верхний слой: во время полёта он полностью укрывает оба видео,
+     поэтому смена фона под ним не видна и стартовый кадр не проскакивает */
+  #cv{opacity:0;transition:opacity .4s var(--ease)}
+  /* у видео НЕТ transition по opacity: слои меняются под непрозрачным canvas
+     мгновенно — их плавный фейд просвечивал бы сквозь растворяющийся canvas
+     (мелькал кадр другой сцены). Вся плавность стыка — только на canvas. */
+  #roomLoop{opacity:0}
+  .hero .scrim{
+    position:absolute;inset:0;transition:background .8s var(--ease);
+    background:linear-gradient(100deg, rgba(21,45,84,.62) 0%, rgba(21,45,84,.34) 34%, rgba(21,45,84,0) 62%),
+               linear-gradient(0deg, rgba(21,45,84,.42) 0%, rgba(21,45,84,0) 34%);
+  }
+  .hero.inside .scrim{
+    background:linear-gradient(100deg, rgba(21,45,84,.66) 0%, rgba(21,45,84,.42) 40%, rgba(21,45,84,.12) 72%);
+  }
+  .hero__in{
+    position:relative;width:100%;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,44px);color:var(--cream);
+    transition:opacity .5s var(--ease), transform .6s var(--ease);
+  }
+  .hero__in.gone{opacity:0;transform:translateY(-14px);pointer-events:none}
+
+  /* Текст «внутри» — тот же экран, другой слой */
+  .inside-ui{
+    position:absolute;inset:0;display:flex;align-items:center;pointer-events:none;
+    opacity:0;transition:opacity .7s var(--ease);
+  }
+  .inside-ui.on{opacity:1;pointer-events:auto}
+  .inside-ui .box{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,44px);color:var(--cream)}
+  .inside-ui .pull{font-family:'Yeseva One',serif;font-size:clamp(24px,3.2vw,42px);line-height:1.4;text-shadow:0 3px 30px rgba(21,45,84,.5)}
+  .inside-ui p{margin-top:18px;font-size:clamp(15px,1.5vw,18px);line-height:1.7;max-width:44ch;opacity:.94}
+  .inside-ui .facts{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px;max-width:52ch}
+  .inside-ui .facts span{font-size:13px;padding:7px 14px;border-radius:999px;background:rgba(247,239,225,.14);border:1px solid rgba(247,239,225,.26)}
+  .inside-ui .st{transform:translateY(16px);opacity:0}
+
+  /* Реплика во время полёта */
+  .cap{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;
+    font-size:clamp(26px,4.4vw,56px);font-weight:300;letter-spacing:.05em;color:var(--cream);
+    text-shadow:0 2px 30px rgba(21,45,84,.85),0 0 80px rgba(21,45,84,.6);
+    opacity:0;transition:opacity .45s;white-space:nowrap;pointer-events:none;
+  }
+  .cap.on{opacity:1}
+  .skipbtn{
+    position:absolute;right:22px;bottom:22px;z-index:5;opacity:0;transition:opacity .4s;pointer-events:none;
+    background:rgba(247,239,225,.16);backdrop-filter:blur(6px);color:var(--cream);
+    border:1px solid rgba(247,239,225,.35);border-radius:999px;padding:10px 20px;font:inherit;font-size:13px;cursor:pointer;
+  }
+  .skipbtn.on{opacity:1;pointer-events:auto}
+
+  /* Выход обратно на улицу — виден только в состоянии «внутри» */
+  .outbtn{
+    position:absolute;left:50%;top:82px;transform:translateX(-50%);z-index:5;
+    opacity:0;transition:opacity .5s var(--ease);pointer-events:none;
+    background:rgba(247,239,225,.12);backdrop-filter:blur(6px);color:var(--cream);
+    border:1px solid rgba(247,239,225,.28);border-radius:999px;padding:8px 18px;
+    font:inherit;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+  }
+  .hero.inside .outbtn{opacity:.75;pointer-events:auto}
+  .hero.inside .outbtn:hover{opacity:1;background:rgba(247,239,225,.2)}
+  .kicker{font-size:12px;letter-spacing:.32em;text-transform:uppercase;opacity:.9;margin-bottom:16px}
+  .hero h1{
+    font-family:'Yeseva One',serif;font-weight:400;line-height:1.06;
+    font-size:clamp(34px,5.4vw,68px);max-width:16ch;text-shadow:0 4px 40px rgba(21,45,84,.5);
+  }
+  .hero .sub{margin-top:20px;font-size:clamp(15px,1.5vw,19px);line-height:1.6;max-width:44ch;opacity:.95}
+  .chip{
+    display:inline-flex;align-items:center;gap:9px;margin-top:24px;
+    background:rgba(247,239,225,.16);backdrop-filter:blur(6px);
+    border:1px solid rgba(247,239,225,.28);border-radius:999px;padding:9px 18px;font-size:14px;
+  }
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:#7BC47F;box-shadow:0 0 0 3px rgba(123,196,127,.28);flex:0 0 auto}
+  .chip .dot.off{background:#D98C6A;box-shadow:0 0 0 3px rgba(217,140,106,.28)}
+  .cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:30px}
+  .trust{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:14px;text-decoration:none;opacity:.95}
+  .trust .stars{color:#F2C14E;letter-spacing:2px}
+  .trust u{text-decoration:none;box-shadow:inset 0 -1px 0 rgba(247,239,225,.5)}
+  .scrollhint{
+    position:absolute;left:50%;bottom:22px;transform:translateX(-50%);color:var(--cream);
+    font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;opacity:.8;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;
+  }
+  .scrollhint .chev{width:16px;height:16px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);animation:chev 2.4s var(--ease) infinite}
+  @keyframes chev{0%,100%{transform:rotate(45deg) translate(0,0);opacity:.5}50%{transform:rotate(45deg) translate(4px,4px);opacity:1}}
+  .doorspot{
+    position:absolute;cursor:pointer;border:0;outline:none;background:transparent;
+    left:63%;top:56%;width:9%;height:22%;border-radius:50% 50% 8% 8%;
+    opacity:1;transition:opacity .3s var(--ease);
+  }
+  .doorspot::after{
+    content:'';position:absolute;inset:-14%;border-radius:inherit;opacity:0;
+    box-shadow:0 0 40px 14px rgba(255,217,143,.55);transition:opacity .45s var(--ease);
+  }
+  .doorspot:hover::after{opacity:1}
+  .doorspot:focus-visible{outline:2px solid rgba(255,217,143,.9);outline-offset:6px}
+  /* во время полёта и внутри дверь-хотспот не должна ловить мышь */
+  .hero.flying .doorspot, .hero.inside .doorspot{opacity:0;pointer-events:none}
+
+  /* ============ ОБЩЕЕ ДЛЯ СЕКЦИЙ ============ */
+  section{position:relative}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:clamp(72px,11vh,140px) clamp(16px,4vw,44px)}
+  .eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;opacity:.55;margin-bottom:12px}
+  h2{font-family:'Yeseva One',serif;font-weight:400;font-size:clamp(28px,4vw,50px);line-height:1.15}
+  .uline{display:block;margin-top:10px;width:min(220px,42vw);height:8px;color:var(--gold)}
+  .lead{margin-top:18px;font-size:clamp(15px,1.5vw,18px);line-height:1.7;max-width:58ch;opacity:.85}
+  .reveal{opacity:0;transform:translateY(22px)}
+
+  /* ============ Б3 МЕНЮ ============ */
+  .menuhead{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+  .menugrid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,4vw,54px);align-items:center;margin-top:44px}
+  .bookwrap{perspective:2400px}
+  .book{position:relative;width:100%;aspect-ratio:1.9/1.16}
+  .page{position:absolute;top:0;bottom:0;width:50%;background:#FBF5E8;box-shadow:0 14px 40px rgba(33,61,107,.16);padding:clamp(12px,2.2vw,26px)}
+  .page.rightp{right:0;border-radius:6px 16px 16px 6px;background:linear-gradient(90deg,#F1E8D6 0%,#FBF5E8 6%,#FBF5E8 100%)}
+  .page h5{font-family:'Yeseva One',serif;font-weight:400;font-size:clamp(13px,1.5vw,19px);margin-bottom:clamp(8px,1.2vw,14px)}
+  .mi{display:flex;gap:clamp(8px,1.2vw,14px);align-items:center;margin-bottom:clamp(8px,1.4vw,16px)}
+  .mi img{width:clamp(46px,6.4vw,74px);height:clamp(46px,6.4vw,74px);object-fit:cover;border-radius:9px;border:3px solid #fff;box-shadow:0 4px 14px rgba(33,61,107,.18);transform:rotate(-2deg);flex:0 0 auto}
+  .mi:nth-child(odd) img{transform:rotate(1.6deg)}
+  .mi .nm{font-weight:700;font-size:clamp(11.5px,1.2vw,15px)}
+  .mi .ds{font-size:clamp(9.5px,.95vw,12.5px);opacity:.72;line-height:1.4;margin-top:2px}
+  .mi .pr{margin-left:auto;font-weight:700;color:var(--gold);font-size:clamp(11.5px,1.2vw,15px);white-space:nowrap}
+  .cover{position:absolute;right:0;top:-1.6%;bottom:-1.6%;width:50.8%;z-index:5;transform-style:preserve-3d;transform-origin:left center}
+  .cover .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:8px 16px 16px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  .cover .front{background:linear-gradient(135deg,#2E4E85,#213D6B 60%);color:var(--cream);box-shadow:0 18px 50px rgba(33,61,107,.35), inset 0 0 0 3px rgba(217,164,65,.5), inset 0 0 0 13px rgba(247,239,225,.06)}
+  .cover .front .t{font-family:'Yeseva One',serif;font-size:clamp(24px,3.4vw,42px)}
+  .cover .front .s{font-size:clamp(8.5px,.9vw,11px);letter-spacing:.38em;text-transform:uppercase;opacity:.8}
+  .cover .back{transform:rotateY(180deg);background:#FBF5E8;border-radius:16px 6px 6px 16px;box-shadow:0 14px 40px rgba(33,61,107,.16);align-items:stretch;justify-content:flex-start;padding:clamp(12px,2.2vw,26px)}
+  .mlist{list-style:none}
+  .mlist li{display:flex;align-items:baseline;gap:10px;padding:14px 0;border-bottom:1px dashed rgba(33,61,107,.18)}
+  .mlist .nm{font-weight:700;font-size:15.5px}
+  .mlist .ds{font-size:13px;opacity:.7;margin-top:3px}
+  .mlist .dots{flex:1;border-bottom:1px dotted rgba(33,61,107,.3);transform:translateY(-3px)}
+  .mlist .pr{font-weight:700;color:var(--gold);white-space:nowrap}
+  .badge{display:inline-block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:#fff;border-radius:999px;padding:3px 9px;margin-left:8px;vertical-align:2px}
+  .mnote{margin-top:22px;font-size:13.5px;opacity:.6}
+
+  /* ============ Б4 ПОЧЕМУ ============ */
+  .why4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(18px,2.6vw,34px);margin-top:48px}
+  .why4 .it{text-align:left}
+  .why4 svg{width:44px;height:44px;color:var(--sage);margin-bottom:14px}
+  .why4 h3{font-family:'Yeseva One',serif;font-weight:400;font-size:19px;margin-bottom:8px}
+  .why4 p{font-size:14.5px;line-height:1.6;opacity:.78}
+
+  /* ============ Б5 ТЁМНЫЙ ============ */
+  .dark{background:linear-gradient(180deg,#22406F,#1B3159);color:var(--cream);overflow:hidden}
+  .dark::before{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(38% 44% at 16% 22%, rgba(255,217,143,.16), transparent 70%),
+               radial-gradient(34% 40% at 82% 68%, rgba(255,217,143,.12), transparent 70%);
+  }
+  .dark .eyebrow{color:#E3A434;opacity:1}
+  .dark .uline{color:#E3A434}
+  .darkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,44px);margin-top:46px}
+  .darkgrid h3{font-family:'Yeseva One',serif;font-weight:400;font-size:21px;margin-bottom:10px}
+  .darkgrid p{font-size:14.5px;line-height:1.7;opacity:.86}
+
+  /* ============ Б6 ГАЛЕРЕЯ ============ */
+  .frames{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.8vw,22px);margin-top:44px}
+  .frame{background:#fff;padding:8px 8px 20px;border-radius:3px;box-shadow:0 10px 26px rgba(33,61,107,.16);transform:rotate(var(--tilt,0deg));transition:transform .45s var(--ease), box-shadow .45s}
+  .frame:hover{transform:rotate(0) translateY(-5px) scale(1.02);box-shadow:0 18px 40px rgba(33,61,107,.22)}
+  .frame img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:2px}
+  .frame.tall img{aspect-ratio:3/4}
+  .frame figcaption{font-size:11px;text-align:center;margin-top:8px;opacity:.6}
+
+  /* ============ Б7 ЛЕНТА ============ */
+  .band{background:rgba(185,138,60,.1);border-top:1px solid rgba(185,138,60,.2);border-bottom:1px solid rgba(185,138,60,.2)}
+  .band .wrap{padding-top:clamp(34px,5vh,54px);padding-bottom:clamp(34px,5vh,54px);display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap}
+  .band .big{font-family:'Yeseva One',serif;font-size:clamp(20px,2.4vw,30px)}
+  .band .stars{color:#F2C14E;letter-spacing:3px}
+
+  /* ============ Б8 КОНТАКТЫ ============ */
+  .contacts .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,4vw,56px);align-items:center;margin-top:40px}
+  .cdata dl{margin-top:22px}
+  .cdata dt{font-size:11px;letter-spacing:.28em;text-transform:uppercase;opacity:.5;margin-top:20px}
+  .cdata dd{font-size:17px;line-height:1.6;margin-top:6px}
+  .cdata dd a{text-decoration:none;font-weight:700;box-shadow:inset 0 -1px 0 rgba(33,61,107,.3)}
+  .cdata .phone{font-size:clamp(20px,2.2vw,28px);font-family:'Yeseva One',serif}
+  .cbtns{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+  .facade{background:#fff;padding:10px 10px 24px;border-radius:3px;box-shadow:0 14px 36px rgba(33,61,107,.18);transform:rotate(-1deg)}
+  .facade img{width:100%;aspect-ratio:4/3;object-fit:cover}
+  .facade figcaption{text-align:center;font-size:12.5px;opacity:.65;margin-top:10px}
+
+  /* ============ Б9 НОЧНОЙ ФУТЕР ============ */
+  .night{position:relative;overflow:hidden;color:var(--cream);background:linear-gradient(180deg,#2A4470 0%,#1B2F52 45%,#12213D 100%);padding-top:clamp(70px,10vh,120px)}
+  .night::before{
+    content:'';position:absolute;inset:0;pointer-events:none;opacity:.85;
+    background-image:
+      radial-gradient(1.6px 1.6px at 12% 18%, rgba(255,244,214,.9), transparent 60%),
+      radial-gradient(1.2px 1.2px at 28% 34%, rgba(255,244,214,.7), transparent 60%),
+      radial-gradient(1.8px 1.8px at 44% 12%, rgba(255,244,214,.85), transparent 60%),
+      radial-gradient(1.1px 1.1px at 61% 27%, rgba(255,244,214,.6), transparent 60%),
+      radial-gradient(1.7px 1.7px at 76% 15%, rgba(255,244,214,.9), transparent 60%),
+      radial-gradient(1.2px 1.2px at 89% 31%, rgba(255,244,214,.7), transparent 60%),
+      radial-gradient(1.4px 1.4px at 52% 7%,  rgba(255,244,214,.8), transparent 60%),
+      radial-gradient(1.1px 1.1px at 8% 44%,  rgba(255,244,214,.5), transparent 60%);
+  }
+  .minihouse{position:relative;width:88px;margin:0 auto 26px;filter:drop-shadow(0 8px 30px rgba(0,0,0,.35))}
+  .minihouse .roof{width:0;height:0;margin:0 auto;border-left:44px solid transparent;border-right:44px solid transparent;border-bottom:32px solid #2E4E85}
+  .minihouse .body{width:72px;height:54px;margin:0 auto;background:#EFE6D2;border-radius:0 0 6px 6px;position:relative}
+  .minihouse .win{
+    position:absolute;left:50%;top:15px;transform:translateX(-50%);width:21px;height:21px;border-radius:50%;
+    background:#FFD98F;box-shadow:0 0 18px 6px rgba(255,217,143,.75), 0 0 44px 14px rgba(255,217,143,.35);
+    animation:winGlow 4.2s ease-in-out infinite;
+  }
+  @keyframes winGlow{50%{box-shadow:0 0 12px 4px rgba(255,217,143,.55), 0 0 30px 10px rgba(255,217,143,.25)}}
+  .dlg{position:relative;text-align:center;font-family:'Yeseva One',serif;font-size:clamp(20px,3vw,32px);line-height:1.5}
+  .fcols{position:relative;display:grid;grid-template-columns:1.2fr .8fr 1fr;gap:clamp(24px,4vw,54px);max-width:var(--maxw);margin:clamp(50px,7vh,80px) auto 0;padding:0 clamp(16px,4vw,44px)}
+  .fcols h4{font-size:11px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;margin-bottom:16px;font-weight:600}
+  .flogo{font-family:'Yeseva One',serif;font-size:26px;text-decoration:none}
+  .fcols p{font-size:14px;line-height:1.7;opacity:.8;margin-top:10px;max-width:32ch}
+  .fnav{display:flex;flex-direction:column;gap:11px}
+  .fnav a{font-size:14.5px;text-decoration:none;opacity:.85;transition:opacity .25s,transform .3s var(--ease);width:fit-content}
+  .fnav a:hover{opacity:1;transform:translateX(3px)}
+  .fcontacts{font-size:14.5px;line-height:1.9;opacity:.88}
+  .fcontacts a{text-decoration:none;box-shadow:inset 0 -1px 0 rgba(247,239,225,.4)}
+  .fbottom{
+    position:relative;max-width:var(--maxw);margin:clamp(40px,6vh,64px) auto 0;padding:22px clamp(16px,4vw,44px);
+    border-top:1px solid rgba(247,239,225,.14);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-size:12.5px;opacity:.6;
+  }
+
+  /* ============ МОБИЛЬНОЕ ============ */
+  @media (max-width:900px){
+    .hnav{display:none;position:fixed;inset:60px 0 auto;background:rgba(247,239,225,.98);backdrop-filter:blur(10px);
+      flex-direction:column;gap:0;padding:8px 0 16px;box-shadow:0 18px 40px rgba(33,61,107,.16)}
+    .hnav.open{display:flex}
+    .hnav a{color:var(--ink);text-shadow:none;padding:15px clamp(16px,4vw,44px);font-size:16px}
+    .hnav a::after{display:none}
+    .burger{display:grid;place-items:center;margin-left:auto}
+    .langs{margin-left:0}
+    .menugrid{grid-template-columns:1fr}
+    .why4{grid-template-columns:repeat(2,1fr)}
+    .darkgrid{grid-template-columns:1fr}
+    .frames{grid-template-columns:repeat(2,1fr)}
+    .contacts .grid{grid-template-columns:1fr}
+    .fcols{grid-template-columns:1fr;gap:34px}
+    .about .wrap{flex-direction:column;align-items:flex-start}
+    .vign{width:min(280px,70vw);margin:0 auto}
+    .doorspot{display:none}
+  }
+  @media (max-width:560px){
+    .hero h1{font-size:clamp(30px,8.4vw,40px)}
+    .cta-row .btn{width:100%;justify-content:center}
+    .why4{grid-template-columns:1fr}
+    .cbtns .btn{flex:1 1 45%;justify-content:center}
+  }
+  /* на телефонах кнопка шапки выталкивала бургер за край —
+     прячем её: «Как добраться» и так есть в hero и в контактах */
+  @media (max-width:600px){
+    .hcta{display:none}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none}
+    .scrollhint,.winGlow{animation:none}
+    .chev{animation:none}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#top">К содержимому</a>
+
+<!-- ============ ШАПКА ============ -->
+<header class="header" id="header">
+  <a class="hlogo" href="#top" aria-label="Домик — на главную">Домик</a>
+
+  <nav class="hnav" id="nav" aria-label="Основная навигация">
+    <a href="../menu.html">Меню</a>
+    <a href="#bakery">Выпечка</a>
+    <a href="#about">О нас</a>
+    <a href="#gallery">Галерея</a>
+    <a href="#contacts">Контакты</a>
+  </nav>
+
+  <div class="langs" role="group" aria-label="Язык сайта">
+    <button data-lang="ru" aria-pressed="true">RU</button>
+    <button data-lang="en" aria-pressed="false">EN</button>
+    <button data-lang="zh" aria-pressed="false">中</button>
+    <button data-lang="ar" aria-pressed="false">ع</button>
+  </div>
+
+  <a class="hphone" href="tel:+79037246283" aria-label="Позвонить">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+  </a>
+
+  <a class="btn btn--gold hcta" href="#contacts" style="padding:11px 20px;font-size:14px">Как добраться</a>
+
+  <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</header>
+
+<main id="top">
+
+<!-- ============ Б1 СЦЕНА: снаружи → влёт → внутри (ОДИН экран) ============ -->
+<section class="hero" id="hero">
+  <span id="about" style="position:absolute;top:0"></span>
+  <video id="heroLoop" src="hero-v5-web.mp4" poster="hero-poster.jpg" autoplay muted loop playsinline></video>
+  <video id="roomLoop" src="room-loop-web.mp4" poster="room-1600.jpg" muted loop playsinline preload="none"></video>
+  <canvas id="cv"></canvas>
+  <div class="scrim"></div>
+
+  <button class="doorspot" id="doorspot" aria-label="Зайти в домик"></button>
+
+  <!-- СНАРУЖИ -->
+  <div class="hero__in" id="uiOut">
+    <div class="kicker reveal">спешелти-кофейня · Москва</div>
+    <h1 class="reveal">Кофейня у Павелецкой,<br>где можно спрятаться от города</h1>
+    <p class="sub reveal">Спешелти-кофе, свежая выпечка и веранда в тихом дворе. Бахрушина, 12 — в трёх минутах от метро.</p>
+
+    <div class="chip reveal">
+      <span class="dot" id="statusDot"></span>
+      <span>Бахрушина, 12 · <b id="statusText">ежедневно до 21:00</b></span>
+    </div>
+
+    <div class="cta-row reveal">
+      <a class="btn btn--gold btn--lg" href="../menu.html">Посмотреть меню</a>
+      <a class="tlink" href="#contacts"><u>Как добраться</u> <span class="arrow">→</span></a>
+    </div>
+
+    <a class="trust reveal" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">
+      <span class="stars">★★★★★</span> <span><b>5,0</b> <u>на Яндекс Картах · 140 отзывов</u></span>
+    </a>
+  </div>
+
+  <!-- ВНУТРИ (тот же экран, другой текст) -->
+  <div class="inside-ui" id="uiIn" aria-hidden="true">
+    <div class="box">
+      <div class="pull st">— Ты где?<br>— Я в Домике.</div>
+      <p class="st">Помнишь детскую игру: пока ты в домике — тебя нельзя догнать. Мы выросли, а правило осталось.</p>
+      <p class="st">«Домик» — кофейня в тихом дворе у Павелецкой. Здесь можно выключить город на полчаса: посидеть одному, поговорить с близким, поработать или просто помолчать над чашкой.</p>
+      <div class="facts st">
+        <span>спешелти-зерно</span><span>печём каждое утро</span><span>веранда во дворе</span><span>розетки под рукой</span><span>можно с собакой</span>
+      </div>
+      <div class="st" style="margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+        <a class="btn btn--gold" href="../menu.html">Посмотреть меню</a>
+        <a class="tlink" href="#bakery" style="color:var(--cream)"><u>Что попробовать</u> <span class="arrow">↓</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cap" id="cap1">— Ты где?</div>
+  <button class="skipbtn" id="skipbtn">Пропустить</button>
+  <button class="outbtn" id="outBtn" aria-label="Выйти из домика">↑ выйти на воздух</button>
+
+  <div class="scrollhint" id="scrollhint">
+    <span id="hintText">листай — и ты внутри</span>
+    <span class="chev"></span>
+  </div>
+</section>
+
+<!-- ============ Б3 ВЫПЕЧКА / МЕНЮ ============ -->
+<section id="bakery">
+  <div class="wrap">
+    <div class="menuhead">
+      <div>
+        <div class="eyebrow reveal">Из печи каждое утро</div>
+        <h2 class="reveal">Свежая выпечка
+          <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </h2>
+        <p class="lead reveal">Выбирайте под настроение — печём каждый день из хороших продуктов.</p>
+      </div>
+      <a class="btn btn--ghost-ink reveal" href="../menu.html">Смотреть всё меню <span class="arrow">→</span></a>
+    </div>
+
+    <div class="menugrid">
+      <div class="bookwrap reveal">
+        <div class="book" id="menuBook" aria-hidden="true">
+          <div class="page rightp">
+            <h5>к кофе</h5>
+            <div class="mi"><img src="../assets/tube.webp" alt="">
+              <div><div class="nm">Трубочка со сгущёнкой</div><div class="ds">хрустящая вафля с варёной сгущёнкой</div></div>
+              <div class="pr">180 ₽</div></div>
+            <div class="mi"><img src="../assets/bun-pecan.webp" alt="">
+              <div><div class="nm">Булочка карамель-пекан</div><div class="ds">карамель и хрустящий пекан</div></div>
+              <div class="pr">360 ₽</div></div>
+          </div>
+          <div class="cover" id="bookCover">
+            <div class="face front">
+              <div class="t">Меню</div>
+              <div class="s">домик · лучшее</div>
+            </div>
+            <div class="face back">
+              <h5>круассаны</h5>
+              <div class="mi"><img src="../assets/croissant-classic.webp" alt="">
+                <div><div class="nm">Классический круассан</div><div class="ds">хрустящий, на сливочном масле</div></div>
+                <div class="pr">220 ₽</div></div>
+              <div class="mi"><img src="../assets/croissant-almond.webp" alt="">
+                <div><div class="nm">Миндальный круассан</div><div class="ds">с кремом франжипан и лепестками</div></div>
+                <div class="pr">320 ₽</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <ul class="mlist reveal">
+          <li><div><div class="nm">Классический круассан</div><div class="ds">хрустящий, на сливочном масле</div></div><span class="dots"></span><span class="pr">220 ₽</span></li>
+          <li><div><div class="nm">Миндальный круассан <span class="badge">хит недели</span></div><div class="ds">с кремом франжипан и лепестками</div></div><span class="dots"></span><span class="pr">320 ₽</span></li>
+          <li><div><div class="nm">Трубочка со сгущёнкой</div><div class="ds">хрустящая вафля с варёной сгущёнкой</div></div><span class="dots"></span><span class="pr">180 ₽</span></li>
+          <li><div><div class="nm">Булочка карамель-пекан</div><div class="ds">карамель и хрустящий пекан</div></div><span class="dots"></span><span class="pr">360 ₽</span></li>
+        </ul>
+        <div class="mnote reveal">Кофе, десерты и сезонные новинки — в полном меню.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Б4 ПОЧЕМУ ВОЗВРАЩАЮТСЯ ============ -->
+<section id="why">
+  <div class="wrap">
+    <div class="eyebrow reveal">О нас</div>
+    <h2 class="reveal">Почему гости возвращаются
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true" style="color:var(--sage)"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </h2>
+
+    <div class="why4">
+      <div class="it reveal">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18h22v10a11 11 0 0 1-22 0z"/><path d="M32 20h4a4 4 0 0 1 0 8h-4"/><path d="M8 40h26"/><path d="M16 12c0-2 2-2 2-4M22 12c0-2 2-2 2-4"/></svg>
+        <h3>Отличный кофе</h3>
+        <p>Рожковая и фильтр, зерно от проверенных обжарщиков.</p>
+      </div>
+      <div class="it reveal">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30c4-10 12-14 18-14s14 4 18 14c-6 4-12 5-18 5s-12-1-18-5z"/><path d="M18 18l-2-5M30 18l2-5M24 16v-6"/></svg>
+        <h3>Свежая выпечка</h3>
+        <p>Печём каждый день из хороших продуктов.</p>
+      </div>
+      <div class="it reveal">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v6"/><path d="M14 30l10-16 10 16z"/><path d="M18 30a6 6 0 0 0 12 0"/><path d="M24 36v6M18 42h12"/></svg>
+        <h3>Уютная атмосфера</h3>
+        <p>Кирпич, дерево, тёплый свет и негромкая музыка.</p>
+      </div>
+      <div class="it reveal">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40s-11-7-11-15a6 6 0 0 1 11-3 6 6 0 0 1 11 3c0 8-11 15-11 15z"/><circle cx="12" cy="12" r="3"/><circle cx="20" cy="8" r="3"/><circle cx="28" cy="8" r="3"/><circle cx="36" cy="12" r="3"/></svg>
+        <h3>Рады каждому</h3>
+        <p>Можно с собакой, с ноутбуком или просто посидеть.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Б5 ТЁМНЫЙ ============ -->
+<section class="dark" id="space">
+  <div class="wrap">
+    <div class="eyebrow reveal">Вечером здесь ламповый свет</div>
+    <h2 class="reveal">Зерно, десерты и место, где хорошо
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </h2>
+    <div class="darkgrid">
+      <article class="reveal">
+        <h3>Отборное зерно</h3>
+        <p>Спешелти от проверенных обжарщиков. Классику варим на рожковой, для ценителей — фильтр с новыми нотами каждый раз.</p>
+      </article>
+      <article class="reveal">
+        <h3>Выпечка и десерты</h3>
+        <p>Круассаны, слойки, чизкейк и сезонные новинки — то, что хочется сфотографировать и тут же съесть.</p>
+      </article>
+      <article class="reveal">
+        <h3>Пространство для вас</h3>
+        <p>Тёплый зал, веранда во дворе и розетки под рукой. Удобно работать, встречаться и отдыхать.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Б6 ГАЛЕРЕЯ ============ -->
+<section id="gallery">
+  <div class="wrap">
+    <div class="eyebrow reveal">Загляните внутрь</div>
+    <h2 class="reveal">Галерея
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true" style="color:#2F8A86"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </h2>
+    <p class="lead reveal">Интерьер и уютные уголки кофейни «Домик» — арт на стенах, тёплый свет и живые детали.</p>
+
+    <div class="frames">
+      <figure class="frame tall reveal" style="--tilt:-1.6deg"><img src="../assets/gal1.webp" alt="Мурал с девушкой в оранжевом пальто на стене кофейни" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:1.2deg"><img src="../assets/gal2.webp" alt="Синие кресла и жёлтый мурал в зале" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:-.8deg"><img src="../assets/gal3.webp" alt="Барный шкаф с настольными играми" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:1.8deg"><img src="../assets/gal4.webp" alt="Столик у окна с декоративной звездой" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:-1.2deg"><img src="../assets/gal8.webp" alt="Летняя веранда с шезлонгами во дворе" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:.9deg"><img src="../assets/gal5.webp" alt="Диван у окна с мягкими подушками" loading="lazy"></figure>
+      <figure class="frame tall reveal" style="--tilt:-1.4deg"><img src="../assets/gal7.webp" alt="Мурал с двумя фигурами под лампой" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:1.5deg"><img src="../assets/gal9.webp" alt="Руки сердечком над чашкой капучино" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:-.6deg"><img src="../assets/bar.webp" alt="Барная стойка с полками и кофемашиной" loading="lazy"></figure>
+      <figure class="frame reveal" style="--tilt:1.1deg"><img src="../assets/gal10.webp" alt="Фасад кофейни «Домик» с вывеской" loading="lazy"><figcaption>так выглядит наш дом с улицы</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Б7 ЛЕНТА-ОТЗЫВ ============ -->
+<section class="band">
+  <div class="wrap">
+    <div class="big reveal"><span class="stars">★★★★★</span> 5,0 на Яндекс Картах</div>
+    <div class="reveal" style="opacity:.7">140 отзывов гостей</div>
+    <a class="btn btn--ghost-ink reveal" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">Читать отзывы <span class="arrow">→</span></a>
+  </div>
+</section>
+
+<!-- ============ Б8 КОНТАКТЫ ============ -->
+<section class="contacts" id="contacts">
+  <div class="wrap">
+    <div class="eyebrow reveal">Контакты</div>
+    <h2 class="reveal">Приходите в гости
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </h2>
+    <p class="lead reveal">Всегда рады видеть вас — заходите на чашку спешелти и свежую выпечку. Мы в трёх минутах от Павелецкой, на Бахрушина.</p>
+
+    <div class="grid">
+      <div class="cdata">
+        <dl>
+          <dt class="reveal">Адрес</dt>
+          <dd class="reveal">Москва, ул. Бахрушина, 12, стр. 2<br><span style="opacity:.65;font-size:15px">3 минуты пешком от м. Павелецкая</span></dd>
+
+          <dt class="reveal">Часы работы</dt>
+          <dd class="reveal">Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00<br>
+            <span class="chip" style="background:rgba(33,61,107,.06);border-color:rgba(33,61,107,.14);color:var(--ink);margin-top:12px;backdrop-filter:none">
+              <span class="dot" id="statusDot2"></span><b id="statusText2">ежедневно до 21:00</b>
+            </span>
+          </dd>
+
+          <dt class="reveal">Телефон</dt>
+          <dd class="reveal phone"><a href="tel:+79037246283">+7 (903) 724-62-83</a></dd>
+        </dl>
+
+        <div class="cbtns reveal">
+          <a class="btn btn--gold" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">Построить маршрут</a>
+          <a class="btn btn--ghost-ink" href="tel:+79037246283">Позвонить</a>
+        </div>
+      </div>
+
+      <figure class="facade reveal">
+        <img src="../assets/gal10.webp" alt="Фасад кофейни «Домик» на Бахрушина с вывеской" loading="lazy">
+        <figcaption>ищите эту дверь и вывеску</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ Б9 НОЧНОЙ ФУТЕР ============ -->
+<footer class="night" id="footer">
+  <div class="minihouse reveal">
+    <div class="roof"></div>
+    <div class="body"><div class="win"></div></div>
+  </div>
+  <div class="dlg reveal">— Ты где?<br>— Я в Домике.</div>
+
+  <div class="fcols">
+    <div>
+      <a class="flogo" href="#top">Домик</a>
+      <p>Городская кофейня в тихом дворе у Павелецкой.</p>
+      <a class="trust" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" style="margin-top:14px">
+        <span class="stars">★</span> <span><b>5,0</b> · 140 отзывов</span>
+      </a>
+    </div>
+
+    <nav aria-label="Навигация в подвале">
+      <h4>Навигация</h4>
+      <div class="fnav">
+        <a href="../menu.html">Меню</a>
+        <a href="#bakery">Выпечка</a>
+        <a href="#about">О нас</a>
+        <a href="#gallery">Галерея</a>
+        <a href="#contacts">Контакты</a>
+      </div>
+    </nav>
+
+    <div>
+      <h4>Контакты</h4>
+      <div class="fcontacts">
+        Москва, ул. Бахрушина, 12, стр. 2<br>
+        <a href="tel:+79037246283">+7 (903) 724-62-83</a><br>
+        Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00
+      </div>
+      <a class="btn btn--ghost" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" style="margin-top:18px;font-size:13px;padding:11px 20px">Построить маршрут</a>
+    </div>
+  </div>
+
+  <div class="fbottom">
+    <span>© 2026 «Домик» · городская кофейня</span>
+    <span>Сделано с теплом</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isPortrait = matchMedia('(max-aspect-ratio: 4/5)').matches;
+
+  var CFG = isPortrait
+    ? { N:100, dir:'frames-m/', hero:'mob-hero-web.mp4', room:'mob-room-web.mp4', frameMs:46 }
+    : { N:121, dir:'frames/',   hero:'hero-v5-web.mp4',  room:'room-loop-web.mp4', frameMs:38 };
+
+  var heroLoop = document.getElementById('heroLoop');
+  var roomLoop = document.getElementById('roomLoop');
+  if (isPortrait){
+    heroLoop.src = CFG.hero; roomLoop.src = CFG.room;
+    /* постеры-заглушки тоже вертикальные — иначе до загрузки видео
+       мелькает обрезанный десктопный кадр */
+    heroLoop.poster = CFG.dir + 'f_001.webp';
+    roomLoop.poster = CFG.dir + 'f_' + String(CFG.N).padStart(3,'0') + '.webp';
+  }
+
+  /* ---------- шапка ---------- */
+  var header = document.getElementById('header');
+  function headerState(){ header.classList.toggle('is-scrolled', scrollY > 24); }
+  addEventListener('scroll', headerState, {passive:true}); headerState();
+
+  var burger = document.getElementById('burger'), nav = document.getElementById('nav');
+  burger.addEventListener('click', function(){
+    var open = nav.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open);
+    burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+  });
+  nav.addEventListener('click', function(e){ if(e.target.tagName==='A'){ nav.classList.remove('open'); burger.setAttribute('aria-expanded','false'); } });
+
+  /* ---------- живой статус «открыто» ---------- */
+  function status(){
+    var now = new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+    var d = now.getDay(), h = now.getHours() + now.getMinutes()/60;
+    var weekend = (d===0 || d===6);
+    var open = weekend ? 9 : 8, close = 21;
+    var isOpen = h >= open && h < close;
+    var txt, on = isOpen;
+    if (isOpen) txt = 'открыто до 21:00';
+    else if (h < open) txt = 'откроется в ' + open + ':00';
+    else {
+      var tomorrowWeekend = ((d+1)%7===0 || (d+1)%7===6);
+      txt = 'откроется завтра в ' + (tomorrowWeekend ? 9 : 8) + ':00';
+    }
+    [['statusText','statusDot'],['statusText2','statusDot2']].forEach(function(p){
+      var t = document.getElementById(p[0]), dot = document.getElementById(p[1]);
+      if (t) t.textContent = txt;
+      if (dot) dot.classList.toggle('off', !on);
+    });
+  }
+  status(); setInterval(status, 60000);
+
+  /* ---------- якоря без #hash ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var href = a.getAttribute('href');
+      var t = document.querySelector(href);
+      if (!t) return;
+      e.preventDefault();
+      /* «О нас» живёт на первом экране: поднимаемся наверх и показываем «внутри» */
+      if (href === '#about'){
+        scrollTo({top:0, behavior: reduce ? 'auto' : 'smooth'});
+        setTimeout(function(){ if (typeof startFly === 'function') startFly(); }, reduce ? 0 : 480);
+        return;
+      }
+      var y = (href==='#top') ? 0 : t.getBoundingClientRect().top + scrollY - 54;
+      scrollTo({top:y, behavior: reduce ? 'auto' : 'smooth'});
+    });
+  });
+
+  /* ---------- сцена: пауза видео вне экрана ---------- */
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        var v = document.querySelector('.hero.inside') ? roomLoop : heroLoop;
+        if (e.isIntersecting) v.play().catch(function(){});
+        else { heroLoop.pause(); roomLoop.pause(); }
+      });
+    }, {threshold:.05}).observe(document.getElementById('hero'));
+  }
+
+  /* ---------- появления ---------- */
+  if (!reduce && window.gsap && window.ScrollTrigger){
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.utils.toArray('.hero .reveal').forEach(function(el,i){
+      gsap.to(el, {opacity:1, y:0, duration:.9, ease:'power2.out', delay:.15 + i*.09});
+    });
+    gsap.utils.toArray('.reveal').forEach(function(el){
+      if (el.closest('.hero')) return;
+      gsap.to(el, {opacity:1, y:0, duration:.8, ease:'power2.out',
+        scrollTrigger:{trigger:el, start:'top 86%', once:true}});
+    });
+
+    ScrollTrigger.create({trigger:'#menuBook', start:'top 70%', once:true, onEnter:function(){
+      gsap.to('#bookCover', {rotationY:-178, duration:1.7, ease:'power3.inOut', transformOrigin:'left center'});
+      gsap.fromTo('#menuBook .rightp .mi', {opacity:0,y:14},{opacity:1,y:0,stagger:.14,duration:.5,delay:1.0});
+      gsap.fromTo('#bookCover .back .mi', {opacity:0,y:14},{opacity:1,y:0,stagger:.14,duration:.5,delay:1.15});
+    }});
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
+  }
+  setTimeout(function(){
+    document.querySelectorAll('.reveal').forEach(function(el){
+      if (getComputedStyle(el).opacity === '0') { el.style.opacity=1; el.style.transform='none'; }
+    });
+  }, 3000);
+
+  /* ================= ВЛЁТ (по кнопке, не барьер) ================= */
+  var N = CFG.N, FRAME_MS = CFG.frameMs;
+  var srcOf = function(i){ return CFG.dir + 'f_' + String(i+1).padStart(3,'0') + '.webp'; };
+  var hero = document.getElementById('hero');
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var uiOut = document.getElementById('uiOut'), uiIn = document.getElementById('uiIn');
+  var cap1 = document.getElementById('cap1');
+  var skipbtn = document.getElementById('skipbtn');
+  var outBtn = document.getElementById('outBtn');
+  var hintText = document.getElementById('hintText'), scrollhint = document.getElementById('scrollhint');
+  var imgs = new Array(N), frame = 0, current = -1, timer = null, framesReady = false;
+
+  function resize(){
+    var dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = Math.round(innerWidth*dpr); cv.height = Math.round(innerHeight*dpr);
+    current = -1; draw(frame);
+  }
+  addEventListener('resize', resize);
+
+  function draw(i){
+    i = Math.max(0, Math.min(N-1, i));
+    var j = i; while (j>0 && !(imgs[j]&&imgs[j].complete&&imgs[j].naturalWidth)) j--;
+    if (j===current) return;
+    var im = imgs[j]; if (!im||!im.complete||!im.naturalWidth) return;
+    current = j;
+    var cw=cv.width, ch=cv.height, iw=im.naturalWidth, ih=im.naturalHeight;
+    var s = Math.max(cw/iw, ch/ih);
+    ctx.drawImage(im, (cw-iw*s)/2, (ch-ih*s)/2, iw*s, ih*s);
+  }
+
+  /* очередь: грузим кадры фоном, не мешая hero-видео */
+  var next = 0, started = false;
+  function pump(){
+    if (next >= N) { framesReady = true; return; }
+    var i = next++, im = new Image();
+    im.onload = im.onerror = function(){ if (next>=N && i>=N-1) framesReady = true; pump(); };
+    im.src = srcOf(i); imgs[i] = im;
+  }
+  function startFrames(){ if(started) return; started=true; for(var k=0;k<3;k++) pump(); }
+  /* Кадры влёта — ПОСЛЕДНИЙ приоритет: сначала контент (фото, видео),
+     иначе 121 запрос забивает пул соединений и ленивые фото не грузятся. */
+  if (!reduce){
+    if (document.readyState === 'complete') setTimeout(startFrames, 400);
+    else addEventListener('load', function(){ setTimeout(startFrames, 400); }, {once:true});
+    setTimeout(startFrames, 8000);
+  }
+
+  /* Приземление: тот же экран — меняются только фон и текст.
+     Порядок важен: сначала подводим комнату ПОД canvas, даём ей кадр, и только
+     потом гасим canvas — иначе на миг проглядывает стартовое видео. */
+  function showInside(){
+    markFlown();
+    hero.classList.remove('flying');
+    hero.classList.add('inside');
+    uiOut.classList.add('gone'); uiOut.setAttribute('aria-hidden','true');
+    cap1.classList.remove('on');
+    skipbtn.classList.remove('on');
+    document.documentElement.style.overflow = '';
+
+    if (roomLoop.readyState === 0) roomLoop.load();
+    roomLoop.pause();
+    try { roomLoop.currentTime = 0; } catch(e){}
+    roomLoop.style.opacity = 1;      // под canvas: застывший первый кадр
+    heroLoop.style.opacity = 0;      // чтобы не мелькнула при гашении canvas
+    handOff(roomLoop, heroLoop);
+
+    uiIn.classList.add('on'); uiIn.removeAttribute('aria-hidden');
+    /* строки внутри проявляются каскадом */
+    var st = uiIn.querySelectorAll('.st');
+    if (!reduce && window.gsap){
+      gsap.to(st, {opacity:1, y:0, duration:.75, ease:'power2.out', stagger:.11, delay:.15, overwrite:true});
+    } else {
+      st.forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
+    }
+    hintText.textContent = 'листай дальше';
+    scrollhint.style.opacity = .8;
+  }
+  /* Плавная передача картинки из canvas в видео:
+     1) видео стоит ПОД canvas на паузе, показывая первый кадр
+        (он совпадает с последним кадром полёта);
+     2) ждём, пока браузер реально отрисует этот кадр (rVFC);
+     3) canvas медленно растворяется поверх НЕПОДВИЖНОЙ картинки;
+     4) и только после растворения видео оживает — стыка не видно. */
+  function handOff(vid, hiddenVid){
+    var done = false;
+    function reveal(){
+      if (done) return; done = true;
+      cv.style.transition = 'opacity .7s var(--ease)';   // растворение — медленно
+      cv.style.opacity = 0;
+      setTimeout(function(){
+        if (!reduce) vid.play().catch(function(){});
+        if (hiddenVid) hiddenVid.pause();
+      }, 730);
+    }
+    var guard = setTimeout(reveal, 500);                 // страховка: кадр не отчитался
+    if (vid.requestVideoFrameCallback){
+      vid.requestVideoFrameCallback(function(){ clearTimeout(guard); reveal(); });
+    }
+  }
+
+  /* Возврат на улицу: тот же экран, обратный порядок */
+  function showOutside(){
+    flown = false;
+    hero.classList.remove('flying');
+    hero.classList.remove('inside');
+    uiIn.classList.remove('on'); uiIn.setAttribute('aria-hidden','true');
+    if (window.gsap) gsap.set(uiIn.querySelectorAll('.st'), {opacity:0, y:16});
+    cap1.classList.remove('on');
+    skipbtn.classList.remove('on');
+    document.documentElement.style.overflow = '';
+
+    heroLoop.pause();
+    try { heroLoop.currentTime = 0; } catch(e){}   // кадр совпадает с началом полёта
+    heroLoop.style.opacity = 1;      // под canvas: застывший кадр
+    roomLoop.style.opacity = 0;
+    handOff(heroLoop, roomLoop);
+
+    uiOut.classList.remove('gone'); uiOut.removeAttribute('aria-hidden');
+    hintText.textContent = 'листай — и ты внутри';
+    scrollhint.style.opacity = .8;
+  }
+
+  var flyDir = 1;
+  function endFly(){                    // «Пропустить» / Esc — сразу в конец текущего полёта
+    if (timer) cancelAnimationFrame(timer);
+    timer = null;
+    frame = flyDir > 0 ? N-1 : 0;
+    draw(frame);
+    flyDir > 0 ? showInside() : showOutside();
+  }
+
+  /* Полёт: dir=+1 внутрь, dir=-1 наружу */
+  function fly(dir){
+    if (timer) return;
+    if (dir > 0 && hero.classList.contains('inside')) return;
+    if (dir < 0 && !hero.classList.contains('inside')) return;
+    if (reduce || (!framesReady && !(imgs[0] && imgs[0].complete))){
+      dir > 0 ? showInside() : showOutside();
+      return;
+    }
+    flyDir = dir;
+    resize();
+    document.documentElement.style.overflow = 'hidden';
+    hero.classList.add('flying');
+
+    /* комната начинает грузиться уже на старте полёта — к посадке кадр готов */
+    if (dir > 0 && roomLoop.readyState === 0) roomLoop.load();
+
+    /* сначала рисуем стартовый кадр полёта и показываем canvas,
+       и только потом трогаем слои под ним */
+    frame = dir > 0 ? 0 : N-1;
+    draw(frame);
+    cv.style.transition = 'opacity .3s ease-out';    // появление — быстро
+    cv.style.opacity = 1;
+    scrollhint.style.opacity = 0;
+
+    if (dir > 0){
+      uiOut.classList.add('gone');
+    } else {
+      uiIn.classList.remove('on'); uiIn.setAttribute('aria-hidden','true');
+      hero.classList.remove('inside');          // прячем кнопку «выйти»
+    }
+    setTimeout(function(){ if (timer) skipbtn.classList.add('on'); }, 900);
+
+    /* проигрывание по реальному времени (rAF): на слабых устройствах
+       полёт не растягивается, а мягко пропускает кадры */
+    var t0 = performance.now(), total = (N-1) * FRAME_MS;
+    timer = requestAnimationFrame(function step(now){
+      var p = Math.min(1, (now - t0) / total);
+      /* линейно: кадров всего ~120, любое замедление в конце превращает
+         последние кадры в слайд-шоу. Плавность посадки даёт растворение canvas. */
+      var q = dir > 0 ? p : 1 - p;              // назад — кадры в обратном порядке
+      frame = Math.round(q * (N-1));
+      draw(frame);
+      cap1.classList.toggle('on', dir > 0 && p > .12 && p < .30);
+      if (p >= 1){ timer = null; dir > 0 ? showInside() : showOutside(); return; }
+      timer = requestAnimationFrame(step);
+    });
+  }
+  function startFly(){ fly(+1); }
+  function flyBack(){ fly(-1); }
+
+  /* для тестов: ?at=3200 — прыгнуть в точку скролла; ?inside=1 — сразу состояние «внутри»;
+     ?shot=1 — фикс. высота hero (полностраничные скриншоты в headless) */
+  var qs = new URLSearchParams(location.search);
+  if (qs.get('shot')){
+    var shotCss = document.createElement('style');
+    shotCss.textContent = '.hero{height:812px !important;min-height:812px !important}';
+    document.head.appendChild(shotCss);
+  }
+  var at = qs.get('at');
+  if (at) addEventListener('load', function(){ setTimeout(function(){ scrollTo(0, parseInt(at,10)); }, 300); });
+  if (qs.get('inside')) addEventListener('load', function(){ setTimeout(showInside, 500); });
+
+  /* ---------- ВЛЁТ ПО СКРОЛЛУ (один раз за визит) ----------
+     Первый жест вниз на hero проигрывает видео. Дальше скролл обычный.
+     Кто уже летал (sessionStorage) или нажал «Пропустить» — сразу листает. */
+  var flown = false;                 // сбрасывается при перезагрузке — влёт снова доступен
+  function markFlown(){ flown = true; }
+
+  function onHero(){ return scrollY < 60; }
+  var inside = function(){ return hero.classList.contains('inside'); };
+
+  /* dir>0 — жест вниз, dir<0 — жест вверх. Возвращает true, если полёт начат */
+  function maybeFly(dir){
+    if (timer || reduce || !onHero()) return false;
+    if (!imgs[0] || !imgs[0].complete) return false;   // кадры ещё не готовы — не мешаем
+    if (dir > 0 && !inside() && !flown){ fly(+1); return true; }
+    if (dir < 0 && inside()){ fly(-1); return true; }  // наверху жест вверх — вылетаем
+    return false;
+  }
+  addEventListener('wheel', function(e){
+    if (maybeFly(e.deltaY)) e.preventDefault();
+    else if (timer) e.preventDefault();               // во время полёта скролл не нужен
+  }, {passive:false});
+
+  var touchY = null;
+  addEventListener('touchstart', function(e){ touchY = e.touches[0].clientY; }, {passive:true});
+  addEventListener('touchmove', function(e){
+    if (timer){ e.preventDefault(); return; }
+    if (touchY === null) return;
+    var dy = touchY - e.touches[0].clientY;           // >0 — палец вверх (скролл вниз)
+    if (Math.abs(dy) > 26 && maybeFly(dy)){ touchY = null; e.preventDefault(); }
+  }, {passive:false});
+  addEventListener('keydown', function(e){
+    if ((e.key==='ArrowDown'||e.key==='PageDown'||e.key===' ') && maybeFly(1)) e.preventDefault();
+    if ((e.key==='ArrowUp'||e.key==='PageUp') && maybeFly(-1)) e.preventDefault();
+  });
+
+  document.getElementById('doorspot').addEventListener('click', startFly);
+  outBtn.addEventListener('click', flyBack);
+  skipbtn.addEventListener('click', endFly);
+  addEventListener('keydown', function(e){ if (e.key==='Escape' && timer) endFly(); });
+  header.addEventListener('click', function(){ if (timer) endFly(); });
+  resize();
+})();
+</script>
+</body>
+</html>
