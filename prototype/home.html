@@ -269,14 +269,8 @@
   .bt-deckwrap{position:absolute;left:calc(50% + 14px);bottom:6%;transform:translateX(-50%);z-index:5;
     width:322px;height:492px;touch-action:pan-y}
   .bt-deck{position:absolute;inset:0;perspective:900px}
-  /* булавка ЗАФИКСИРОВАНА в одной точке; кончик = точка (Px, PY), куда встают дырки бирок.
-     tip булавки: x=13.3% ширины, y=низ. PINW=40 → высота 71.7, кончик (5.32, 71.5); PY=46.
-     rotate(-15.8°) вокруг кончика — выпрямляем наклон иглы (шарик над дыркой, кончик остаётся в дырке) */
-  .bt-pin{position:absolute;left:calc(50% - 5.3px);top:-25.7px;z-index:20;pointer-events:none;width:40px;
-    transform:rotate(-15.8deg);transform-origin:13.3% 99.8%}
-  .bt-pin img{width:100%;display:block;filter:drop-shadow(0 3px 5px rgba(18,10,3,.5))}
-  /* бирка = целиком нарисованная картинка; left/top/width/origin задаёт JS (дырка → под булавку) */
-  .bt-tag{position:absolute;transition:transform .5s var(--ease), opacity .4s;will-change:transform}
+  /* бирка = целиком нарисованная картинка; left/top/width задаёт JS (по центру колоды) */
+  .bt-tag{position:absolute;transition:transform .42s var(--ease), opacity .35s;will-change:transform}
   .bt-tag img{width:100%;display:block;pointer-events:none;
     filter:drop-shadow(0 14px 20px rgba(10,8,4,.4))}
   /* стопка: нижние выглядывают (их собственный наклон уже в картинке) */
@@ -286,7 +280,7 @@
   .bt-tag[data-pos="0"]{z-index:5;animation:btSway 4.6s ease-in-out infinite}
   @keyframes btSway{0%,100%{transform:rotate(-1.3deg)}50%{transform:rotate(1.5deg)}}
   .bt-tag.dragging{transition:none;animation:none}
-  .bt-tag.flyout{transition:transform .55s cubic-bezier(.5,.05,.6,1), opacity .45s .1s;opacity:0;pointer-events:none}
+  .bt-tag.flyout{transition:transform .44s cubic-bezier(.4,0,.5,1), opacity .34s .06s;opacity:0;pointer-events:none}
   .bt-hint{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);
     font-family:'Caveat',cursive;font-size:20px;color:var(--cream);opacity:.85;white-space:nowrap;
     text-shadow:0 2px 14px rgba(24,18,10,.8);transition:opacity .5s}
@@ -551,7 +545,7 @@
   <div class="bt-stage">
     <picture>
       <!-- пробелы в srcset обязаны быть закодированы: пробел = разделитель дескриптора -->
-      <source media="(max-aspect-ratio: 4/5)" srcset="Печет%20хлеб%20моб.png">
+      <source media="(max-aspect-ratio: 4/5)" srcset="bakery-mob.webp">
       <img src="Печет%20хлеб.png" alt="Мальчик достаёт свежий хлеб из печи — иллюстрация" loading="lazy">
     </picture>
     <div class="bt-dim" id="btDim"></div>
@@ -564,7 +558,6 @@
 
     <div class="bt-deckwrap" id="btDeckwrap" aria-label="Выпечка — свайпайте бирки">
       <div class="bt-deck" id="btDeck"></div>
-      <div class="bt-pin" aria-hidden="true"><img src="pin.webp" alt="" draggable="false"></div>
       <div class="bt-hint" id="btHint">свайпни бирку ⟷</div>
       <div class="bt-dots" id="btDots"></div>
     </div>
@@ -843,10 +836,15 @@
     var btScene = document.querySelector('.bt-stage picture img');
     var btDim = document.getElementById('btDim');
     if (btScene && btDim){
-      gsap.fromTo(btScene, {scale:1.1}, {scale:1, ease:'none',
-        scrollTrigger:{trigger:'#bakery', start:'top bottom', end:'top top', scrub:true}});
-      gsap.fromTo(btDim, {opacity:.85}, {opacity:0, ease:'none',
-        scrollTrigger:{trigger:'#bakery', start:'top bottom', end:'top 38%', scrub:true}});
+      gsap.fromTo(btScene, {scale:1.12}, {scale:1, ease:'none',
+        scrollTrigger:{trigger:'#bakery', start:'top bottom', end:'top 20%', scrub:.4}});
+      gsap.fromTo(btDim, {opacity:.94}, {opacity:0, ease:'none',
+        scrollTrigger:{trigger:'#bakery', start:'top bottom', end:'top 34%', scrub:.4}});
+      /* позиции ScrollTrigger надо пересчитать ПОСЛЕ загрузки тяжёлой сцены,
+         иначе скраб «проскакивает» (кажется, что перехода нет) */
+      var refresh = function(){ ScrollTrigger.refresh(); };
+      if (btScene.complete) refresh(); else btScene.addEventListener('load', refresh, {once:true});
+      addEventListener('load', refresh);
     }
   } else {
     document.querySelectorAll('.reveal').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
@@ -1214,19 +1212,16 @@
 <!-- ===== Выпечка: свайп-колода крафт-бирок ===== -->
 <script>
 (function(){
-  /* hole:[x%,y%] — положение дырки в КАЖДОЙ картинке (они чуть разные),
-     чтобы двигать булавку под верхнюю бирку и кончик всегда попадал в дырку */
-  /* hole:[x%,y%] — дырка в картинке; scale — размер бирки (классик чуть меньше) */
+  /* scale — размер бирки (классик чуть меньше остальных) */
   var ITEMS = [
-    {img:'tag-almond.webp',  alt:'Миндальный круассан — 320 ₽, хит недели', hole:[52.63,11.87]},
-    {img:'tag-classic.webp', alt:'Классический круассан — 220 ₽',           hole:[53.32, 8.93], scale:0.9},
-    {img:'tag-tube.webp',    alt:'Трубочка со сгущёнкой — 180 ₽',           hole:[50.33,10.52]},
-    {img:'tag-bun.webp',     alt:'Булочка карамель-пекан — 360 ₽',          hole:[50.09,10.94]}
+    {img:'tag-almond.webp',  alt:'Миндальный круассан — 320 ₽, хит недели'},
+    {img:'tag-classic.webp', alt:'Классический круассан — 220 ₽', scale:0.9},
+    {img:'tag-tube.webp',    alt:'Трубочка со сгущёнкой — 180 ₽'},
+    {img:'tag-bun.webp',     alt:'Булочка карамель-пекан — 360 ₽'}
   ];
   var deck = document.getElementById('btDeck');
   var wrap = document.getElementById('btDeckwrap');
   var dotsEl = document.getElementById('btDots');
-  var pin = document.querySelector('.bt-pin');
   if (!deck || !wrap) return;
 
   var tags = ITEMS.map(function(it){
@@ -1241,19 +1236,16 @@
   var _tp = parseInt(new URLSearchParams(location.search).get('tag')||'0',10);
   if (_tp > 0 && _tp < N) top = _tp;   // тест: ?tag=N — какая бирка сверху
 
-  /* Булавка НЕ двигается (статичный кончик в точке Px,Py). Двигаем каждую бирку так,
-     чтобы её дырка встала ровно под кончик булавки; классик чуть меньше (scale). */
-  var BASEW = 300, RATIO = 1161/820, PY = 46;   // ширина бирки, пропорция картинки, y дырки-цели
+  /* бирки просто по центру колоды (без булавки); классик чуть меньше */
+  var BASEW = 300;
   function placeTags(){
-    var deckC = (wrap.clientWidth || 264) / 2;   // Px — совпадает с left булавки
+    var deckC = (wrap.clientWidth || 322) / 2;
     tags.forEach(function(el, i){
-      var it = ITEMS[i], sc = it.scale || 1;
-      var w = BASEW * sc, hpx = w * RATIO;
-      var hx = it.hole[0]/100 * w, hy = it.hole[1]/100 * hpx;
+      var w = BASEW * (ITEMS[i].scale || 1);
       el.style.width = w.toFixed(1) + 'px';
-      el.style.left = (deckC - hx).toFixed(1) + 'px';   // дырка по X под булавкой
-      el.style.top  = (PY - hy).toFixed(1) + 'px';       // дырка по Y под булавкой
-      el.style.transformOrigin = it.hole[0] + '% ' + it.hole[1] + '%';  // качание/масштаб вокруг дырки
+      el.style.left = (deckC - w/2).toFixed(1) + 'px';
+      el.style.top  = '4px';
+      el.style.transformOrigin = '50% 9%';   // качание/масштаб от верха-центра
     });
   }
   placeTags();
@@ -1267,16 +1259,25 @@
   }
   layout();
 
+  var busy = false;
   function flyNext(dir){
+    if (busy) return; busy = true;
     var el = tags[top];
-    el.classList.add('flyout');
-    el.style.transform = 'translateX('+(dir*130)+'%) rotate('+(dir*36)+'deg)';
+    el.style.zIndex = 15;                 // выше карт (z1-5), но ПОД булавкой (z20)
+    el.classList.add('flyout');           // opacity→0 + transition полёта
+    el.style.transform = 'translateX('+(dir*145)+'%) rotate('+(dir*20)+'deg)';
     if (!hintHidden){ hintHidden = true; document.getElementById('btHint').style.opacity = 0; }
-    setTimeout(function(){
-      top = (top + 1) % N;
-      el.classList.remove('flyout'); el.style.transform = '';
-      layout();
-    }, 420);
+    top = (top + 1) % N;
+    layout();                             // СРАЗУ: следующая карта плавно едет вперёд
+    setTimeout(function(){                // после полёта — тихо вернуть улетевшую в самый низ
+      el.classList.remove('flyout');
+      el.style.transition = 'none';
+      el.style.transform = '';
+      el.style.zIndex = '';
+      void el.offsetWidth;                // применить мгновенно, без анимации
+      el.style.transition = '';
+      busy = false;
+    }, 470);
   }
 
   var startX = null, curX = 0, active = null;
