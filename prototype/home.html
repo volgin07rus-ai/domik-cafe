@@ -260,7 +260,7 @@
   /* мобилка (тот же порог, что у <source>): кадр прижат к правому краю и к верху */
   @media (max-aspect-ratio: 4/5){
     .bt-stage > picture img,
-    .bt-vid{object-position:100% 0%}
+    .bt-vid{object-position:50% 0%}
   }
   /* затемнения: сверху под заголовок, снизу под колоду */
   .bt-stage::before{content:'';position:absolute;inset:0 0 auto 0;height:30%;z-index:1;pointer-events:none;
@@ -554,7 +554,7 @@
   <div class="bt-stage">
     <picture>
       <!-- пробелы в srcset обязаны быть закодированы: пробел = разделитель дескриптора -->
-      <source media="(max-aspect-ratio: 4/5)" srcset="bakery-mob-far.webp">
+      <source media="(max-aspect-ratio: 4/5)" srcset="bakery-mob-oven.webp">
       <img src="Печет%20хлеб.png" alt="Мальчик достаёт свежий хлеб из печи — иллюстрация" loading="lazy">
     </picture>
     <!-- src ставится из JS: только на мобилке, только при подходе к блоку (см. btVid ниже) -->
@@ -856,7 +856,7 @@
       var armLoad = function(){
         var loadObs = new IntersectionObserver(function(es){
           if (!es[0].isIntersecting) return;
-          btVid.src = 'bakery-mob-loop.mp4';
+          btVid.src = 'bakery-mob-loop-v3.mp4';
           btVid.addEventListener('canplay', function(){ btVid.classList.add('on'); }, {once:true});
           loadObs.disconnect();
           apply();
