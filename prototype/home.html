@@ -252,10 +252,15 @@
 
   /* ============ Б3 ВЫПЕЧКА: сцена «мальчик у печи» + свайп-бирки ============ */
   .bt-stage{position:relative;height:100svh;min-height:640px;overflow:hidden;background:#33261a}
-  .bt-stage > picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .bt-stage > picture img,
+  .bt-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  /* луп-видео поверх статики: статика — мгновенная отрисовка и фолбэк, видео проявляется, когда готово */
+  .bt-vid{z-index:2;opacity:0;transition:opacity .6s var(--ease);pointer-events:none}
+  .bt-vid.on{opacity:1}
   /* мобилка (тот же порог, что у <source>): кадр прижат к правому краю и к верху */
   @media (max-aspect-ratio: 4/5){
-    .bt-stage > picture img{object-position:100% 0%}
+    .bt-stage > picture img,
+    .bt-vid{object-position:100% 0%}
   }
   /* затемнения: сверху под заголовок, снизу под колоду */
   .bt-stage::before{content:'';position:absolute;inset:0 0 auto 0;height:30%;z-index:1;pointer-events:none;
@@ -552,6 +557,8 @@
       <source media="(max-aspect-ratio: 4/5)" srcset="bakery-mob-far.webp">
       <img src="Печет%20хлеб.png" alt="Мальчик достаёт свежий хлеб из печи — иллюстрация" loading="lazy">
     </picture>
+    <!-- src ставится из JS: только на мобилке, только при подходе к блоку (см. btVid ниже) -->
+    <video class="bt-vid" id="btVid" muted loop playsinline preload="none" aria-hidden="true"></video>
     <div class="bt-dim" id="btDim"></div>
 
     <div class="bt-head">
@@ -812,16 +819,64 @@
     });
   });
 
-  /* ---------- сцена: пауза видео вне экрана ---------- */
-  if ('IntersectionObserver' in window){
-    new IntersectionObserver(function(es){
+  /* ---------- ДИРИЖЁР ВИДЕО ----------
+     Правило: играет ТОЛЬКО тот блок, который занимает больше экрана.
+     Так на стыке hero↔выпечка два видео никогда не декодируются одновременно. */
+  (function(){
+    if (!('IntersectionObserver' in window)) return;
+    var heroEl = document.getElementById('hero');
+    var bakery = document.getElementById('bakery');
+    var btVid  = document.getElementById('btVid');
+    if (!heroEl) return;
+
+    /* луп кухни снят под мобильный кадр; на десктопе блок остаётся статикой */
+    var wantBt = btVid && bakery && !reduce && matchMedia('(max-aspect-ratio: 4/5)').matches;
+
+    var seen = {hero:0, bakery:0};
+
+    function apply(){
+      var heroVid = document.querySelector('.hero.inside') ? roomLoop : heroLoop;
+      if (wantBt && seen.bakery > seen.hero && seen.bakery > .1){
+        heroLoop.pause(); roomLoop.pause();
+        btVid.play().catch(function(){});
+      } else if (seen.hero > .05){
+        if (btVid) btVid.pause();
+        heroVid.play().catch(function(){});
+      } else {
+        heroLoop.pause(); roomLoop.pause();
+        if (btVid) btVid.pause();
+      }
+    }
+
+    /* Грузим mp4 при подходе к блоку, но НЕ раньше window.load —
+       иначе он тянется параллельно с hero-видео и тормозит первый экран.
+       После выдачи src обязательно пере-решаем: при preload="none" файл
+       не начнёт грузиться, пока кто-то не позовёт play(). */
+    if (wantBt){
+      var armLoad = function(){
+        var loadObs = new IntersectionObserver(function(es){
+          if (!es[0].isIntersecting) return;
+          btVid.src = 'bakery-mob-loop.mp4';
+          btVid.addEventListener('canplay', function(){ btVid.classList.add('on'); }, {once:true});
+          loadObs.disconnect();
+          apply();
+        }, {rootMargin:'400px 0px', threshold:0});
+        loadObs.observe(bakery);
+      };
+      if (document.readyState === 'complete') armLoad();
+      else addEventListener('load', armLoad, {once:true});
+    }
+
+    var obs = new IntersectionObserver(function(es){
       es.forEach(function(e){
-        var v = document.querySelector('.hero.inside') ? roomLoop : heroLoop;
-        if (e.isIntersecting) v.play().catch(function(){});
-        else { heroLoop.pause(); roomLoop.pause(); }
+        seen[e.target.id === 'bakery' ? 'bakery' : 'hero'] = e.intersectionRatio;
       });
-    }, {threshold:.05}).observe(document.getElementById('hero'));
-  }
+      apply();
+    }, {threshold:[0,.1,.25,.4,.6,.8,1]});
+
+    obs.observe(heroEl);
+    if (bakery) obs.observe(bakery);
+  })();
 
   /* ---------- появления ---------- */
   if (!reduce && window.gsap && window.ScrollTrigger){
@@ -837,9 +892,9 @@
     });
 
     /* ПЕРЕХОД «сквозь тёплую темноту»: кухня выходит из тьмы и «зажигается» */
-    var btScene = document.querySelector('.bt-stage picture img');
+    var btScene = document.querySelectorAll('.bt-stage picture img, .bt-vid');
     var btDim = document.getElementById('btDim');
-    if (btScene && btDim){
+    if (btScene.length && btDim){
       gsap.fromTo(btScene, {scale:1.12}, {scale:1, ease:'none',
         scrollTrigger:{trigger:'#bakery', start:'top bottom', end:'top 20%', scrub:.4}});
       gsap.fromTo(btDim, {opacity:.94}, {opacity:0, ease:'none',
@@ -847,7 +902,10 @@
       /* позиции ScrollTrigger надо пересчитать ПОСЛЕ загрузки тяжёлой сцены,
          иначе скраб «проскакивает» (кажется, что перехода нет) */
       var refresh = function(){ ScrollTrigger.refresh(); };
-      if (btScene.complete) refresh(); else btScene.addEventListener('load', refresh, {once:true});
+      var btImg = document.querySelector('.bt-stage picture img');
+      if (btImg){
+        if (btImg.complete) refresh(); else btImg.addEventListener('load', refresh, {once:true});
+      }
       addEventListener('load', refresh);
     }
   } else {
