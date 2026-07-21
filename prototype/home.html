@@ -253,6 +253,10 @@
   /* ============ Б3 ВЫПЕЧКА: сцена «мальчик у печи» + свайп-бирки ============ */
   .bt-stage{position:relative;height:100svh;min-height:640px;overflow:hidden;background:#33261a}
   .bt-stage > picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  /* мобилка (тот же порог, что у <source>): кадр прижат к левому краю — печь и мальчик целиком */
+  @media (max-aspect-ratio: 4/5){
+    .bt-stage > picture img{object-position:0% 50%}
+  }
   /* затемнения: сверху под заголовок, снизу под колоду */
   .bt-stage::before{content:'';position:absolute;inset:0 0 auto 0;height:30%;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(24,18,10,.52) 0%, rgba(24,18,10,0) 100%)}
