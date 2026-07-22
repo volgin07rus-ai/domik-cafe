@@ -8,7 +8,9 @@
 <meta name="theme-color" content="#F7EFE1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<!-- Yeseva убрана из загрузки (реш. 22.07): заголовки теперь VAG World, локальный @font-face
+     ниже перекрывает имя 'Yeseva One'. Caveat +700 — реплика и адрес жирным начертанием. -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#213D6B; --cream:#F7EFE1; --gold:#B98A3C; --sage:#93A786;
@@ -18,10 +20,22 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
+  /* ===== VAG World Bold — ЗАКРЕПЛЁН (реш. 22.07): текст и заголовки.
+     ascent/descent-override чинят кривые hhea-метрики файла (ascent 150% em —
+     текст садился ниже центра кнопок). Второй @font-face перекрывает имя
+     'Yeseva One' — все прежние заголовочные правила работают без правок.
+     ⚠️ Лицензию шрифта проверить перед продом! */
+  @font-face{font-family:'VAGWorld';src:url('vag-world.woff2') format('woff2');
+    font-display:swap;ascent-override:80%;descent-override:20%;line-gap-override:0%}
+  @font-face{font-family:'Yeseva One';src:url('vag-world.woff2') format('woff2');
+    font-display:swap;ascent-override:80%;descent-override:20%;line-gap-override:0%}
   /* scrollbar-gutter: во время полёта прокрутка блокируется, скроллбар исчезал
      и центрированная шапка съезжала на полширины скроллбара; жёлоб резервируем всегда */
   html{scrollbar-gutter:stable}
-  body{background:var(--cream);color:var(--ink);font-family:'Nunito Sans',system-ui,sans-serif;overflow-x:hidden}
+  /* разрядка .035em — воздух для VAG; рукописным Caveat-элементам ниже возвращается normal */
+  body{background:var(--cream);color:var(--ink);font-family:'VAGWorld','Nunito Sans',system-ui,sans-serif;
+    letter-spacing:.035em;overflow-x:hidden}
+  .hero h1,.hero .chip,.cap,.inside-ui .pull,.num,.bt-hint{letter-spacing:normal}
   img{max-width:100%;display:block}
   a{color:inherit}
 
