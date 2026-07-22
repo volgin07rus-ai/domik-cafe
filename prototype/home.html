@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#F7EFE1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#213D6B; --cream:#F7EFE1; --gold:#B98A3C; --sage:#93A786;
@@ -62,8 +62,10 @@
   }
   .header.is-scrolled .navpill{background:rgba(20,30,54,.48)}
 
-  .hlogo{font-family:'Yeseva One',serif;font-size:clamp(19px,1.7vw,24px);color:var(--cream);text-decoration:none;
-    text-shadow:0 1px 10px rgba(0,0,0,.35);white-space:nowrap}
+  /* лого — рукописное «домик» с крышей над «м» (краска, дал пользователь 22.07).
+     Без свечения (реш. 22.07). */
+  .hlogo{display:flex;align-items:center;text-decoration:none}
+  .hlogo img{height:clamp(24px,2.2vw,30px);width:auto;display:block}
   .hnav{display:flex;gap:clamp(4px,.7vw,10px);align-items:center;margin:0 2px}
   .hnav a{
     font-size:14px;text-decoration:none;color:rgba(247,239,225,.9);white-space:nowrap;
@@ -123,6 +125,16 @@
   /* светлое стекло (тёмный текст) — для светлых секций */
   .btn--cream{background:rgba(255,255,255,.44);color:var(--ink)}
   .btn--cream:hover{background:rgba(255,255,255,.58)}
+  /* бумажная бирка (Г2, реш. 22.07): крафт-бумага с рваными углами и лёгким наклоном —
+     перекличка с бирками выпечки. Для hero вместо золотого стекла. */
+  .btn--paper{color:#4a3a26;background:linear-gradient(180deg,#F8EED8,#EFDDBB);
+    border:1px solid rgba(91,74,51,.2);border-radius:10px 18px 12px 16px;transform:rotate(.8deg);
+    box-shadow:0 3px 8px rgba(18,12,7,.3),0 14px 30px rgba(18,12,7,.22)}
+  .btn--paper:hover{transform:rotate(.8deg) scale(1.04);background:linear-gradient(180deg,#FBF3E2,#F3E3C4)}
+  .btn--paper:active{transform:rotate(.8deg) scale(.97)}
+  /* обводка — вторая кнопка в паре: тот же силуэт, тише голос */
+  .btn--line{background:transparent;border:1.5px solid rgba(247,239,225,.5);color:var(--cream)}
+  .btn--line:hover{background:rgba(247,239,225,.13);border-color:rgba(247,239,225,.85)}
   /* прозрачное стекло поверх сцены */
   .btn--ghost{color:var(--cream)}
   .btn--ghost-ink{color:var(--ink)}
@@ -168,9 +180,17 @@
   .inside-ui .box{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,44px);color:var(--cream)}
   .inside-ui .pull{font-family:'Yeseva One',serif;font-size:clamp(24px,3.2vw,42px);line-height:1.4;text-shadow:0 3px 30px rgba(21,45,84,.5)}
   .inside-ui p{margin-top:18px;font-size:clamp(15px,1.5vw,18px);line-height:1.7;max-width:44ch;opacity:.94}
-  .inside-ui .facts{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px;max-width:52ch}
+  /* 52ch считаются от кегля родителя и на телефоне выходят шире экрана —
+     последняя плашка уезжала за правый край */
+  .inside-ui .facts{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px;max-width:min(52ch,100%)}
   .inside-ui .facts span{font-size:13px;padding:7px 14px;border-radius:999px;background:rgba(247,239,225,.14);border:1px solid rgba(247,239,225,.26)}
   .inside-ui .st{transform:translateY(16px);opacity:0}
+  /* Кнопки в комнате. Золото тонет в тёплом ламповом свете сцены, поэтому
+     основная — плотная «бумага» (светлое на тёмном), вторая — та же пилюля обводкой. */
+  .inside-ui .inside-cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:30px}
+  .inside-ui .btn--cream{background:rgba(250,243,230,.93);color:var(--ink);
+    box-shadow:0 2px 6px rgba(18,12,7,.18),0 14px 34px rgba(18,12,7,.28)}
+  .inside-ui .btn--cream:hover{background:#FFF9EE}
 
   /* Реплика во время полёта */
   .cap{
@@ -204,9 +224,11 @@
   .hero.inside .outbtn{opacity:.38;pointer-events:auto}
   .hero.inside .outbtn:hover, .hero.inside .outbtn:active{opacity:.95;background:rgba(255,255,255,.22);transform:translateX(-50%) translateY(2px)}
   .kicker{font-size:12px;letter-spacing:.32em;text-transform:uppercase;opacity:.9;margin-bottom:16px}
+  /* заголовок — рукописный Caveat (реш. 21.07): почерк, как у номеров и подписи бирок.
+     Caveat мельче и легче Yeseva на том же кегле, поэтому размер и вес больше */
   .hero h1{
-    font-family:'Yeseva One',serif;font-weight:400;line-height:1.06;
-    font-size:clamp(34px,5.4vw,68px);max-width:16ch;text-shadow:0 4px 40px rgba(21,45,84,.5);
+    font-family:'Caveat',cursive;font-weight:600;line-height:1.08;
+    font-size:clamp(46px,7vw,92px);max-width:16ch;text-shadow:0 4px 40px rgba(21,45,84,.55);
   }
   .hero .sub{margin-top:20px;font-size:clamp(15px,1.5vw,19px);line-height:1.6;max-width:44ch;opacity:.95}
   .chip{
@@ -216,6 +238,13 @@
   }
   .chip .dot{width:7px;height:7px;border-radius:50%;background:#7BC47F;box-shadow:0 0 0 3px rgba(123,196,127,.28);flex:0 0 auto}
   .chip .dot.off{background:#D98C6A;box-shadow:0 0 0 3px rgba(217,140,106,.28)}
+  /* Г2 (реш. 22.07): на hero адрес — рукопись «чернилами», как подпись художника
+     на иллюстрации. Без свечения (реш. 22.07). Стеклянная плашка осталась в контактах. */
+  .hero .chip{background:none;border:0;backdrop-filter:none;padding:2px 4px;margin-top:20px;
+    font-family:'Caveat',cursive;font-weight:700;font-size:clamp(21px,2vw,25px);color:#1E3660;gap:10px}
+  .hero .chip b{font-weight:700}
+  .hero .chip .dot{width:9px;height:9px;border-radius:50% 44% 52% 46%;background:#3E8F58}
+  .hero .chip .dot.off{background:#C46B42}
   .cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:30px}
   .trust{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:14px;text-decoration:none;opacity:.95}
   .trust .stars{color:#F2C14E;letter-spacing:2px}
@@ -303,9 +332,23 @@
   }
 
   /* ============ Б4 ПОЧЕМУ ============ */
-  .why4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(18px,2.6vw,34px);margin-top:48px}
-  .why4 .it{text-align:left}
-  .why4 svg{width:44px;height:44px;color:var(--sage);margin-bottom:14px}
+  /* тёплая подложка: секция отделяется от кремовых соседей, не становясь «карточной» */
+  #why{background:linear-gradient(180deg,#F7EFE1 0%,#F6E6D2 45%,#F7EFE1 100%)}
+  .why4{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px}
+  .why4 .it{text-align:left;position:relative;padding:0 clamp(14px,2vw,26px)}
+  .why4 .it:first-child{padding-left:0}
+  /* карандашный пунктир между карточками — вместо пустого зазора */
+  .why4 .it+.it::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;
+    background:repeating-linear-gradient(180deg, rgba(33,61,107,.20) 0 5px, transparent 5px 11px)}
+  .why4 .num{font-family:'Caveat',cursive;font-size:26px;line-height:1;color:var(--gold);margin-bottom:2px}
+  /* слот одинаковой высоты для всех четырёх: где-то иконка, где-то картинка —
+     выравниваем по низу, чтобы заголовки карточек стояли на одной линии */
+  .why4 .ic{display:flex;align-items:flex-end;height:88px;margin-bottom:14px}
+  .why4 .ic svg{width:44px;height:44px;color:var(--sage)}
+  .why4 .ic img{height:88px;width:auto;max-width:100%;object-fit:contain;display:block}
+  /* круассан лежит горизонтально и на общей высоте выходит шире и тяжелее
+     остальных — сажаем его пониже, чтобы в ряду был равный вес */
+  .why4 .ic.sm img{height:64px}
   .why4 h3{font-family:'Yeseva One',serif;font-weight:400;font-size:19px;margin-bottom:8px}
   .why4 p{font-size:14.5px;line-height:1.6;opacity:.78}
 
@@ -423,7 +466,11 @@
     .hnav a:hover{background:rgba(33,61,107,.09)}
     .burger{display:grid;place-items:center}
     .hphone,.hcta{display:none}
-    .why4{grid-template-columns:repeat(2,1fr)}
+    /* сетка ломается на колонки — вертикальный пунктир между «соседями»
+       оказался бы поперёк строк, поэтому на узких экранах возвращаем зазор */
+    .why4{grid-template-columns:repeat(2,1fr);gap:clamp(26px,4vw,34px)}
+    .why4 .it{padding:0}
+    .why4 .it+.it::before{display:none}
     .darkgrid{grid-template-columns:1fr}
     .frames{grid-template-columns:repeat(2,1fr)}
     .contacts .grid{grid-template-columns:1fr}
@@ -433,8 +480,10 @@
     .doorspot{display:none}
   }
   @media (max-width:560px){
-    .hero h1{font-size:clamp(30px,8.4vw,40px)}
-    .cta-row .btn{width:100%;justify-content:center}
+    .hero h1{font-size:clamp(40px,11vw,54px)}
+    /* кнопка на стартовом экране осталась одна — во всю ширину она читается
+       как баннер, поэтому даём ей ровно свой размер */
+    .cta-row .btn{width:auto;justify-content:center}
     .why4{grid-template-columns:1fr}
     .cbtns .btn{flex:1 1 45%;justify-content:center}
   }
@@ -458,7 +507,7 @@
 <!-- ============ ШАПКА — плавающая овальная капсула ============ -->
 <header class="header" id="header">
   <div class="navpill">
-    <a class="hlogo" href="#top" aria-label="Домик — на главную">Домик</a>
+    <a class="hlogo" href="#top" aria-label="Домик — на главную"><img src="logo-hand.webp" alt="Домик" width="445" height="120"></a>
 
     <nav class="hnav" id="nav" aria-label="Основная навигация">
       <a href="../menu.html">Меню</a>
@@ -500,10 +549,10 @@
   <button class="doorspot" id="doorspot" aria-label="Зайти в домик"></button>
 
   <!-- СНАРУЖИ -->
+  <!-- Стартовый экран намеренно пустой: заголовок, адрес с часами и меню.
+       Остальное (описание, «как добраться», рейтинг) живёт ниже по странице. -->
   <div class="hero__in" id="uiOut">
-    <div class="kicker reveal">спешелти-кофейня · Москва</div>
-    <h1 class="reveal">Кофейня у Павелецкой,<br>где можно спрятаться от города</h1>
-    <p class="sub reveal">Спешелти-кофе, свежая выпечка и веранда в тихом дворе. Бахрушина, 12 — в трёх минутах от метро.</p>
+    <h1 class="reveal">Место, где время идёт медленнее</h1>
 
     <div class="chip reveal">
       <span class="dot" id="statusDot"></span>
@@ -511,13 +560,8 @@
     </div>
 
     <div class="cta-row reveal">
-      <a class="btn btn--gold btn--lg" href="../menu.html">Посмотреть меню</a>
-      <a class="tlink" href="#contacts"><u>Как добраться</u> <span class="arrow">→</span></a>
+      <a class="btn btn--paper btn--lg" href="../menu.html">Посмотреть меню</a>
     </div>
-
-    <a class="trust reveal" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">
-      <span class="stars">★★★★★</span> <span><b>5,0</b> <u>на Яндекс Картах · 140 отзывов</u></span>
-    </a>
   </div>
 
   <!-- ВНУТРИ (тот же экран, другой текст) -->
@@ -529,9 +573,9 @@
       <div class="facts st">
         <span>спешелти-зерно</span><span>печём каждое утро</span><span>веранда во дворе</span><span>розетки под рукой</span><span>можно с собакой</span>
       </div>
-      <div class="st" style="margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-        <a class="btn btn--gold" href="../menu.html">Посмотреть меню</a>
-        <a class="tlink" href="#bakery" style="color:var(--cream)"><u>Что попробовать</u> <span class="arrow">↓</span></a>
+      <div class="st inside-cta">
+        <a class="btn btn--cream" href="../menu.html">Посмотреть меню</a>
+        <a class="btn btn--line" href="#bakery">Что попробовать <span class="arrow">↓</span></a>
       </div>
     </div>
   </div>
@@ -585,22 +629,26 @@
 
     <div class="why4">
       <div class="it reveal">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18h22v10a11 11 0 0 1-22 0z"/><path d="M32 20h4a4 4 0 0 1 0 8h-4"/><path d="M8 40h26"/><path d="M16 12c0-2 2-2 2-4M22 12c0-2 2-2 2-4"/></svg>
+        <span class="ic"><img src="why-coffee.webp" alt="Алиса пьёт кофе — иллюстрация" loading="lazy" width="294" height="360"></span>
+        <div class="num">01</div>
         <h3>Отличный кофе</h3>
         <p>Рожковая и фильтр, зерно от проверенных обжарщиков.</p>
       </div>
       <div class="it reveal">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30c4-10 12-14 18-14s14 4 18 14c-6 4-12 5-18 5s-12-1-18-5z"/><path d="M18 18l-2-5M30 18l2-5M24 16v-6"/></svg>
+        <span class="ic sm"><img src="why-bakery.webp" alt="Круассан — иллюстрация" loading="lazy" width="658" height="360"></span>
+        <div class="num">02</div>
         <h3>Свежая выпечка</h3>
         <p>Печём каждый день из хороших продуктов.</p>
       </div>
       <div class="it reveal">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v6"/><path d="M14 30l10-16 10 16z"/><path d="M18 30a6 6 0 0 0 12 0"/><path d="M24 36v6M18 42h12"/></svg>
+        <span class="ic"><img src="why-cozy.webp" alt="Алиса и мальчик за столиком с кофе — иллюстрация" loading="lazy" width="540" height="360"></span>
+        <div class="num">03</div>
         <h3>Уютная атмосфера</h3>
         <p>Кирпич, дерево, тёплый свет и негромкая музыка.</p>
       </div>
       <div class="it reveal">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40s-11-7-11-15a6 6 0 0 1 11-3 6 6 0 0 1 11 3c0 8-11 15-11 15z"/><circle cx="12" cy="12" r="3"/><circle cx="20" cy="8" r="3"/><circle cx="28" cy="8" r="3"/><circle cx="36" cy="12" r="3"/></svg>
+        <span class="ic"><img src="why-welcome.webp" alt="Мальчик придерживает открытую дверь — иллюстрация" loading="lazy" width="380" height="360"></span>
+        <div class="num">04</div>
         <h3>Рады каждому</h3>
         <p>Можно с собакой, с ноутбуком или просто посидеть.</p>
       </div>
@@ -829,8 +877,11 @@
     var btVid  = document.getElementById('btVid');
     if (!heroEl) return;
 
-    /* луп кухни снят под мобильный кадр; на десктопе блок остаётся статикой */
-    var wantBt = btVid && bakery && !reduce && matchMedia('(max-aspect-ratio: 4/5)').matches;
+    /* Луп кухни ВЫКЛЮЧЕН — в блоке «Выпечка» статичная иллюстрация.
+       Чтобы вернуть видео: BT_LOOP = true (файл bakery-mob-loop-v3.mp4 на месте). */
+    var BT_LOOP = false;
+    /* луп снят под мобильный кадр; на десктопе блок в любом случае статика */
+    var wantBt = BT_LOOP && btVid && bakery && !reduce && matchMedia('(max-aspect-ratio: 4/5)').matches;
 
     var seen = {hero:0, bakery:0};
 
@@ -1108,7 +1159,18 @@
   if (qs.get('shot')){
     var shotCss = document.createElement('style');
     shotCss.textContent = '.hero{height:812px !important;min-height:812px !important}' +
-      (qs.get('shot') === 'bakery' ? '.hero{display:none !important}' : '');
+      (qs.get('shot') === 'bakery' ? '.hero{display:none !important}' : '') +
+      /* ?shot=why — снять секцию «Почему возвращаются»: прячем оба
+         полноэкранных блока выше неё, иначе она всегда за краем кадра */
+      (qs.get('shot') === 'why' ? '.hero,#bakery{display:none !important}' : '') +
+      /* ?shot=inside — состояние «внутри» без анимации: в headless переход
+         не доигрывает и оба текста наложены друг на друга */
+      (qs.get('shot') === 'inside'
+        ? '#uiOut{display:none !important}' +
+          '.inside-ui{opacity:1 !important;pointer-events:auto;z-index:5}' +
+          '.inside-ui .st{opacity:1 !important;transform:none !important}' +
+          '#roomLoop{opacity:1 !important;z-index:2}#cv{opacity:0 !important}'
+        : '');
     document.head.appendChild(shotCss);
   }
   var at = qs.get('at');
