@@ -374,14 +374,12 @@
   /* 22px→10px (реш. 22.07): крупный подъём при ступенчатом скролле колёсиком
      читался как «дёргание» — оставляем лёгкий сдвиг, почти чистое проявление */
   .reveal{opacity:0;transform:translateY(10px)}
-  /* ScrollReveal (порт с React Bits, реш. 22.07): заголовки и лиды собираются
-     из слов по мере прокрутки — прозрачность+блюр на слово, скраб. Без GSAP
-     или с reduced-motion элементы просто видимы (класс ничего не прячет). */
-  .sr .word{display:inline-block;will-change:opacity,filter}
-  /* SplitText: буквы (ch) внутри слов-обёрток (chw) — обёртка не даёт
-     строке ломаться посреди слова */
+  /* ScrollFloat/SplitText: буквы (ch) внутри слов-обёрток (chw) — обёртка
+     не даёт строке ломаться посреди слова. Без will-change: на ~2000 букв
+     он заставил бы браузер держать слой под каждую. Без GSAP или с
+     reduced-motion элементы просто видимы (классы ничего не прячут). */
   .chw{display:inline-block;white-space:nowrap}
-  .ch{display:inline-block;will-change:transform,opacity}
+  .ch{display:inline-block}
 
   /* ============ Б3 ВЫПЕЧКА: сцена «мальчик у печи» + свайп-бирки ============ */
   .bt-stage{position:relative;height:100svh;min-height:640px;overflow:hidden;background:#33261a}
@@ -1346,6 +1344,8 @@
        ⚠️ Окна НЕ как в React-оригинале ('bottom bottom'): у коротких строк низ
        достигает низа экрана раньше старта — окно выходит отрицательным и всё
        проигрывается мгновенно. Привязка к пути по экрану: 88% → 45% высоты окна. */
+    /* нарезка по БУКВАМ (ScrollFloat): буквы .ch внутри слов-обёрток .chw,
+       чтобы строка не ломалась посреди слова */
     function srSplit(el){
       var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: function(n){
         if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
@@ -1353,7 +1353,7 @@
           if (p.nodeType !== 1) continue;
           if (p instanceof SVGElement) return NodeFilter.FILTER_REJECT;
           var c = p.classList;
-          if (c && (c.contains('chip') || c.contains('ic') || c.contains('btn') || c.contains('word')))
+          if (c && (c.contains('chip') || c.contains('ic') || c.contains('btn') || c.contains('chw')))
             return NodeFilter.FILTER_REJECT;
         }
         return NodeFilter.FILTER_ACCEPT;
@@ -1365,9 +1365,14 @@
         n.nodeValue.split(/(\s+)/).forEach(function(part){
           if (!part) return;
           if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-          var s = document.createElement('span');
-          s.className = 'word'; s.textContent = part;
-          frag.appendChild(s);
+          var w = document.createElement('span');
+          w.className = 'chw';
+          part.split('').forEach(function(chr){
+            var s = document.createElement('span');
+            s.className = 'ch'; s.textContent = chr;
+            w.appendChild(s);
+          });
+          frag.appendChild(w);
         });
         n.parentNode.replaceChild(frag, n);
       });
@@ -1378,19 +1383,20 @@
       if (el.classList.contains('btn') || el.querySelector('iframe')) return; /* кнопки и карта — мягкое проявление ниже */
       srAll.push(el);
     });
+    /* ScrollFloat (порт с React Bits, реш. 22.07, заменил ScrollReveal):
+       буквы всплывают снизу вытянутыми (yPercent 120, scaleY 2.3) и
+       распрямляются с пружинкой back.inOut. Окно прежнее — с кромки к 58%.
+       overflow:hidden на контейнере прячет буквы до всплытия. */
     srAll.forEach(function(el){
       srSplit(el);
-      var items = el.querySelectorAll('.word, .ic img');
+      var items = el.querySelectorAll('.ch, .ic img');
       if (!items.length) return;               /* дробить нечего — останется на старом проявлении */
-      el.classList.remove('reveal');           /* контейнер видим, работают слова */
-      var tilt = el.classList.contains('sr') ? 4 : 2.5;   /* мелким блокам — наклон тише */
-      /* окно сдвинуто раньше (реш. 22.07): старт у самой кромки, сбор к 58% экрана */
-      gsap.fromTo(el, {transformOrigin:'0% 50%', rotate:tilt}, {rotate:0, ease:'none',
-        scrollTrigger:{trigger:el, start:'top bottom', end:'top 52%', scrub:true}});
-      gsap.fromTo(items, {opacity:0}, {opacity:1, ease:'none', stagger:.05,
-        scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
-      gsap.fromTo(items, {filter:'blur(9px)'}, {filter:'blur(0px)', ease:'none', stagger:.05,
-        scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
+      el.classList.remove('reveal');           /* контейнер видим, работают буквы */
+      el.style.overflow = 'hidden';
+      gsap.fromTo(items,
+        {opacity:0, yPercent:120, scaleY:2.3, scaleX:.7, transformOrigin:'50% 0%'},
+        {opacity:1, yPercent:0, scaleY:1, scaleX:1, duration:1, ease:'back.inOut(2)', stagger:.03,
+         scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
     });
 
     /* мягкое проявление — для того, что не дробится (кнопки, карта) */
