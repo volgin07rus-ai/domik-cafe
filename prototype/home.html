@@ -608,21 +608,22 @@
   /* жёлтое свечение в дырке убрано (реш. пользователя 23.07) */
   /* дымка-воздух между стеной и кустами */
   .bw-haze{position:absolute;inset:0;pointer-events:none;background:#1B3159}
-  /* мобилка: дырка вертикальной стены сидит выше центра (32% высоты кадра) —
-     зум наводим на неё */
-  @media (max-aspect-ratio: 4/5){
-    .bw-plane--wall{transform-origin:50% 32%}
-  }
+  /* transform-origin стены НЕ задаём в CSS (24.07): экранное положение дырки
+     зависит от того, как object-fit:cover подрезал картинку на конкретном
+     экране — его считает JS (см. aimHole). Небольшой запас по краям нужен,
+     потому что план ещё и подъезжает, доводя дырку до центра кадра. */
+  .bw-plane--wall{inset:-3%}
   /* светлячки: мерцают сами, глубину получают вместе со своим планом */
   .ff{position:absolute;width:6px;height:6px;border-radius:50%;
     background:radial-gradient(circle, #FFE9A8 0%, rgba(255,214,110,0) 70%);
     animation:ffTw 2.8s ease-in-out infinite}
   @keyframes ffTw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
-  /* ⚠️ мерцание глушим на время пролёта (24.07): светлячок живёт ВНУТРИ плана,
-     а план в этот момент растянут до 7×. Пока внутри что-то анимируется,
-     видеокарта не может держать слой готовым и перерисовывает его целиком
-     в увеличенном размере на каждом кадре — это и был главный тормоз. */
-  #burrow.flying .ff{animation:none;opacity:.6}
+  .ff{transition:opacity .45s ease}
+  /* ⚠️ светлячки гаснут на время пролёта (24.07). Две причины: они живут ВНУТРИ
+     плана, растянутого до 7×, и пока внутри что-то анимируется, видеокарта
+     перерисовывает весь этот слой каждый кадр; плюс к финалу зума светлячок
+     стены уезжал в угол экрана и висел жёлтой точкой над галереей. */
+  #burrow.flying .ff{animation:none;opacity:0}
   /* кремовый «выход» убран (реш. пользователя 23.07): после пролёта остаёмся
      в тёмном пространстве — рисованное небо (night-sky) с луной и облаками,
      CSS-полумесяц стал не нужен */
@@ -670,6 +671,20 @@
   .bw-gal .lead{opacity:.8}
   .bw-gal .cgal{margin:20px 0 6px}
   .bw-gal .cgal-hint{color:var(--cream);opacity:.55}
+  /* ЖИВЫЕ ЗВЁЗДЫ ПОВЕРХ ГАЛЕРЕИ (24.07): те же четырёхлучевые звёздочки, что
+     нарисованы в небе, но дышащие — искры мерцают прямо по фотографиям.
+     Слой лежит ВНУТРИ .bw-gal, поэтому проявляется вместе с ней; клики и
+     перетаскивание карусели сквозь него проходят (pointer-events:none). */
+  .gal-sparks{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+  .gal-sparks.paused i{animation-play-state:paused}
+  .gal-sparks i{position:absolute;display:block;background:#FFF3D2;
+    clip-path:polygon(50% 0,57% 43%,100% 50%,57% 57%,50% 100%,43% 57%,0 50%,43% 43%);
+    filter:drop-shadow(0 0 3px rgba(255,226,152,.8));
+    animation:sparkTw 4s ease-in-out infinite}
+  @keyframes sparkTw{
+    0%,100%{opacity:.08;transform:scale(.5) rotate(0deg)}
+    50%    {opacity:.95;transform:scale(1)  rotate(24deg)}}
+  @media (prefers-reduced-motion: reduce){ .gal-sparks{display:none} }
   /* WebGL CircularGallery (порт React Bits, 23.07): включается классом .webgl
      на .bw-gal, DOM-карусель .cgal остаётся фолбэком (нет WebGL / reduce).
      touch-action:pan-y — вертикальный скролл страницы не перехватываем */
@@ -1056,7 +1071,11 @@
          вертикальный garden-side-m (⚠️ без пробелов в srcset). -->
     <!-- data-dur .85: стена ПОЛНОСТЬЮ уходит за кадр до появления галереи (.72),
          иначе её края «не докручивались» и висели по бокам финала -->
-    <div class="bw-plane bw-plane--wall" data-scale="7" data-dur=".85" data-ease="power3.in">
+    <!-- data-hole: центр прозрачной дырки в процентах от самой картинки
+         (замерено по альфе: десктоп 50.8/48.6, мобилка 50/35.7) — по нему JS
+         наводит зум и доводит дырку к центру кадра -->
+    <div class="bw-plane bw-plane--wall" data-scale="7" data-dur=".85" data-ease="power3.in"
+      data-hole="50.8 48.6" data-hole-m="50 35.7">
       <picture>
         <source media="(max-aspect-ratio: 4/5)" srcset="garden-wall-m.webp">
         <img class="bw-img" src="garden-wall.webp" alt="">
@@ -1120,6 +1139,8 @@
         <div class="wgal" id="wgal" tabindex="0" role="region"
           aria-label="Круговая галерея фотографий — тяните вбок или стрелками"></div>
       </section>
+      <!-- мерцающие звёзды поверх фотографий (наполняются из JS) -->
+      <div class="gal-sparks" id="galSparks" aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -1975,6 +1996,39 @@
       var sec = document.getElementById('burrow');
       if (!sec) return;
       sec.classList.add('on');
+      /* ⚠️ ПРИЦЕЛ В ДЫРКУ (24.07). Раньше зум шёл от фиксированного процента
+         (50% 50% на десктопе, 50% 36% на мобилке), но экранное положение дырки
+         от этих процентов не зависит: object-fit:cover подрезает картинку
+         по-разному на каждом экране, и влёт уходил мимо центра.
+         Теперь считаем координаты дырки честно и делаем две вещи:
+         1) ставим туда transform-origin — летим ровно в дырку;
+         2) плавно подвозим план так, чтобы дырка выехала в центр кадра.
+         Сдвиг с ease power3.in: в начале он почти нулевой, а к моменту, когда
+         он заметен, стена уже разрослась и краями за кадр не вылезает. */
+      var wall = sec.querySelector('.bw-plane--wall');
+      var wimg = wall && wall.querySelector('img');
+      var aim = {x: 0, y: 0};
+      function aimHole(){
+        if (!wall || !wimg || !wimg.naturalWidth) return;
+        var bw = wall.offsetWidth, bh = wall.offsetHeight;
+        if (!bw || !bh) return;
+        var nw = wimg.naturalWidth, nh = wimg.naturalHeight;
+        var k = Math.max(bw / nw, bh / nh);              /* как object-fit:cover */
+        var mob = /-m\.webp/.test(wimg.currentSrc || wimg.src);
+        var h = (wall.getAttribute(mob ? 'data-hole-m' : 'data-hole') || '50 50').split(' ');
+        var px = bw / 2 + (parseFloat(h[0]) / 100 - .5) * nw * k;
+        var py = bh / 2 + (parseFloat(h[1]) / 100 - .5) * nh * k;
+        /* smoothOrigin:false — иначе GSAP при смене origin сам подправит x/y,
+           «чтобы не дёрнулось», и подмешает лишний сдвиг к нашему */
+        gsap.set(wall, {transformOrigin: px + 'px ' + py + 'px', smoothOrigin: false});
+        aim.x = bw / 2 - px;
+        aim.y = bh / 2 - py;
+      }
+      aimHole();
+      if (wimg && !wimg.complete)
+        wimg.addEventListener('load', function(){ aimHole(); ScrollTrigger.refresh(); }, {once: true});
+      ScrollTrigger.addEventListener('refreshInit', aimHole);
+
       /* класс .flying гасит мерцание светлячков на время полёта (см. CSS) —
          ставим один раз на входе в полёт, а не на каждом кадре */
       var flying = false;
@@ -2020,6 +2074,12 @@
         var d = parseFloat(pl.getAttribute('data-dur')) || 1;
         tl.fromTo(pl, {scale: f}, {scale: s, ease: ez, duration: du(d)}, at(0));
       });
+      /* доводка дырки к центру кадра (см. aimHole). Значения — функциями,
+         чтобы invalidateOnRefresh пересчитал их после ресайза и загрузки
+         картинки; power3.in держит сдвиг около нуля, пока стена ещё мелкая */
+      if (wall) tl.fromTo(wall, {x: 0, y: 0},
+        {x: function(){ return aim.x; }, y: function(){ return aim.y; },
+         ease: 'power3.in', duration: du(.55)}, at(0));
       /* ближние кусты гаснут, пройдя мимо камеры */
       var near = sec.querySelector('.bw-plane--near');
       if (near) tl.to(near, {opacity: 0, ease: 'power1.in', duration: du(.16)}, at(.46));
@@ -2031,6 +2091,21 @@
       tl.fromTo('#burrow .bw-gal', {opacity: 0, y: 36},
         {opacity: 1, y: 0, ease: 'power2.out', duration: du(.24)}, at(.72));
       tl.set('#burrow .bw-gal', {pointerEvents: 'auto'}, at(.78));
+
+      /* ?bw=0.5 — поставить пролёт на заданную фазу и замереть.
+         Нужен для снимков в headless: там нет прокрутки, а скраб со
+         сглаживанием сам по себе никуда не доедет. */
+      var bwq = new URLSearchParams(location.search).get('bw');
+      if (bwq !== null) addEventListener('load', function(){
+        setTimeout(function(){
+          var p = Math.max(0, Math.min(1, parseFloat(bwq) || 0));
+          ScrollTrigger.refresh();
+          scrollTo({top: tl.scrollTrigger.start + (tl.scrollTrigger.end - tl.scrollTrigger.start) * p,
+            behavior: 'instant'});
+          ScrollTrigger.update();
+          tl.progress(p);
+        }, 250);
+      }, {once: true});
     })();
 
     /* ПЕРЕХОД «сквозь тёплую темноту»: кухня выходит из тьмы и «зажигается» */
@@ -2273,6 +2348,11 @@
            за первые 18% скраба — иначе на снимке он всегда полупрозрачный */
         ? '.hero,#bakery,#why{display:none !important}' +
           '.bw-uiw{opacity:1 !important;transform:none !important}' : '') +
+      /* ?shot=gallery — финал пролёта: галерея и искры над ночным небом */
+      (qs.get('shot') === 'gallery'
+        ? '.hero,#bakery,#why{display:none !important}' +
+          '.bw-plane,.bw-haze,.bw-ui{display:none !important}' +
+          '.bw-gal{opacity:1 !important;pointer-events:auto}' : '') +
       /* ?shot=inside — состояние «внутри» без анимации: в headless переход
          не доигрывает и оба текста наложены друг на друга */
       (qs.get('shot') === 'inside'
@@ -2426,10 +2506,28 @@
       'animation-delay:-' + (Math.random()*6).toFixed(2) + 's';
     amb.appendChild(s);
   }
+  /* мерцающие искры ПОВЕРХ фотографий галереи: те же звёздочки, что в небе,
+     только крупнее и с лучами. Живут внутри .bw-gal — значит, проявляются
+     вместе с галереей и не мешают её перетаскивать. */
+  var sp = document.getElementById('galSparks');
+  if (sp){
+    for (var j = 0; j < 28; j++){
+      var k = document.createElement('i');
+      var kz = (6 + Math.random()*9).toFixed(1);
+      k.style.cssText = 'left:' + (2 + Math.random()*94).toFixed(1) + '%;' +
+        'top:' + (3 + Math.random()*93).toFixed(1) + '%;' +
+        'width:' + kz + 'px;height:' + kz + 'px;' +
+        'animation-duration:' + (3 + Math.random()*3.4).toFixed(2) + 's;' +
+        'animation-delay:-' + (Math.random()*7).toFixed(2) + 's';
+      sp.appendChild(k);
+    }
+  }
   var sec = amb.closest('#burrow') || amb.closest('.dark');
   if ('IntersectionObserver' in window && sec){
     new IntersectionObserver(function(es){
-      amb.classList.toggle('paused', !es[0].isIntersecting);
+      var off = !es[0].isIntersecting;
+      amb.classList.toggle('paused', off);
+      if (sp) sp.classList.toggle('paused', off);
     }, {rootMargin:'80px'}).observe(sec);
   }
 })();
@@ -2663,8 +2761,9 @@ class Media {
         uniform float uTime;uniform float uSpeed;varying vec2 vUv;
         void main(){
           vUv=uv;vec3 p=position;
-          /* амплитуда ряби снижена (24.07): карточки «волновались» слишком сильно */
-          p.z=(sin(p.x*4.0+uTime)*1.0+cos(p.y*2.0+uTime)*1.0)*(0.07+uSpeed*0.32);
+          /* амплитуда ряби снижена дважды (24.07): карточки «волновались»
+             слишком сильно — сначала до 1.0/0.07/0.32, теперь ещё тише */
+          p.z=(sin(p.x*4.0+uTime)*0.75+cos(p.y*2.0+uTime)*0.75)*(0.035+uSpeed*0.16);
           gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
         }`,
       fragment: `precision highp float;
