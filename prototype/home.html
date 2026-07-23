@@ -157,9 +157,12 @@
   /* гуи-слой: каретка и капли внутри него сливаются в одну жидкость */
   .lang-goo{position:absolute;inset:0;pointer-events:none;filter:url(#gnGoo2)}
   /* цвет = цвет гуи-эффекта (крем). Без transition — движением рулит GSAP */
+  /* will-change: каретка и капли живут в своём слое — на телефоне перелёт
+     заметно плавнее (иначе каждый кадр пере-растрируется под гуи-фильтром) */
   .lang-pill{position:absolute;top:2px;bottom:2px;left:2px;width:34px;border-radius:999px;
-    background:var(--cream);pointer-events:none}
-  .lang-drop{position:absolute;border-radius:50%;background:var(--cream);pointer-events:none}
+    background:var(--cream);pointer-events:none;will-change:transform}
+  .lang-drop{position:absolute;border-radius:50%;background:var(--cream);pointer-events:none;
+    will-change:transform}
   /* Смена языка: мягкий кросс-фейд с размытием.
      ⚠️ !important обязателен: SplitText/reveal проставляют hero-элементам
      инлайновый opacity:1, из-за него заголовок менялся МГНОВЕННО (рывок),
@@ -1470,12 +1473,14 @@
       var h = wrap.clientHeight;
       var startCx = curL + curW/2, endCx = newL + newW/2;
 
+      /* Тайминги ускорены (реш. 23.07: каретка казалась заторможенной) —
+         весь цикл ~0.45с вместо 0.7с, паузы между фазами короче. */
       /* 1) старая пилюля схлопывается в точку */
-      gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.16, ease:'power2.in',
+      gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.12, ease:'power2.in',
         onComplete:function(){
           /* 3) …и собирается на новом месте, когда капли долетают */
           gsap.set(pill, {left:newL, width:newW, scaleX:0, scaleY:0});
-          gsap.to(pill, {scaleX:1, scaleY:1, duration:.38, delay:.16, ease:'back.out(1.7)'});
+          gsap.to(pill, {scaleX:1, scaleY:1, duration:.3, delay:.08, ease:'back.out(1.7)'});
         }});
 
       /* 2) капли: вылетают из старого места, дугами летят к цели и тонут в новой пилюле */
@@ -1490,12 +1495,12 @@
         (function(el, i){
           var dx = endCx - startCx;
           var arc = (Math.random()*16 - 8);            // у каждой капли своя дуга
-          var t = .28 + Math.random()*.14;
-          var dl = .04 + i*.035;
+          var t = .2 + Math.random()*.1;
+          var dl = .02 + i*.022;
           gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'power1.inOut'});
           gsap.to(el, {y:arc, duration:t/2, delay:dl, ease:'sine.out'});
           gsap.to(el, {y:0, duration:t/2, delay:dl + t/2, ease:'sine.in'});
-          gsap.to(el, {scale:0, duration:.14, delay:dl + t, ease:'power2.in',
+          gsap.to(el, {scale:0, duration:.1, delay:dl + t, ease:'power2.in',
             onComplete:function(){ try { goo.removeChild(el); } catch(e){} }});
         })(d, i);
       }
@@ -1962,13 +1967,20 @@
       var sec = document.getElementById('burrow');
       if (!sec) return;
       sec.classList.add('on');
-      var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top', end: '+=200%',
-        scrub: true, pin: true, anticipatePin: 1, invalidateOnRefresh: true}});
+      var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top', end: '+=240%',
+        scrub: true, pin: true, invalidateOnRefresh: true}});
       window.__bwST = tl.scrollTrigger;   /* для ?debug=1 и якоря #gallery */
+      /* ⚠️ ВЫДЕРЖКА в начале (реш. 23.07): раньше полёт стартовал с первого же
+         пикселя прокрутки и текст «Зерно, десерты…» таял, не успев прочитаться.
+         Первые HOLD прокрутки блок просто стоит; вся хореография сжата в SPAN,
+         поэтому взаимные скорости планов сохранены. */
+      var HOLD = .22, SPAN = 1 - HOLD;
+      var at = function(p){ return HOLD + p * SPAN; };   /* позиция на таймлайне */
+      var du = function(d){ return d * SPAN; };          /* длительность */
       /* фаза 1: текст сцены тает и чуть летит на камеру */
       tl.fromTo('#burrow .bw-ui', {opacity: 1, scale: 1},
-        {opacity: 0, scale: 1.22, ease: 'power1.in', duration: .26}, .04);
-      tl.set('#burrow .bw-ui', {pointerEvents: 'none'}, .2);
+        {opacity: 0, scale: 1.22, ease: 'power1.in', duration: du(.26)}, at(.04));
+      tl.set('#burrow .bw-ui', {pointerEvents: 'none'}, at(.2));
       /* фаза 2: полёт — планы растут от центра с разной скоростью */
       /* ПАРАЛЛАКС (фикс 23.07): скорости планов РАЗНЫЕ по форме, не только
          по величине — кусты уходят мимо камеры линейно и рано (duration .6),
@@ -1978,20 +1990,20 @@
         var s = parseFloat(pl.getAttribute('data-scale')) || 2;
         var f = parseFloat(pl.getAttribute('data-from')) || 1;
         var ez = pl.getAttribute('data-ease') || 'power1.in';
-        var du = parseFloat(pl.getAttribute('data-dur')) || 1;
-        tl.fromTo(pl, {scale: f}, {scale: s, ease: ez, duration: du}, 0);
+        var d = parseFloat(pl.getAttribute('data-dur')) || 1;
+        tl.fromTo(pl, {scale: f}, {scale: s, ease: ez, duration: du(d)}, at(0));
       });
       /* ближние кусты гаснут, пройдя мимо камеры */
       var near = sec.querySelector('.bw-plane--near');
-      if (near) tl.to(near, {opacity: 0, ease: 'power1.in', duration: .16}, .46);
+      if (near) tl.to(near, {opacity: 0, ease: 'power1.in', duration: du(.16)}, at(.46));
       /* дымка между планами — воздух; тает по мере приближения к стене */
-      tl.fromTo('#burrow .bw-haze', {opacity: .42}, {opacity: 0, ease: 'power1.in', duration: .8}, .1);
-      tl.fromTo('#burrow .bw-bg', {scale: 1}, {scale: 1.18, ease: 'power1.in', duration: 1}, 0);
+      tl.fromTo('#burrow .bw-haze', {opacity: .42}, {opacity: 0, ease: 'power1.in', duration: du(.8)}, at(.1));
+      tl.fromTo('#burrow .bw-bg', {scale: 1}, {scale: 1.18, ease: 'power1.in', duration: du(1)}, at(0));
       /* фаза 3: пролетели дырку — остаёмся в тёмном звёздном пространстве,
          и НА ЭТОМ ЖЕ месте проявляется галерея */
       tl.fromTo('#burrow .bw-gal', {opacity: 0, y: 36},
-        {opacity: 1, y: 0, ease: 'power2.out', duration: .24}, .72);
-      tl.set('#burrow .bw-gal', {pointerEvents: 'auto'}, .78);
+        {opacity: 1, y: 0, ease: 'power2.out', duration: du(.24)}, at(.72));
+      tl.set('#burrow .bw-gal', {pointerEvents: 'auto'}, at(.78));
     })();
 
     /* ПЕРЕХОД «сквозь тёплую темноту»: кухня выходит из тьмы и «зажигается» */

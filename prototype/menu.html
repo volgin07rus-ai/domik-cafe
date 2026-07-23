@@ -56,9 +56,11 @@
   .langs button:hover{color:#fff}
   .langs button[aria-pressed="true"]{color:var(--gold);font-weight:700;transition:color .22s .3s}
   .lang-goo{position:absolute;inset:0;pointer-events:none;filter:url(#gnGoo2)}
+  /* will-change: каретка и капли в своём слое — перелёт плавнее на телефоне */
   .lang-pill{position:absolute;top:2px;bottom:2px;left:2px;width:34px;border-radius:999px;
-    background:var(--cream);pointer-events:none}
-  .lang-drop{position:absolute;border-radius:50%;background:var(--cream);pointer-events:none}
+    background:var(--cream);pointer-events:none;will-change:transform}
+  .lang-drop{position:absolute;border-radius:50%;background:var(--cream);pointer-events:none;
+    will-change:transform}
   /* бургер: три полоски, морф в крестик (тот же приём, что на главной) */
   .burger{display:none;position:relative;width:34px;height:34px;border-radius:50%;flex:0 0 auto;
     background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:var(--cream);cursor:pointer}
@@ -530,10 +532,11 @@
     var curL = parseFloat(pill.style.left) || 2, curW = parseFloat(pill.style.width) || 34;
     if (Math.abs(newL - curL) < 1){ place(btn); return; }
     var h = wrap.clientHeight, startCx = curL + curW / 2, endCx = newL + newW / 2;
-    gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.16, ease:'power2.in',
+    /* тайминги ускорены (реш. 23.07) — весь цикл ~0.45с вместо 0.7с */
+    gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.12, ease:'power2.in',
       onComplete:function(){
         gsap.set(pill, {left:newL, width:newW, scaleX:0, scaleY:0});
-        gsap.to(pill, {scaleX:1, scaleY:1, duration:.38, delay:.16, ease:'back.out(1.7)'});
+        gsap.to(pill, {scaleX:1, scaleY:1, duration:.3, delay:.08, ease:'back.out(1.7)'});
       }});
     for (var i = 0; i < 5; i++){
       var d = document.createElement('span'); d.className = 'lang-drop';
@@ -543,11 +546,11 @@
       d.style.top = (h / 2 - size / 2).toFixed(1) + 'px';
       goo.appendChild(d);
       (function(el, i){
-        var dx = endCx - startCx, arc = (Math.random() * 16 - 8), t = .28 + Math.random() * .14, dl = .04 + i * .035;
+        var dx = endCx - startCx, arc = (Math.random() * 16 - 8), t = .2 + Math.random() * .1, dl = .02 + i * .022;
         gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'power1.inOut'});
         gsap.to(el, {y:arc, duration:t/2, delay:dl, ease:'sine.out'});
         gsap.to(el, {y:0, duration:t/2, delay:dl + t/2, ease:'sine.in'});
-        gsap.to(el, {scale:0, duration:.14, delay:dl + t, ease:'power2.in',
+        gsap.to(el, {scale:0, duration:.1, delay:dl + t, ease:'power2.in',
           onComplete:function(){ try { goo.removeChild(el); } catch(e){} }});
       })(d, i);
     }
