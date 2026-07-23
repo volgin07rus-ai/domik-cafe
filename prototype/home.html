@@ -33,8 +33,11 @@
      и центрированная шапка съезжала на полширины скроллбара; жёлоб резервируем всегда */
   html{scrollbar-gutter:stable}
   /* разрядка .035em — воздух для VAG; рукописным Caveat-элементам ниже возвращается normal */
+  /* overflow-x: clip, НЕ hidden — hidden делает body скролл-контейнером и
+     молча ломает position:sticky (норка не липла, 23.07). clip режет так же,
+     но sticky живёт; hidden оставлен фолбэком для старых браузеров. */
   body{background:var(--cream);color:var(--ink);font-family:'VAGWorld','Nunito Sans',system-ui,sans-serif;
-    letter-spacing:.035em;overflow-x:hidden}
+    letter-spacing:.035em;overflow-x:hidden;overflow-x:clip}
   .hero h1,.hero .chip,.cap,.inside-ui .pull,.num,.bt-hint{letter-spacing:normal}
   img{max-width:100%;display:block}
   a{color:inherit}
@@ -157,23 +160,61 @@
   .lang-pill{position:absolute;top:2px;bottom:2px;left:2px;width:34px;border-radius:999px;
     background:var(--cream);pointer-events:none}
   .lang-drop{position:absolute;border-radius:50%;background:var(--cream);pointer-events:none}
+  /* Смена языка: мягкий кросс-фейд с размытием.
+     ⚠️ !important обязателен: SplitText/reveal проставляют hero-элементам
+     инлайновый opacity:1, из-за него заголовок менялся МГНОВЕННО (рывок),
+     пока остальное плавно гасло.
+     ⚠️ Гасим и соседей без перевода (иконка статуса, часы, стрелки) — иначе
+     они остаются видимыми и прыгают, когда текст рядом меняет длину.
+     Без сдвига по Y: на крупном заголовке он читался как дёрганье. */
+  [data-i18n], .hero .chip, #statusText, #statusText2, .arrow{
+    transition:opacity .55s var(--ease), filter .55s var(--ease)}
+  html.lang-swap [data-i18n],
+  html.lang-swap .hero .chip,
+  html.lang-swap #statusText,
+  html.lang-swap #statusText2,
+  html.lang-swap .arrow{opacity:0 !important;filter:blur(7px) !important;transition-duration:.2s}
   /* телефон / бургер — стеклянные кружки внутри капсулы */
   .hphone,.burger{
     display:grid;place-items:center;width:38px;height:38px;border-radius:50%;color:var(--cream);cursor:pointer;flex:0 0 auto;
     background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);transition:background .25s, transform .2s;
   }
   .hphone:hover,.burger:hover{background:rgba(255,255,255,.18)}
-  .hphone:active,.burger:active{transform:scale(.94)}
-  /* бургер: три полоски из общего центра — только transform, плавно в обе стороны */
+  .hphone:active{transform:scale(.94)}
+  /* у бургера отклик БЕЗ scale (фикс 23.07): скейл кнопки пере-растрировал
+     полоски внутри стеклянной капсулы, и они оставались «вытянутыми» */
+  .burger:active{background:rgba(255,255,255,.26)}
+  /* бургер: три полоски из общего центра — только transform, плавно в обе стороны.
+     Ширина фиксированная (не через left/right-инсеты) + will-change: полоски
+     живут в своём постоянном слое и не пересемплируются после анимаций */
   .burger{display:none;position:relative}
-  .burger .bl{position:absolute;left:11px;right:11px;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:currentColor;
+  .burger .bl{position:absolute;left:50%;top:50%;width:16px;height:2px;margin:-1px 0 0 -8px;
+    border-radius:2px;background:currentColor;will-change:transform;
     transition:transform .3s cubic-bezier(.4,0,.2,1), opacity .18s linear}
-  .burger .bl1{transform:translateY(-6px)}
+  /* ⚠️ состав transform ОДИНАКОВЫЙ в обоих состояниях (translateY + rotate):
+     при разных списках браузер интерполирует через матрицу, и полоски
+     «вытягивались» по пути морфа (фикс 23.07) */
+  .burger .bl1{transform:translateY(-6px) rotate(0deg)}
   .burger .bl2{transform:translateY(0)}
-  .burger .bl3{transform:translateY(6px)}
-  .burger[aria-expanded="true"] .bl1{transform:rotate(45deg)}
+  .burger .bl3{transform:translateY(6px) rotate(0deg)}
+  .burger[aria-expanded="true"] .bl1{transform:translateY(0) rotate(45deg)}
   .burger[aria-expanded="true"] .bl2{opacity:0}
-  .burger[aria-expanded="true"] .bl3{transform:rotate(-45deg)}
+  .burger[aria-expanded="true"] .bl3{transform:translateY(0) rotate(-45deg)}
+  /* ===== BubbleMenu (порт React Bits, 23.07): мобильное меню-пузыри.
+     Бургер надувает полноэкранные пилюли со stagger'ом (GSAP back.out);
+     старый дропдаун .hnav.open остаётся фолбэком без GSAP. Оверлей z-55 —
+     ПОД шапкой (z-60), чтобы бургер-крестик оставался кликабельным. */
+  .bubm{position:fixed;inset:0;z-index:55;display:none;padding:104px 18px 24px;
+    background:rgba(14,22,40,.5);
+    -webkit-backdrop-filter:blur(12px) saturate(140%);backdrop-filter:blur(12px) saturate(140%)}
+  .bubm.on{display:block}
+  .bubm-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+  .bubm-pill{display:flex;align-items:center;justify-content:center;min-height:62px;
+    border-radius:999px;background:var(--cream);color:var(--ink);text-decoration:none;
+    font-family:'Yeseva One',serif;font-size:clamp(20px,5.5vw,28px);
+    box-shadow:0 8px 26px rgba(10,16,30,.25);will-change:transform}
+  .bubm-pill:active{background:var(--hb,#B98A3C);color:#fff}
+  .bubm-label{display:inline-block;line-height:1.2}
 
   /* ============ КНОПКИ — Liquid Glass (по мотивам LiquidButton) ============ */
   .btn{
@@ -374,10 +415,13 @@
   /* 22px→10px (реш. 22.07): крупный подъём при ступенчатом скролле колёсиком
      читался как «дёргание» — оставляем лёгкий сдвиг, почти чистое проявление */
   .reveal{opacity:0;transform:translateY(10px)}
-  /* ScrollFloat/SplitText: буквы (ch) внутри слов-обёрток (chw) — обёртка
-     не даёт строке ломаться посреди слова. Без will-change: на ~2000 букв
-     он заставил бы браузер держать слой под каждую. Без GSAP или с
-     reduced-motion элементы просто видимы (классы ничего не прячут). */
+  /* ScrollReveal (порт с React Bits, реш. 22.07; возврат 23.07 — ScrollFloat
+     откатили по решению пользователя): заголовки и лиды собираются из слов
+     по мере прокрутки — прозрачность+блюр на слово, скраб. Без GSAP
+     или с reduced-motion элементы просто видимы (класс ничего не прячет). */
+  .sr .word{display:inline-block;will-change:opacity,filter}
+  /* SplitText: буквы (ch) внутри слов-обёрток (chw) — обёртка не даёт
+     строке ломаться посреди слова */
   .chw{display:inline-block;white-space:nowrap}
   .ch{display:inline-block}
 
@@ -438,26 +482,59 @@
     .bt-head{text-align:left;left:clamp(24px,5vw,70px);right:auto}
   }
 
-  /* ============ Б4 ПОЧЕМУ ============ */
-  /* тёплая подложка: секция отделяется от кремовых соседей, не становясь «карточной» */
+  /* ============ Б4 ПОЧЕМУ — вертикальные шаги (реф. пользователя 23.07):
+     крупный рукописный номер у заголовка, описание под ним, иллюстрация
+     напротив; стороны чередуются зигзагом. Схема одна и на десктопе, и на
+     мобилке — на узких экранах колонка картинки просто становится меньше. */
   #why{background:linear-gradient(180deg,#F7EFE1 0%,#F6E6D2 45%,#F7EFE1 100%)}
-  .why4{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px}
-  .why4 .it{text-align:left;position:relative;padding:0 clamp(14px,2vw,26px)}
-  .why4 .it:first-child{padding-left:0}
-  /* карандашный пунктир между карточками — вместо пустого зазора */
-  .why4 .it+.it::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;
-    background:repeating-linear-gradient(180deg, rgba(33,61,107,.20) 0 5px, transparent 5px 11px)}
-  .why4 .num{font-family:'Caveat',cursive;font-size:26px;line-height:1;color:var(--gold);margin-bottom:2px}
-  /* слот одинаковой высоты для всех четырёх: где-то иконка, где-то картинка —
-     выравниваем по низу, чтобы заголовки карточек стояли на одной линии */
-  .why4 .ic{display:flex;align-items:flex-end;height:88px;margin-bottom:14px}
-  .why4 .ic svg{width:44px;height:44px;color:var(--sage)}
-  .why4 .ic img{height:88px;width:auto;max-width:100%;object-fit:contain;display:block}
-  /* круассан лежит горизонтально и на общей высоте выходит шире и тяжелее
-     остальных — сажаем его пониже, чтобы в ряду был равный вес */
-  .why4 .ic.sm img{height:64px}
-  .why4 h3{font-family:'Yeseva One',serif;font-weight:400;font-size:19px;margin-bottom:8px}
-  .why4 p{font-size:14.5px;line-height:1.6;opacity:.78}
+  .whysteps{margin-top:clamp(36px,6vh,64px);display:grid;gap:clamp(44px,8vh,92px);max-width:940px}
+  .wstep{display:grid;grid-template-columns:1fr clamp(200px,26vw,300px);
+    gap:clamp(24px,5vw,64px);align-items:center}
+  /* nth-of-TYPE, не child: в .whysteps первым ребёнком лежит svg тропинки */
+  .wstep:nth-of-type(even){grid-template-columns:clamp(200px,26vw,300px) 1fr}
+  .wstep:nth-of-type(even) .wtxt{order:2}
+  .wstep:nth-of-type(even) .wimg{order:1}
+  .wtxt{display:grid;grid-template-columns:auto 1fr;column-gap:clamp(14px,2.2vw,26px);
+    align-items:start;text-align:left}
+  .wnum{grid-row:1/3;font-family:'Caveat',cursive;font-weight:600;line-height:.78;
+    font-size:clamp(64px,8.5vw,112px);color:var(--gold);transform:rotate(-4deg);margin-top:.02em}
+  .wtxt h3{font-family:'Yeseva One',serif;font-weight:400;font-size:clamp(21px,2.6vw,30px);
+    align-self:center}
+  .wtxt p{grid-column:2;margin-top:10px;font-size:clamp(14.5px,1.4vw,16.5px);
+    line-height:1.65;opacity:.8;max-width:42ch}
+  .wimg .ic{display:block}
+  .wimg img{width:100%;height:auto;max-height:240px;object-fit:contain;display:block}
+  /* подгонка веса картинок (реш. 23.07): scale вместо width — колонка сетки
+     не меняется, зигзаг и центровка остаются как есть */
+  .wstep:nth-of-type(1) .wimg img{transform:scale(.78)}   /* Алиса — меньше */
+  .wstep:nth-of-type(2) .wimg img{transform:scale(.94)}   /* круассан — совсем чуть меньше */
+  .wstep:nth-of-type(3) .wimg img{transform:scale(1.26)}  /* пара за столиком — крупнее */
+  @media (max-width:719px){
+    .wstep{grid-template-columns:1fr 128px;gap:18px}
+    .wstep:nth-of-type(even){grid-template-columns:128px 1fr}
+    .wnum{font-size:54px}
+    .wtxt{column-gap:12px}
+    .wimg img{max-height:150px}
+  }
+  /* --- ЖИВОЙ ФОН «Почему» (23.07, v2 по реш. пользователя): золотые пылинки
+     в тёплом свете плывут вверх, а тропинка = СЛЕДЫ-ШАГИ, будто кто-то прошёл
+     к Домику: размашистая змейка через края секции, пары следов появляются
+     по одному при скролле. Геометрию строит JS по реальным позициям шагов,
+     следы — <use> вдоль невидимой направляющей (getPointAtLength). --- */
+  #why .wrap{position:relative;z-index:2}
+  .why-amb{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .why-amb.paused i{animation-play-state:paused}
+  .why-amb i{position:absolute;border-radius:50%;
+    background:radial-gradient(circle, rgba(227,164,52,.55), rgba(227,164,52,0) 72%);
+    animation:mote linear infinite}
+  @keyframes mote{0%{transform:translate(0,0);opacity:0}
+    12%{opacity:.7}55%{transform:translate(var(--dx),-90px);opacity:.45}
+    100%{transform:translate(0,-180px);opacity:0}}
+  .whysteps{position:relative}
+  .wstep{position:relative;z-index:1}
+  .why-path{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;
+    color:var(--gold);overflow:visible} /* overflow: следам можно выходить за блок шагов */
+  @media (prefers-reduced-motion: reduce){ .why-amb{display:none} }
 
   /* ============ Б5 ТЁМНЫЙ ============ */
   .dark{background:linear-gradient(180deg,#22406F,#1B3159);color:var(--cream);overflow:hidden}
@@ -468,9 +545,130 @@
   }
   .dark .eyebrow{color:#E3A434;opacity:1}
   .dark .uline{color:#E3A434}
+  /* --- ЖИВОЙ ФОН (проба слоёв, 23.07, по мотивам реф. ORIGIN/Notosan):
+     звёзды мерцают, облака дрейфуют, вдалеке пролетает чайка (оммаж Баху).
+     Всё на transform/opacity (без блюров и layout), элементов мало;
+     вне экрана IntersectionObserver ставит анимации на паузу. --- */
+  .amb{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .amb.paused *{animation-play-state:paused}
+  .dark .wrap{position:relative;z-index:2}   /* контент поверх, чайка летит ЗА текстом */
+  .amb-star{position:absolute;border-radius:50%;background:#FFEBC2;
+    animation:ambTw 3.4s ease-in-out infinite}
+  @keyframes ambTw{0%,100%{opacity:.12}50%{opacity:.7}}
+  .amb-cloud{position:absolute;left:-46vw;width:46vw;max-width:640px;aspect-ratio:5/2;
+    border-radius:50%;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(247,239,225,.09), transparent 70%);
+    animation:ambDrift linear infinite}
+  @keyframes ambDrift{from{transform:translateX(0)}to{transform:translateX(210vw)}}
+  /* чайку пробовали — убрана (реш. пользователя 23.07: «чайки получились плохо») */
+  @media (prefers-reduced-motion: reduce){ .amb{display:none} }
   .darkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,44px);margin-top:46px}
   .darkgrid h3{font-family:'Yeseva One',serif;font-weight:400;font-size:21px;margin-bottom:10px}
   .darkgrid p{font-size:14.5px;line-height:1.7;opacity:.86}
+
+  /* ============ Б5.5 ПРОЛЁТ В САД (v3, 23.07, реш. пользователя): зум-сквозь,
+     как кристаллы в Dreamcore — камера летит ВПЕРЁД: слои-кулисы (ветви по
+     краям) растут от центра экрана с разной скоростью (data-scale), дальние
+     еле-еле — разница масштабов и даёт объём. В конце кремовый свет в центре
+     поглощает экран → галерея «Загляните внутрь». Ветви — ЗАГЛУШКИ
+     (SVG-силуэты), под замену на иллюстрации. Прилипание = GSAP pin
+     (CSS-sticky на живом экране не липнул). Без GSAP секции нет (.on из JS). */
+  #burrow{display:none;position:relative;height:100svh;overflow:hidden;background:#1B3159}
+  #burrow.on{display:block}
+  .bw-pin{position:relative;height:100%;overflow:hidden}
+  .bw-bg{position:absolute;inset:0;transform-origin:50% 50%;
+    background:linear-gradient(180deg,#1B3159 0%,#1F3D48 42%,#24503F 100%)}
+  .bw-plane{position:absolute;inset:0;transform-origin:50% 50%;pointer-events:none}
+  .bw-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  /* венок — НЕ фуллскрин-кавер (при scale<1 торчали прямые срезы файла):
+     цельная картинка по центру + радиальная растушёвка прячет края,
+     где листва обрезана границей изображения */
+  .bw-img--hole{inset:auto;left:50%;top:50%;width:max(92vw,118vh);height:auto;
+    transform:translate(-50%,-50%);
+    -webkit-mask-image:radial-gradient(50% 50% at 50% 50%, #000 58%, rgba(0,0,0,0) 87%);
+            mask-image:radial-gradient(50% 50% at 50% 50%, #000 58%, rgba(0,0,0,0) 87%)}
+  /* стена в глубине — вечерний свет; ближние кусты почти в силуэт и в
+     лёгком расфокусе (глубина резкости — как у камеры) */
+  .bw-plane--wall{filter:brightness(.82) saturate(.95)}
+  .bw-plane--near{filter:brightness(.4) saturate(.75) blur(2.5px)}
+  /* жёлтое свечение в дырке убрано (реш. пользователя 23.07) */
+  /* дымка-воздух между стеной и кустами */
+  .bw-haze{position:absolute;inset:0;pointer-events:none;background:#1B3159}
+  /* мобилка: дырка вертикальной стены сидит выше центра (32% высоты кадра) —
+     зум наводим на неё */
+  @media (max-aspect-ratio: 4/5){
+    .bw-plane--wall{transform-origin:50% 32%}
+  }
+  /* светлячки: мерцают сами, глубину получают вместе со своим планом */
+  .ff{position:absolute;width:6px;height:6px;border-radius:50%;
+    background:radial-gradient(circle, #FFE9A8 0%, rgba(255,214,110,0) 70%);
+    animation:ffTw 2.8s ease-in-out infinite}
+  @keyframes ffTw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+  /* кремовый «выход» убран (реш. пользователя 23.07): после пролёта остаёмся
+     в тёмном пространстве — рисованное небо (night-sky) с луной и облаками,
+     CSS-полумесяц стал не нужен */
+  /* текст сцены (реф. FALL INTO REVERIE): живёт ВНУТРИ сада, тает при полёте */
+  .bw-ui{position:absolute;inset:0;display:grid;align-content:center;color:var(--cream);
+    padding:0 clamp(16px,4vw,44px);transform-origin:50% 50%}
+  /* лёгкая виньетка под текстовой зоной (основной контраст несёт стекло) */
+  .bw-ui::before{content:'';position:absolute;inset:-10%;z-index:-1;
+    background:radial-gradient(52% 60% at 32% 48%, rgba(8,14,26,.3), transparent 72%)}
+  /* стекло (Liquid Glass, как шапка): панель заголовка и карточки */
+  .bw-glass{background:rgba(12,20,36,.44);border:1px solid rgba(247,239,225,.2);
+    border-radius:20px;box-shadow:0 12px 38px rgba(8,14,26,.35),
+    inset 0 1px 0 rgba(247,239,225,.14);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+  .bw-glass--head{display:inline-block;padding:18px 26px 20px;max-width:560px}
+  .bw-glass--head h2{max-width:15ch}
+  .bw-uiw{max-width:var(--maxw);margin:0 auto;width:100%}
+  .bw-ui .eyebrow{color:#E3A434;opacity:1;text-shadow:0 1px 10px rgba(10,20,16,.85)}
+  .bw-ui h2{font-family:'Yeseva One',serif;font-weight:400;font-size:clamp(28px,4vw,50px);
+    line-height:1.15;max-width:17ch;text-shadow:0 2px 22px rgba(10,20,16,.45)}
+  .bw-ui .uline{color:#E3A434}
+  .bw-cards{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap;max-width:920px}
+  .bw-cards article{flex:1 1 240px;background:rgba(12,20,36,.44);border:1px solid rgba(247,239,225,.2);
+    border-radius:16px;padding:14px 16px;
+    box-shadow:0 10px 30px rgba(8,14,26,.3), inset 0 1px 0 rgba(247,239,225,.12);
+    -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+  .bw-cards h3{font-family:'Yeseva One',serif;font-weight:400;font-size:17px;margin-bottom:6px}
+  .bw-cards p{font-size:13.5px;line-height:1.55;opacity:.85}
+  @media (max-width:719px){
+    .bw-ui h2{font-size:clamp(24px,6.5vw,34px)}
+    .bw-cards{gap:8px;margin-top:18px}
+    .bw-cards article{flex:1 1 100%;padding:9px 12px}
+    .bw-cards p{font-size:12px;line-height:1.45}
+  }
+  /* галерея-оверлей: появляется на том же экране в конце полёта,
+     живёт в тёмном звёздном пространстве — текст светлый */
+  .bw-gal{position:absolute;inset:0;opacity:0;pointer-events:none;
+    display:grid;align-content:center;overflow:hidden;color:var(--cream)}
+  .bw-gal .wrap{padding-top:0;padding-bottom:0}
+  .bw-gal .eyebrow{color:#E3A434;opacity:1}
+  .bw-gal .lead{opacity:.8}
+  .bw-gal .cgal{margin:20px 0 6px}
+  .bw-gal .cgal-hint{color:var(--cream);opacity:.55}
+  /* WebGL CircularGallery (порт React Bits, 23.07): включается классом .webgl
+     на .bw-gal, DOM-карусель .cgal остаётся фолбэком (нет WebGL / reduce).
+     touch-action:pan-y — вертикальный скролл страницы не перехватываем */
+  .wgal{display:none;position:relative;height:clamp(340px,54vh,540px);margin:20px 0 6px;
+    overflow:hidden;cursor:grab;touch-action:pan-y;outline:none}
+  .wgal:active{cursor:grabbing}
+  .wgal:focus-visible{outline:2px solid rgba(247,239,225,.6);outline-offset:4px}
+  .wgal canvas{display:block;width:100%;height:100%}
+  .bw-gal.webgl .cgal{display:none}
+  .bw-gal.webgl .wgal{display:block}
+  /* облако пробовали — убрано (реш. пользователя 23.07); cloud.webp остался на диске */
+  /* лайтбокс галереи: клик по карточке открывает фото целиком */
+  .glb{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:4vmin;
+    background:rgba(10,14,26,.88);opacity:0;pointer-events:none;transition:opacity .25s}
+  .glb.on{opacity:1;pointer-events:auto}
+  .glb figure{margin:0;max-width:min(1100px,94vw)}
+  .glb img{max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:14px;
+    box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .glb figcaption{color:var(--cream);text-align:center;margin-top:12px;font-size:15px;opacity:.85}
+  .glb-x{position:absolute;top:14px;right:16px;width:44px;height:44px;border-radius:50%;
+    border:1px solid rgba(247,239,225,.3);background:rgba(12,20,36,.55);color:var(--cream);
+    font-size:26px;line-height:1;cursor:pointer}
 
   /* ============ Б6 ГАЛЕРЕЯ ============ */
   /* ===== Круговая (изогнутая) галерея: перетаскивание вбок, бесконечная лента ===== */
@@ -575,11 +773,6 @@
     .hnav a.gn-active{background:rgba(33,61,107,.08);color:var(--ink)}
     .burger{display:grid;place-items:center}
     .hphone,.hcta{display:none}
-    /* сетка ломается на колонки — вертикальный пунктир между «соседями»
-       оказался бы поперёк строк, поэтому на узких экранах возвращаем зазор */
-    .why4{grid-template-columns:repeat(2,1fr);gap:clamp(26px,4vw,34px)}
-    .why4 .it{padding:0}
-    .why4 .it+.it::before{display:none}
     .darkgrid{grid-template-columns:1fr}
     .frames{grid-template-columns:repeat(2,1fr)}
     .contacts .grid{grid-template-columns:1fr}
@@ -593,7 +786,6 @@
     /* кнопка на стартовом экране осталась одна — во всю ширину она читается
        как баннер, поэтому даём ей ровно свой размер */
     .cta-row .btn{width:auto;justify-content:center}
-    .why4{grid-template-columns:1fr}
     .cbtns .btn{flex:1 1 45%;justify-content:center}
   }
   /* на телефонах кнопка шапки выталкивала бургер за край —
@@ -638,11 +830,11 @@
     <a class="hlogo" href="#top" aria-label="Домик — на главную"><img src="logo-hand-white.webp" alt="Домик" width="445" height="120"></a>
 
     <nav class="hnav" id="nav" aria-label="Основная навигация">
-      <a href="../menu.html">Меню</a>
-      <a href="#bakery">Выпечка</a>
-      <a href="#about">О нас</a>
-      <a href="#gallery">Галерея</a>
-      <a href="#contacts">Контакты</a>
+      <a href="menu.html" data-i18n="nav_menu">Меню</a>
+      <a href="#bakery" data-i18n="nav_bakery">Выпечка</a>
+      <a href="#about" data-i18n="nav_about">О нас</a>
+      <a href="#gallery" data-i18n="nav_gallery">Галерея</a>
+      <a href="#contacts" data-i18n="nav_contacts">Контакты</a>
     </nav>
 
     <div class="langs" role="group" aria-label="Язык сайта">
@@ -656,7 +848,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
     </a>
 
-    <a class="btn btn--gold hcta" href="#contacts" style="padding:10px 18px;font-size:13.5px">Как добраться</a>
+    <a class="btn btn--gold hcta" href="#contacts" style="padding:10px 18px;font-size:13.5px" data-i18n="directions">Как добраться</a>
 
     <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav">
       <span class="bl bl1"></span><span class="bl bl2"></span><span class="bl bl3"></span>
@@ -680,7 +872,7 @@
   <!-- Стартовый экран намеренно пустой: заголовок, адрес с часами и меню.
        Остальное (описание, «как добраться», рейтинг) живёт ниже по странице. -->
   <div class="hero__in" id="uiOut">
-    <h1 class="reveal">Место, где время идёт медленнее</h1>
+    <h1 class="reveal" data-i18n="hero_title">Место, где время идёт медленнее</h1>
 
     <div class="chip reveal">
       <!-- З2 (реш. 22.07): открыто = солнышко, закрыто = месяц.
@@ -694,11 +886,11 @@
           <path d="M15.2 3.2a9 9 0 1 0 5.6 12.4 7.2 7.2 0 0 1-5.6-12.4z"/>
         </svg>
       </span>
-      <span>Бахрушина, 12 · <b id="statusText">ежедневно до 21:00</b></span>
+      <span><span data-i18n="addr">Бахрушина, 12</span> · <b id="statusText">ежедневно до 21:00</b></span>
     </div>
 
     <div class="cta-row reveal">
-      <a class="btn btn--paper btn--lg" href="../menu.html">Посмотреть меню</a>
+      <a class="btn btn--paper btn--lg" href="menu.html" data-i18n="view_menu">Посмотреть меню</a>
     </div>
   </div>
 
@@ -708,25 +900,25 @@
       <!-- Реплика без вопроса и точки (реш. 22.07): вопрос «— Ты где?» остался
            только титром во время влёта, комната сразу отвечает -->
       <!-- без .st: реплика собирается по буквам (SplitText), а не общим каскадом -->
-      <div class="pull">Я в Домике</div>
+      <div class="pull" data-i18n="im_in">Я в Домике</div>
       <!-- без .st: подзаголовок собирается по буквам (SplitText) вслед за репликой -->
-      <p>«Домик» — кофейня в тихом дворе у Павелецкой. Здесь можно выключить город на полчаса: посидеть одному, поговорить с близким, поработать или просто помолчать над чашкой.</p>
+      <p data-i18n="room_desc">«Домик» — кофейня в тихом дворе у Павелецкой. Здесь можно выключить город на полчаса: посидеть одному, поговорить с близким, поработать или просто помолчать над чашкой.</p>
       <div class="st inside-cta">
-        <a class="btn btn--cream" href="../menu.html">Посмотреть меню</a>
-        <a class="btn btn--line" href="#bakery">Что попробовать <span class="arrow">↓</span></a>
+        <a class="btn btn--cream" href="menu.html" data-i18n="view_menu">Посмотреть меню</a>
+        <a class="btn btn--line" href="#bakery"><span data-i18n="what_try">Что попробовать</span> <span class="arrow">↓</span></a>
       </div>
     </div>
   </div>
 
-  <div class="cap" id="cap1">— Ты где?</div>
-  <button class="skipbtn" id="skipbtn">Пропустить</button>
+  <div class="cap" id="cap1" data-i18n="where_you">— Ты где?</div>
+  <button class="skipbtn" id="skipbtn" data-i18n="skip">Пропустить</button>
   <button class="outbtn" id="outBtn" aria-label="Выйти из домика — на воздух" title="На воздух">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
 
 
   <div class="scrollhint" id="scrollhint">
-    <span id="hintText">листай — и ты внутри</span>
+    <span id="hintText" data-i18n="scroll_in">листай — и ты внутри</span>
     <span class="chev"></span>
   </div>
 </section>
@@ -737,21 +929,22 @@
     <picture>
       <!-- пробелы в srcset обязаны быть закодированы: пробел = разделитель дескриптора -->
       <source media="(max-aspect-ratio: 4/5)" srcset="bakery-mob-oven.webp">
-      <img src="Печет%20хлеб.png" alt="Мальчик достаёт свежий хлеб из печи — иллюстрация" loading="lazy">
+      <!-- bakery-desk.webp = пережатый «Печет хлеб.png» (3 МБ → 361 КБ, 23.07) -->
+      <img src="bakery-desk.webp" alt="Мальчик достаёт свежий хлеб из печи — иллюстрация" loading="lazy">
     </picture>
     <!-- src ставится из JS: только на мобилке, только при подходе к блоку (см. btVid ниже) -->
     <video class="bt-vid" id="btVid" muted loop playsinline preload="none" aria-hidden="true"></video>
     <div class="bt-dim" id="btDim"></div>
 
     <div class="bt-head">
-      <div class="eyebrow">Из печи каждое утро</div>
-      <h2>Свежая выпечка</h2>
-      <a class="btn btn--ghost bt-cta" href="../menu.html" style="padding:10px 20px;font-size:13.5px">Смотреть всё меню <span class="arrow">→</span></a>
+      <div class="eyebrow" data-i18n="bk_eyebrow">Из печи каждое утро</div>
+      <h2 data-i18n="fresh_bakery">Свежая выпечка</h2>
+      <a class="btn btn--ghost bt-cta" href="menu.html" style="padding:10px 20px;font-size:13.5px"><span data-i18n="see_all_menu">Смотреть всё меню</span> <span class="arrow">→</span></a>
     </div>
 
     <div class="bt-deckwrap" id="btDeckwrap" aria-label="Выпечка — свайпайте бирки">
       <div class="bt-deck" id="btDeck"></div>
-      <div class="bt-hint" id="btHint">свайпни бирку ⟷</div>
+      <div class="bt-hint" id="btHint"><span data-i18n="swipe_tag">свайпни бирку</span> ⟷</div>
       <div class="bt-dots" id="btDots"></div>
     </div>
   </div>
@@ -759,125 +952,198 @@
 
 <!-- ============ Б4 ПОЧЕМУ ВОЗВРАЩАЮТСЯ ============ -->
 <section id="why">
+  <div class="why-amb" id="whyAmb" aria-hidden="true"></div>
   <div class="wrap">
-    <div class="eyebrow reveal">О нас</div>
-    <h2 class="sr">Почему гости возвращаются
+    <div class="eyebrow reveal" data-i18n="about">О нас</div>
+    <h2 class="sr"><span data-i18n="why_back">Почему гости возвращаются</span>
       <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true" style="color:var(--sage)"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
     </h2>
 
-    <div class="why4">
-      <div class="it reveal">
-        <span class="ic"><img src="why-coffee.webp" alt="Алиса пьёт кофе — иллюстрация" loading="lazy" width="294" height="360"></span>
-        <div class="num">01</div>
-        <h3>Отличный кофе</h3>
-        <p>Рожковая и фильтр, зерно от проверенных обжарщиков.</p>
+    <div class="whysteps">
+      <svg class="why-path" id="whyPathSvg" aria-hidden="true" preserveAspectRatio="none">
+        <defs>
+          <!-- след: подошва + пятка, носком в -y (JS доворачивает по ходу тропинки) -->
+          <g id="fpShape">
+            <ellipse cx="0" cy="-2.6" rx="3.1" ry="4.4" fill="currentColor"/>
+            <circle cx="0" cy="4.8" r="2" fill="currentColor"/>
+          </g>
+        </defs>
+        <path id="whyGuide" fill="none" stroke="none"/>
+        <g id="whyFeet"></g>
+      </svg>
+      <div class="wstep">
+        <div class="wtxt reveal">
+          <div class="wnum">01</div>
+          <h3 data-i18n="w1_t">Отличный кофе</h3>
+          <p data-i18n="w1_d">Рожковая и фильтр, зерно от проверенных обжарщиков.</p>
+        </div>
+        <div class="wimg reveal"><span class="ic"><img src="why-coffee.webp" alt="Алиса пьёт кофе — иллюстрация" loading="lazy" width="294" height="360"></span></div>
       </div>
-      <div class="it reveal">
-        <span class="ic sm"><img src="why-bakery.webp" alt="Круассан — иллюстрация" loading="lazy" width="658" height="360"></span>
-        <div class="num">02</div>
-        <h3>Свежая выпечка</h3>
-        <p>Печём каждый день из хороших продуктов.</p>
+      <div class="wstep">
+        <div class="wtxt reveal">
+          <div class="wnum">02</div>
+          <h3 data-i18n="fresh_bakery">Свежая выпечка</h3>
+          <p data-i18n="w2_d">Печём каждый день из хороших продуктов.</p>
+        </div>
+        <div class="wimg reveal"><span class="ic"><img src="why-bakery.webp" alt="Круассан — иллюстрация" loading="lazy" width="658" height="360"></span></div>
       </div>
-      <div class="it reveal">
-        <span class="ic"><img src="why-cozy.webp" alt="Алиса и мальчик за столиком с кофе — иллюстрация" loading="lazy" width="540" height="360"></span>
-        <div class="num">03</div>
-        <h3>Уютная атмосфера</h3>
-        <p>Кирпич, дерево, тёплый свет и негромкая музыка.</p>
+      <div class="wstep">
+        <div class="wtxt reveal">
+          <div class="wnum">03</div>
+          <h3 data-i18n="w3_t">Уютная атмосфера</h3>
+          <p data-i18n="w3_d">Кирпич, дерево, тёплый свет и негромкая музыка.</p>
+        </div>
+        <div class="wimg reveal"><span class="ic"><img src="why-cozy.webp" alt="Алиса и мальчик за столиком с кофе — иллюстрация" loading="lazy" width="540" height="360"></span></div>
       </div>
-      <div class="it reveal">
-        <span class="ic"><img src="why-welcome.webp" alt="Мальчик придерживает открытую дверь — иллюстрация" loading="lazy" width="380" height="360"></span>
-        <div class="num">04</div>
-        <h3>Рады каждому</h3>
-        <p>Можно с собакой, с ноутбуком или просто посидеть.</p>
+      <div class="wstep">
+        <div class="wtxt reveal">
+          <div class="wnum">04</div>
+          <h3 data-i18n="w4_t">Рады каждому</h3>
+          <p data-i18n="w4_d">Можно с собакой, с ноутбуком или просто посидеть.</p>
+        </div>
+        <div class="wimg reveal"><span class="ic"><img src="why-welcome.webp" alt="Мальчик придерживает открытую дверь — иллюстрация" loading="lazy" width="380" height="360"></span></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ============ Б5 ТЁМНЫЙ ============ -->
-<section class="dark" id="space">
-  <div class="wrap">
-    <div class="eyebrow reveal">Вечером здесь ламповый свет</div>
-    <h2 class="sr">Зерно, десерты и место, где хорошо
-      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-    </h2>
-    <div class="darkgrid">
-      <article class="reveal">
-        <h3>Отборное зерно</h3>
-        <p>Спешелти от проверенных обжарщиков. Классику варим на рожковой, для ценителей — фильтр с новыми нотами каждый раз.</p>
-      </article>
-      <article class="reveal">
-        <h3>Выпечка и десерты</h3>
-        <p>Круассаны, слойки, чизкейк и сезонные новинки — то, что хочется сфотографировать и тут же съесть.</p>
-      </article>
-      <article class="reveal">
-        <h3>Пространство для вас</h3>
-        <p>Тёплый зал, веранда во дворе и розетки под рукой. Удобно работать, встречаться и отдыхать.</p>
-      </article>
+<!-- ============ Б5+Б6 ПРОЛЁТ В САД: «Зерно…» внутри сцены → полёт → галерея НА МЕСТЕ ============ -->
+<section id="burrow" aria-hidden="true">
+  <div class="bw-pin">
+    <div class="bw-bg">
+      <!-- рисованное ночное небо пользователя (23.07): луна и облака уже в кадре -->
+      <picture>
+        <source media="(max-aspect-ratio: 4/5)" srcset="night-sky-m.webp">
+        <img class="bw-img" src="night-sky.webp" alt="">
+      </picture>
     </div>
-  </div>
-</section>
-
-<!-- ============ Б6 ГАЛЕРЕЯ ============ -->
-<section id="gallery">
-  <div class="wrap">
-    <div class="eyebrow reveal">Загляните внутрь</div>
-    <h2 class="sr">Галерея
-      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true" style="color:#2F8A86"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-    </h2>
-    <p class="lead sr">Интерьер и уютные уголки кофейни «Домик» — арт на стенах, тёплый свет и живые детали.</p>
-
-  </div>
-  <div class="cgal" id="cgal" role="group" aria-label="Фотографии кофейни — перетаскивайте вбок">
-    <div class="cgal-stage" id="cgalStage"></div>
-    <div class="cgal-hint">тяните вбок ⟷</div>
+    <!-- звёзды-мерцалки поверх нарисованных + облака-дрейф -->
+    <div class="amb" id="amb" aria-hidden="true">
+      <i class="amb-cloud" style="top:4%;animation-duration:130s;animation-delay:-45s"></i>
+      <i class="amb-cloud" style="top:36%;width:30vw;animation-duration:180s;animation-delay:-120s;opacity:.75"></i>
+      <i class="amb-cloud" style="top:60%;width:56vw;animation-duration:95s;animation-delay:-12s;opacity:.55"></i>
+    </div>
+    <!-- планы от дальнего к ближнему: DOM-порядок = порядок отрисовки.
+         Схема 23.07 v3 (по видео-референсу): ближние кулисы = кусты, они
+         разъезжаются первыми; СТЕНА с маленькой прозрачной дыркой — в самой
+         глубине, во весь экран, приближается весь пролёт и в финале
+         раскрывается дыркой на весь экран. На мобилке кусты берут
+         вертикальный garden-side-m (⚠️ без пробелов в srcset). -->
+    <!-- data-dur .85: стена ПОЛНОСТЬЮ уходит за кадр до появления галереи (.72),
+         иначе её края «не докручивались» и висели по бокам финала -->
+    <div class="bw-plane bw-plane--wall" data-scale="7" data-dur=".85" data-ease="power3.in">
+      <picture>
+        <source media="(max-aspect-ratio: 4/5)" srcset="garden-wall-m.webp">
+        <img class="bw-img" src="garden-wall.webp" alt="">
+      </picture>
+      <i class="ff" style="left:44%;top:40%"></i>
+      <i class="ff" style="left:57%;top:58%;animation-delay:-1.3s"></i>
+    </div>
+    <!-- дымка-воздух между стеной и кустами -->
+    <div class="bw-haze"></div>
+    <div class="bw-plane bw-plane--near" data-scale="4.8" data-dur=".6">
+      <i class="ff" style="left:24%;top:52%;width:7px;height:7px"></i>
+      <i class="ff" style="left:74%;top:34%;animation-delay:-.8s"></i>
+      <picture>
+        <source media="(max-aspect-ratio: 4/5)" srcset="garden-side-m.webp">
+        <img class="bw-img" src="garden-side.webp" alt="">
+      </picture>
+      <i class="ff" style="left:18%;top:64%;width:8px;height:8px;animation-delay:-1.6s"></i>
+      <i class="ff" style="left:82%;top:44%;width:8px;height:8px"></i>
+    </div>
+    <!-- текст сцены (как FALL INTO REVERIE): тает при начале полёта -->
+    <div class="bw-ui">
+      <div class="bw-uiw">
+        <div class="bw-glass bw-glass--head">
+          <div class="eyebrow" data-i18n="gd_eyebrow">Вечером здесь ламповый свет</div>
+          <h2><span data-i18n="gd_title">Зерно, десерты и место, где хорошо</span>
+            <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+          </h2>
+        </div>
+        <div class="bw-cards">
+          <article>
+            <h3 data-i18n="g1_t">Отборное зерно</h3>
+            <p data-i18n="g1_d">Спешелти от проверенных обжарщиков. Классику варим на рожковой, для ценителей — фильтр с новыми нотами каждый раз.</p>
+          </article>
+          <article>
+            <h3 data-i18n="g2_t">Выпечка и десерты</h3>
+            <p data-i18n="g2_d">Круассаны, слойки, чизкейк и сезонные новинки — то, что хочется сфотографировать и тут же съесть.</p>
+          </article>
+          <article>
+            <h3 data-i18n="g3_t">Пространство для вас</h3>
+            <p data-i18n="g3_d">Тёплый зал, веранда во дворе и розетки под рукой. Удобно работать, встречаться и отдыхать.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+    <!-- галерея появляется НА ЭТОМ ЖЕ экране в конце полёта, в тёмном
+         пространстве со звёздами и луной, не отдельным блоком -->
+    <div class="bw-gal">
+      <section id="gallery">
+        <div class="wrap">
+          <div class="eyebrow" data-i18n="look_inside">Загляните внутрь</div>
+          <h2><span data-i18n="gallery">Галерея</span>
+            <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true" style="color:#E3A434"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+          </h2>
+          <p class="lead" data-i18n="gal_lead">Интерьер и уютные уголки кофейни «Домик» — арт на стенах, тёплый свет и живые детали.</p>
+        </div>
+        <div class="cgal" id="cgal" role="group" aria-label="Фотографии кофейни — перетаскивайте вбок">
+          <div class="cgal-stage" id="cgalStage"></div>
+          <div class="cgal-hint"><span data-i18n="drag_side">тяните вбок</span> ⟷</div>
+        </div>
+        <!-- WebGL-галерея (порт CircularGallery с React Bits); .cgal — фолбэк -->
+        <div class="wgal" id="wgal" tabindex="0" role="region"
+          aria-label="Круговая галерея фотографий — тяните вбок или стрелками"></div>
+      </section>
+    </div>
   </div>
 </section>
 
 <!-- ============ Б7 ЛЕНТА-ОТЗЫВ ============ -->
 <section class="band">
   <div class="wrap">
-    <div class="big sr"><span class="stars">★★★★★</span> 5,0 на Яндекс Картах</div>
-    <div class="reveal" style="opacity:.7">140 отзывов гостей</div>
-    <a class="btn btn--ghost-ink reveal" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">Читать отзывы <span class="arrow">→</span></a>
+    <div class="big sr"><span class="stars">★★★★★</span> <span data-i18n="rating">5,0 на Яндекс Картах</span></div>
+    <div class="reveal" style="opacity:.7" data-i18n="reviews_n">140 отзывов гостей</div>
+    <a class="btn btn--ghost-ink reveal" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener"><span data-i18n="read_reviews">Читать отзывы</span> <span class="arrow">→</span></a>
   </div>
 </section>
 
 <!-- ============ Б8 КОНТАКТЫ ============ -->
 <section class="contacts" id="contacts">
   <div class="wrap">
-    <div class="eyebrow reveal">Контакты</div>
-    <h2 class="sr">Приходите в гости
+    <div class="eyebrow reveal" data-i18n="contacts">Контакты</div>
+    <h2 class="sr"><span data-i18n="come_visit">Приходите в гости</span>
       <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
     </h2>
-    <p class="lead sr">Всегда рады видеть вас — заходите на чашку спешелти и свежую выпечку. Мы в трёх минутах от Павелецкой, на Бахрушина.</p>
+    <p class="lead sr" data-i18n="contacts_lead">Всегда рады видеть вас — заходите на чашку спешелти и свежую выпечку. Мы в трёх минутах от Павелецкой, на Бахрушина.</p>
 
     <div class="grid">
       <div class="cdata">
         <dl>
-          <dt class="reveal">Адрес</dt>
-          <dd class="reveal">Москва, ул. Бахрушина, 12, стр. 2<br><span style="opacity:.65;font-size:15px">3 минуты пешком от м. Павелецкая</span></dd>
+          <dt class="reveal" data-i18n="addr_label">Адрес</dt>
+          <dd class="reveal" data-i18n="addr_full" data-html="1">Москва, ул. Бахрушина, 12, стр. 2<br><span style="opacity:.65;font-size:15px">3 минуты пешком от м. Павелецкая</span></dd>
 
-          <dt class="reveal">Часы работы</dt>
-          <dd class="reveal">Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00<br>
+          <dt class="reveal" data-i18n="hours_label">Часы работы</dt>
+          <dd class="reveal"><span data-i18n="hours_lines" data-html="1">Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00</span><br>
             <span class="chip" style="background:rgba(33,61,107,.06);border-color:rgba(33,61,107,.14);color:var(--ink);margin-top:12px;backdrop-filter:none">
               <span class="dot" id="statusDot2"></span><b id="statusText2">ежедневно до 21:00</b>
             </span>
           </dd>
 
-          <dt class="reveal">Телефон</dt>
+          <dt class="reveal" data-i18n="phone_label">Телефон</dt>
           <dd class="reveal phone"><a href="tel:+79037246283">+7 (903) 724-62-83</a></dd>
         </dl>
 
         <div class="cbtns reveal">
-          <a class="btn btn--gold" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener">Построить маршрут</a>
-          <a class="btn btn--ghost-ink" href="tel:+79037246283">Позвонить</a>
+          <a class="btn btn--gold" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" data-i18n="get_route">Построить маршрут</a>
+          <a class="btn btn--ghost-ink" href="tel:+79037246283" data-i18n="call">Позвонить</a>
         </div>
       </div>
 
       <figure class="facade reveal">
         <img src="../assets/gal10.webp" alt="Фасад кофейни «Домик» на Бахрушина с вывеской" loading="lazy">
-        <figcaption>ищите эту дверь и вывеску</figcaption>
+        <figcaption data-i18n="door_sign">ищите эту дверь и вывеску</figcaption>
       </figure>
     </div>
   </div>
@@ -891,42 +1157,42 @@
     <div class="roof"></div>
     <div class="body"><div class="win"></div></div>
   </div>
-  <div class="dlg reveal">— Ты где?<br>— Я в Домике.</div>
+  <div class="dlg reveal" data-i18n="dlg" data-html="1">— Ты где?<br>— Я в Домике.</div>
 
   <div class="fcols">
     <div>
       <a class="flogo" href="#top">Домик</a>
-      <p>Городская кофейня в тихом дворе у Павелецкой.</p>
+      <p data-i18n="foot_tag">Городская кофейня в тихом дворе у Павелецкой.</p>
       <a class="trust" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" style="margin-top:14px">
-        <span class="stars">★</span> <span><b>5,0</b> · 140 отзывов</span>
+        <span class="stars">★</span> <span data-i18n="foot_rating">5,0 · 140 отзывов</span>
       </a>
     </div>
 
     <nav aria-label="Навигация в подвале">
-      <h4>Навигация</h4>
+      <h4 data-i18n="nav_title">Навигация</h4>
       <div class="fnav">
-        <a href="../menu.html">Меню</a>
-        <a href="#bakery">Выпечка</a>
-        <a href="#about">О нас</a>
-        <a href="#gallery">Галерея</a>
-        <a href="#contacts">Контакты</a>
+        <a href="menu.html" data-i18n="nav_menu">Меню</a>
+        <a href="#bakery" data-i18n="nav_bakery">Выпечка</a>
+        <a href="#about" data-i18n="nav_about">О нас</a>
+        <a href="#gallery" data-i18n="nav_gallery">Галерея</a>
+        <a href="#contacts" data-i18n="nav_contacts">Контакты</a>
       </div>
     </nav>
 
     <div>
-      <h4>Контакты</h4>
+      <h4 data-i18n="contacts">Контакты</h4>
       <div class="fcontacts">
-        Москва, ул. Бахрушина, 12, стр. 2<br>
+        <span data-i18n="foot_addr">Москва, ул. Бахрушина, 12, стр. 2</span><br>
         <a href="tel:+79037246283">+7 (903) 724-62-83</a><br>
-        Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00
+        <span data-i18n="foot_hours" data-html="1">Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00</span>
       </div>
-      <a class="btn btn--ghost" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" style="margin-top:18px;font-size:13px;padding:11px 20px">Построить маршрут</a>
+      <a class="btn btn--ghost" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" style="margin-top:18px;font-size:13px;padding:11px 20px" data-i18n="get_route">Построить маршрут</a>
     </div>
   </div>
 
   <div class="fbottom">
-    <span>© 2026 «Домик» · городская кофейня</span>
-    <span>Сделано с теплом</span>
+    <span data-i18n="copyright">© 2026 «Домик» · городская кофейня</span>
+    <span data-i18n="made_warm">Сделано с теплом</span>
   </div>
 </footer>
 
@@ -936,6 +1202,142 @@
 (function(){
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var isPortrait = matchMedia('(max-aspect-ratio: 4/5)').matches;
+
+  /* ================= МУЛЬТИЯЗЫЧНОСТЬ (23.07) =================
+     Переводы централизованы в TR по ключу data-i18n (HTML остаётся чистым,
+     RU-текст уже в разметке — нет мелькания). applyText меняет текст,
+     dir/lang, title и «живой статус». Смена языка — с блюр-анимацией.
+     applyText вызывается ДО нарезки букв (SplitText/ScrollFloat), поэтому
+     анимации проигрываются уже на нужном языке. */
+  var TR = {
+    hero_title:{ru:'Место, где время идёт медленнее',en:'A place where time runs slower',zh:'让时间慢下来的地方',ar:'مكان يمضي فيه الوقت بتمهّل'},
+    addr:{ru:'Бахрушина, 12',en:'Bakhrushina 12',zh:'巴赫鲁申街 12 号',ar:'باخروشينا 12'},
+    view_menu:{ru:'Посмотреть меню',en:'View menu',zh:'查看菜单',ar:'عرض القائمة'},
+    im_in:{ru:'Я в Домике',en:"I'm in Domik",zh:'我在 Domik',ar:'أنا في دوميك'},
+    room_desc:{ru:'«Домик» — кофейня в тихом дворе у Павелецкой. Здесь можно выключить город на полчаса: посидеть одному, поговорить с близким, поработать или просто помолчать над чашкой.',en:'Domik is a coffee house in a quiet courtyard near Paveletskaya. Here you can switch the city off for half an hour — sit alone, talk with someone close, work, or simply be quiet over a cup.',zh:'Domik 是帕维列茨车站旁静谧庭院里的咖啡馆。在这里你可以把城市关掉半小时——独自小坐、与亲近的人聊天、工作，或只是捧着一杯静静发呆。',ar:'دوميك مقهى في فناء هادئ قرب بافيليتسكايا. هنا يمكنك إطفاء صخب المدينة لنصف ساعة: تجلس وحدك، تتحدّث مع عزيز، تعمل، أو تصمت قليلًا فوق فنجانك.'},
+    what_try:{ru:'Что попробовать',en:'What to try',zh:'尝点什么',ar:'ماذا تجرّب'},
+    where_you:{ru:'— Ты где?',en:'— Where are you?',zh:'—— 你在哪儿？',ar:'— أين أنت؟'},
+    skip:{ru:'Пропустить',en:'Skip',zh:'跳过',ar:'تخطّي'},
+    scroll_in:{ru:'листай — и ты внутри',en:"scroll — and you're inside",zh:'往下滑，你就进来了',ar:'مرّر — وستكون في الداخل'},
+    bk_eyebrow:{ru:'Из печи каждое утро',en:'From the oven every morning',zh:'每天清晨新鲜出炉',ar:'من الفرن كل صباح'},
+    fresh_bakery:{ru:'Свежая выпечка',en:'Fresh bakery',zh:'新鲜烘焙',ar:'مخبوزات طازجة'},
+    see_all_menu:{ru:'Смотреть всё меню',en:'See full menu',zh:'查看全部菜单',ar:'القائمة كاملة'},
+    swipe_tag:{ru:'свайпни бирку',en:'swipe the tag',zh:'滑动标签',ar:'اسحب البطاقة'},
+    about:{ru:'О нас',en:'About us',zh:'关于我们',ar:'من نحن'},
+    why_back:{ru:'Почему гости возвращаются',en:'Why guests come back',zh:'客人为何一再回来',ar:'لماذا يعود ضيوفنا'},
+    w1_t:{ru:'Отличный кофе',en:'Great coffee',zh:'出色的咖啡',ar:'قهوة ممتازة'},
+    w1_d:{ru:'Рожковая и фильтр, зерно от проверенных обжарщиков.',en:'Espresso and filter, beans from trusted roasters.',zh:'意式与手冲，选用可靠烘焙商的豆子。',ar:'إسبريسو وفلتر، حبوب من محمّصين موثوقين.'},
+    w2_d:{ru:'Печём каждый день из хороших продуктов.',en:'Baked daily from good ingredients.',zh:'每天用优质食材现烤。',ar:'نخبز يوميًا من مكوّنات جيدة.'},
+    w3_t:{ru:'Уютная атмосфера',en:'Cozy atmosphere',zh:'温馨的氛围',ar:'أجواء دافئة'},
+    w3_d:{ru:'Кирпич, дерево, тёплый свет и негромкая музыка.',en:'Brick, wood, warm light and quiet music.',zh:'砖墙、木质、暖光与轻柔音乐。',ar:'طوب وخشب وضوء دافئ وموسيقى هادئة.'},
+    w4_t:{ru:'Рады каждому',en:"Everyone's welcome",zh:'欢迎每一位',ar:'نرحّب بالجميع'},
+    w4_d:{ru:'Можно с собакой, с ноутбуком или просто посидеть.',en:'Come with your dog, your laptop, or just to sit.',zh:'可以带狗、带电脑，或只是坐坐。',ar:'مرحبًا بكلبك، بحاسوبك، أو بجلستك فقط.'},
+    gd_eyebrow:{ru:'Вечером здесь ламповый свет',en:'Warm lamplight in the evening',zh:'入夜后暖灯亮起',ar:'ضوء دافئ في المساء'},
+    gd_title:{ru:'Зерно, десерты и место, где хорошо',en:'Beans, desserts and a place that feels good',zh:'咖啡豆、甜点，和一个待着舒服的地方',ar:'حبوب وحلويات ومكان يطيب فيه المقام'},
+    g1_t:{ru:'Отборное зерно',en:'Selected beans',zh:'精选咖啡豆',ar:'حبوب مختارة'},
+    g1_d:{ru:'Спешелти от проверенных обжарщиков. Классику варим на рожковой, для ценителей — фильтр с новыми нотами каждый раз.',en:'Specialty from trusted roasters. Classics on the espresso machine; for connoisseurs, filter with new notes each time.',zh:'来自可靠烘焙商的精品咖啡。经典用意式机冲煮，为品鉴者奉上每次都有新风味的手冲。',ar:'قهوة مختصة من محمّصين موثوقين. الكلاسيكيات على آلة الإسبريسو، وللذوّاقة فلتر بنكهات جديدة في كل مرة.'},
+    g2_t:{ru:'Выпечка и десерты',en:'Bakery and desserts',zh:'烘焙与甜点',ar:'مخبوزات وحلويات'},
+    g2_d:{ru:'Круассаны, слойки, чизкейк и сезонные новинки — то, что хочется сфотографировать и тут же съесть.',en:'Croissants, puffs, cheesecake and seasonal specials — the kind you want to photograph and eat at once.',zh:'可颂、酥皮、芝士蛋糕与季节新品——让人想拍照又想立刻吃掉。',ar:'كرواسون وفطائر وتشيز كيك وجديد الموسم — ما تودّ تصويره وأكله فورًا.'},
+    g3_t:{ru:'Пространство для вас',en:"Space that's yours",zh:'属于你的空间',ar:'مساحة لك'},
+    g3_d:{ru:'Тёплый зал, веранда во дворе и розетки под рукой. Удобно работать, встречаться и отдыхать.',en:'A warm room, a courtyard veranda and outlets at hand. Easy to work, meet and unwind.',zh:'温暖的厅堂、庭院露台，插座就在手边。工作、会面、放松都自在。',ar:'صالة دافئة وشرفة في الفناء ومقابس في متناول اليد. مريح للعمل واللقاء والاسترخاء.'},
+    look_inside:{ru:'Загляните внутрь',en:'Take a look inside',zh:'进来看看',ar:'ألقِ نظرة بالداخل'},
+    gallery:{ru:'Галерея',en:'Gallery',zh:'相册',ar:'المعرض'},
+    gal_lead:{ru:'Интерьер и уютные уголки кофейни «Домик» — арт на стенах, тёплый свет и живые детали.',en:'The interior and cozy corners of Domik — art on the walls, warm light and living details.',zh:'Domik 的内景与温馨角落——墙上的艺术、暖光与鲜活的细节。',ar:'ديكور دوميك وزواياه الدافئة — فنّ على الجدران وضوء دافئ وتفاصيل نابضة.'},
+    drag_side:{ru:'тяните вбок',en:'drag sideways',zh:'横向拖动',ar:'اسحب جانبًا'},
+    rating:{ru:'5,0 на Яндекс Картах',en:'5.0 on Yandex Maps',zh:'Yandex 地图 5.0 分',ar:'5٫0 على خرائط ياندكس'},
+    reviews_n:{ru:'140 отзывов гостей',en:'140 guest reviews',zh:'140 条顾客评价',ar:'140 تقييمًا للضيوف'},
+    read_reviews:{ru:'Читать отзывы',en:'Read reviews',zh:'查看评价',ar:'اقرأ التقييمات'},
+    contacts:{ru:'Контакты',en:'Contacts',zh:'联系我们',ar:'التواصل'},
+    come_visit:{ru:'Приходите в гости',en:'Come visit',zh:'欢迎来坐坐',ar:'تفضّلوا بالزيارة'},
+    contacts_lead:{ru:'Всегда рады видеть вас — заходите на чашку спешелти и свежую выпечку. Мы в трёх минутах от Павелецкой, на Бахрушина.',en:"Always glad to see you — drop by for a cup of specialty and fresh bakery. We're three minutes from Paveletskaya, on Bakhrushina.",zh:'随时欢迎你——来喝一杯精品咖啡、尝尝新鲜烘焙。我们离帕维列茨车站三分钟，就在巴赫鲁申街。',ar:'يسعدنا لقاؤكم دائمًا — مرّوا لفنجان قهوة مختصة ومخبوزات طازجة. نحن على بعد ثلاث دقائق من بافيليتسكايا، في باخروشينا.'},
+    addr_label:{ru:'Адрес',en:'Address',zh:'地址',ar:'العنوان'},
+    addr_full:{ru:'Москва, ул. Бахрушина, 12, стр. 2<br><span style="opacity:.65;font-size:15px">3 минуты пешком от м. Павелецкая</span>',en:'12 Bakhrushina St., bldg. 2, Moscow<br><span style="opacity:.65;font-size:15px">3 min walk from Paveletskaya metro</span>',zh:'莫斯科巴赫鲁申街 12 号 2 座<br><span style="opacity:.65;font-size:15px">距帕维列茨地铁站步行 3 分钟</span>',ar:'موسكو، شارع باخروشينا 12، مبنى 2<br><span style="opacity:.65;font-size:15px">3 دقائق سيرًا من مترو بافيليتسكايا</span>'},
+    hours_label:{ru:'Часы работы',en:'Opening hours',zh:'营业时间',ar:'ساعات العمل'},
+    hours_lines:{ru:'Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00',en:'Mon–Fri: 8:00–21:00<br>Sat–Sun: 9:00–21:00',zh:'周一至周五 8:00–21:00<br>周六周日 9:00–21:00',ar:'الاثنين–الجمعة: 8:00–21:00<br>السبت–الأحد: 9:00–21:00'},
+    phone_label:{ru:'Телефон',en:'Phone',zh:'电话',ar:'الهاتف'},
+    get_route:{ru:'Построить маршрут',en:'Get directions',zh:'导航路线',ar:'احصل على الاتجاهات'},
+    call:{ru:'Позвонить',en:'Call',zh:'拨打电话',ar:'اتصل'},
+    door_sign:{ru:'ищите эту дверь и вывеску',en:'look for this door and sign',zh:'认准这扇门与招牌',ar:'ابحثوا عن هذا الباب واللافتة'},
+    dlg:{ru:'— Ты где?<br>— Я в Домике.',en:"— Where are you?<br>— I'm in Domik.",zh:'—— 你在哪儿？<br>—— 我在 Domik。',ar:'— أين أنت؟<br>— أنا في دوميك.'},
+    foot_tag:{ru:'Городская кофейня в тихом дворе у Павелецкой.',en:'A city coffee house in a quiet courtyard near Paveletskaya.',zh:'帕维列茨车站旁静谧庭院里的城市咖啡馆。',ar:'مقهى المدينة في فناء هادئ قرب بافيليتسكايا.'},
+    foot_rating:{ru:'5,0 · 140 отзывов',en:'5.0 · 140 reviews',zh:'5.0 · 140 条评价',ar:'5٫0 · 140 تقييمًا'},
+    nav_title:{ru:'Навигация',en:'Navigation',zh:'导航',ar:'التنقّل'},
+    nav_menu:{ru:'Меню',en:'Menu',zh:'菜单',ar:'القائمة'},
+    nav_bakery:{ru:'Выпечка',en:'Bakery',zh:'烘焙',ar:'المخبوزات'},
+    nav_about:{ru:'О нас',en:'About',zh:'关于我们',ar:'من نحن'},
+    nav_gallery:{ru:'Галерея',en:'Gallery',zh:'相册',ar:'المعرض'},
+    nav_contacts:{ru:'Контакты',en:'Contacts',zh:'联系我们',ar:'التواصل'},
+    foot_addr:{ru:'Москва, ул. Бахрушина, 12, стр. 2',en:'12 Bakhrushina St., bldg. 2, Moscow',zh:'莫斯科巴赫鲁申街 12 号 2 座',ar:'موسكو، شارع باخروشينا 12، مبنى 2'},
+    foot_hours:{ru:'Пн–Пт: 8:00–21:00<br>Сб–Вс: 9:00–21:00',en:'Mon–Fri: 8:00–21:00<br>Sat–Sun: 9:00–21:00',zh:'周一至周五 8:00–21:00<br>周六周日 9:00–21:00',ar:'الاثنين–الجمعة: 8:00–21:00<br>السبت–الأحد: 9:00–21:00'},
+    copyright:{ru:'© 2026 «Домик» · городская кофейня',en:'© 2026 Domik · city coffee house',zh:'© 2026 Domik · 城市咖啡馆',ar:'© 2026 دوميك · مقهى المدينة'},
+    made_warm:{ru:'Сделано с теплом',en:'Made with warmth',zh:'用心制作',ar:'صُنع بدفء'},
+    directions:{ru:'Как добраться',en:'Directions',zh:'导航',ar:'كيف تصل'}
+  };
+  var TITLES = {ru:'Домик — городская кофейня на Бахрушина',en:'Domik — city coffee house on Bakhrushina',zh:'Domik — 巴赫鲁申街城市咖啡馆',ar:'دوميك — مقهى المدينة في باخروشينا'};
+  var ST_I18N = {
+    ru:{open:'открыто до 21:00',at:'откроется в {h}:00',tom:'откроется завтра в {h}:00'},
+    en:{open:'open until 21:00',at:'opens at {h}:00',tom:'opens tomorrow at {h}:00'},
+    zh:{open:'营业至 21:00',at:'{h}:00 开门',tom:'明天 {h}:00 开门'},
+    ar:{open:'مفتوح حتى 21:00',at:'يفتح الساعة {h}:00',tom:'يفتح غدًا الساعة {h}:00'}
+  };
+  var curLang = 'ru', i18nNodes = null;
+  function applyText(l){
+    curLang = l;
+    var root = document.documentElement;
+    root.setAttribute('lang', l === 'zh' ? 'zh-Hans' : l);
+    /* dir НЕ переключаем (реш. 23.07): арабский переводим, но раскладку
+       страницы не переворачиваем — сам арабский текст всё равно рисуется
+       справа налево по правилам bidi внутри своих строк */
+    root.setAttribute('dir', 'ltr');
+    i18nNodes = document.querySelectorAll('[data-i18n]');  /* без кэша: бургер-пилюли создаются позже */
+    for (var i = 0; i < i18nNodes.length; i++){
+      var k = i18nNodes[i].getAttribute('data-i18n'), rec = TR[k];
+      if (!rec) continue;
+      var v = rec[l] != null ? rec[l] : rec.ru;
+      if (i18nNodes[i].hasAttribute('data-html')) i18nNodes[i].innerHTML = v;
+      else i18nNodes[i].textContent = v;
+    }
+    document.title = TITLES[l] || TITLES.ru;
+    if (window.__setTagLang) window.__setTagLang(l);   /* бирки выпечки — свои картинки на язык */
+    var lb = document.querySelectorAll('.langs button');
+    for (var j = 0; j < lb.length; j++) lb[j].setAttribute('aria-pressed', String(lb[j].getAttribute('data-lang') === l));
+    if (typeof status === 'function') status();
+  }
+  /* смена языка с плавным блюр-переходом текста; после — пересадка каретки
+     языков (важно для арабского: dir=rtl переворачивает раскладку кнопок) */
+  function switchLang(l, persist){
+    if (reduce){ applyText(l); if (window.__langReplace) window.__langReplace(); }
+    else {
+      document.documentElement.classList.add('lang-swap');
+      setTimeout(function(){
+        applyText(l);
+        /* небольшая пауза, чтобы новый текст встал на место, и только потом
+           проявляем. ⚠️ НЕ requestAnimationFrame: в фоновой вкладке кадры не
+           идут, и текст остался бы навсегда скрытым. */
+        setTimeout(function(){
+          document.documentElement.classList.remove('lang-swap');
+          if (window.__langReplace) window.__langReplace();
+        }, 30);
+      }, 210);
+    }
+    if (persist) try { localStorage.setItem('domik_lang', l); } catch(e){}
+  }
+  window.__setLang = switchLang;   /* мост для переключателя языков ниже */
+  /* стартовый язык: ?lang= > сохранённый > система (авто НЕ сохраняем) */
+  (function(){
+    var list = ['ru','en','zh','ar'], saved = null;
+    try { saved = localStorage.getItem('domik_lang'); } catch(e){}
+    var url = new URLSearchParams(location.search).get('lang');
+    function detect(){
+      var p = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+      for (var i = 0; i < p.length; i++){ var c = String(p[i]).toLowerCase();
+        if (c.indexOf('ru')===0) return 'ru'; if (c.indexOf('zh')===0) return 'zh';
+        if (c.indexOf('ar')===0) return 'ar'; if (c.indexOf('en')===0) return 'en'; }
+      return 'ru';
+    }
+    var l = list.indexOf(url)>=0 ? url : (list.indexOf(saved)>=0 ? saved : detect());
+    if (l !== 'ru') applyText(l);   /* до нарезки букв — анимации на нужном языке */
+  })();
 
   var CFG = isPortrait
     ? { N:100, dir:'frames-m/', hero:'mob-hero-web.mp4', room:'mob-room-web.mp4', frameMs:46 }
@@ -957,8 +1359,74 @@
   addEventListener('scroll', headerState, {passive:true}); headerState();
 
   var burger = document.getElementById('burger'), nav = document.getElementById('nav');
+  /* ---------- BubbleMenu (порт React Bits, 23.07) ----------
+     На мобилке бургер открывает полноэкранные пилюли: каждая надувается
+     из нуля со stagger'ом и лёгкой случайностью (back.out), подпись
+     всплывает следом. Клик по пилюле дёргает СУЩЕСТВУЮЩУЮ ссылку шапки —
+     переиспользуем плавный скролл. Без GSAP — старый дропдаун. */
+  var BUB_COLORS = ['#B98A3C', '#2F8A86', '#C77B8F', '#4A6FA5', '#7B8F5A'];
+  var bub = null, bubOpen = false;
+  function buildBub(){
+    bub = document.createElement('div');
+    bub.className = 'bubm';
+    bub.setAttribute('aria-hidden', 'true');
+    var ul = document.createElement('ul');
+    ul.className = 'bubm-list';
+    ul.setAttribute('role', 'menu');
+    nav.querySelectorAll('a').forEach(function(a, i){
+      var li = document.createElement('li');
+      li.setAttribute('role', 'none');
+      var p = document.createElement('a');
+      p.className = 'bubm-pill';
+      p.href = a.getAttribute('href');
+      p.setAttribute('role', 'menuitem');
+      p.style.setProperty('--hb', BUB_COLORS[i % BUB_COLORS.length]);
+      var key = a.getAttribute('data-i18n');
+      p.innerHTML = '<span class="bubm-label"' + (key ? ' data-i18n="' + key + '"' : '') + '>' + a.textContent + '</span>';
+      p.addEventListener('click', function(ev){
+        ev.preventDefault();
+        toggleBub(false);
+        a.click();
+      });
+      li.appendChild(p); ul.appendChild(li);
+    });
+    bub.appendChild(ul);
+    document.body.appendChild(bub);
+  }
+  function toggleBub(want){
+    if (!bub) buildBub();
+    var open = (typeof want === 'boolean') ? want : !bubOpen;
+    if (open === bubOpen) return;
+    bubOpen = open;
+    burger.setAttribute('aria-expanded', open);
+    burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+    bub.setAttribute('aria-hidden', !open);
+    var pills = bub.querySelectorAll('.bubm-pill');
+    var labels = bub.querySelectorAll('.bubm-label');
+    gsap.killTweensOf(pills); gsap.killTweensOf(labels); gsap.killTweensOf(bub);
+    /* ⚠️ стекло оверлея гасим плавно: резкий display:none заставлял блюр
+       капсулы шапки пересчитаться скачком — бургер «дёргался» (фикс 23.07) */
+    if (open){
+      bub.classList.add('on');
+      gsap.fromTo(bub, {opacity: 0}, {opacity: 1, duration: .25, ease: 'power1.out'});
+      gsap.set(pills, {scale: 0, transformOrigin: '50% 50%'});
+      gsap.set(labels, {y: 24, autoAlpha: 0});
+      pills.forEach(function(p, i){
+        var tl = gsap.timeline({delay: Math.max(0, i * .12 + gsap.utils.random(-.05, .05))});
+        tl.to(p, {scale: 1, duration: .5, ease: 'back.out(1.5)'});
+        if (labels[i]) tl.to(labels[i], {y: 0, autoAlpha: 1, duration: .5, ease: 'power3.out'}, '-=.45');
+      });
+    } else {
+      gsap.to(labels, {y: 24, autoAlpha: 0, duration: .2, ease: 'power3.in'});
+      gsap.to(pills, {scale: 0, duration: .2, ease: 'power3.in'});
+      gsap.to(bub, {opacity: 0, duration: .28, ease: 'power1.in',
+        onComplete: function(){ bub.classList.remove('on'); gsap.set(bub, {opacity: 1}); }});
+    }
+  }
+  addEventListener('keydown', function(e){ if (e.key === 'Escape' && bubOpen) toggleBub(false); });
   burger.addEventListener('click', function(){
-    var open = nav.classList.toggle('open');
+    if (window.gsap && !reduce){ toggleBub(); return; }
+    var open = nav.classList.toggle('open');   /* фолбэк: старый дропдаун */
     burger.setAttribute('aria-expanded', open);
     burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
   });
@@ -969,7 +1437,10 @@
     if (nav.classList.contains('open') && !reduce) setTimeout(close, 450);
     else close();
   });
-  if (new URLSearchParams(location.search).get('menu')){ nav.classList.add('open'); burger.setAttribute('aria-expanded','true'); }
+  if (new URLSearchParams(location.search).get('menu')){
+    if (window.gsap && !reduce) toggleBub(true);
+    else { nav.classList.add('open'); burger.setAttribute('aria-expanded','true'); }
+  }
 
   /* ---------- языки: белая пилюля ездит между кнопками (реш. 22.07) ----------
      Перевод сайта отсюда сознательно НЕ вызывается — подключим позже. */
@@ -1030,12 +1501,19 @@
       }
     }
     place(activeBtn());
+    window.__langReplace = function(){ place(activeBtn()); };
     btns.forEach(function(b){
       b.addEventListener('click', function(){
+        var l = b.getAttribute('data-lang');
+        /* раскладка больше не переворачивается (dir всегда ltr) — жидкий
+           перелёт каретки работает для всех языков, включая арабский */
         btns.forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
         flow(b);
+        if (window.__setLang) window.__setLang(l, true);
       });
     });
+    /* при старте каретка садится на активный язык (его мог выставить applyText) */
+    place(activeBtn());
     addEventListener('resize', function(){ place(activeBtn()); });
     /* после догрузки шрифтов ширины кнопок меняются — пересадить каретку */
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ place(activeBtn()); });
@@ -1134,10 +1612,10 @@
     });
     if (isDesk) addEventListener('resize', function(){ if (active) updatePos(active); });
 
-    /* тот же разлёт: только НЕ стеклянные кнопки (с бургера и языков снято —
-       реш. пользователя 22.07: на языках капли перекрывали букву, там теперь
-       своя жидкая каретка). Стеклянные (ghost/line/ghost-ink) не трогаем. */
-    document.querySelectorAll('.btn--paper, .btn--cream, .btn--gold').forEach(function(btn){
+    /* тот же разлёт: только НЕ стеклянные кнопки (с бургера, языков и кнопки
+       шапки «Как добраться» снято — реш. пользователя; там капли лишние).
+       Стеклянные (ghost/line/ghost-ink) не трогаем. */
+    document.querySelectorAll('.btn--paper, .btn--cream, .btn--gold:not(.hcta)').forEach(function(btn){
       btn.addEventListener('click', function(){
         var host = document.createElement('span');
         host.className = 'gn-burst';
@@ -1155,12 +1633,12 @@
     var weekend = (d===0 || d===6);
     var open = weekend ? 9 : 8, close = 21;
     var isOpen = h >= open && h < close;
-    var txt, on = isOpen;
-    if (isOpen) txt = 'открыто до 21:00';
-    else if (h < open) txt = 'откроется в ' + open + ':00';
+    var txt, on = isOpen, L = ST_I18N[curLang] || ST_I18N.ru;
+    if (isOpen) txt = L.open;
+    else if (h < open) txt = L.at.replace('{h}', open);
     else {
       var tomorrowWeekend = ((d+1)%7===0 || (d+1)%7===6);
-      txt = 'откроется завтра в ' + (tomorrowWeekend ? 9 : 8) + ':00';
+      txt = L.tom.replace('{h}', (tomorrowWeekend ? 9 : 8));
     }
     [['statusText','statusDot'],['statusText2','statusDot2']].forEach(function(p){
       var t = document.getElementById(p[0]), dot = document.getElementById(p[1]);
@@ -1184,6 +1662,10 @@
         return;
       }
       var y = (href==='#top') ? 0 : t.getBoundingClientRect().top + scrollY - 54;
+      /* галерея живёт ВНУТРИ прикнутого пролёта — ведём к 90% его прокрутки,
+         где она уже проявилась (сам элемент прижат к началу пина) */
+      if (href === '#gallery' && window.__bwST)
+        y = window.__bwST.start + (window.__bwST.end - window.__bwST.start) * .9;
       scrollTo({top:y, behavior: reduce ? 'auto' : 'smooth'});
     });
   });
@@ -1300,10 +1782,14 @@
       }
       var chip = document.querySelector('.hero .chip');
       if (chip){
-        /* дробим только статичный текст; часы (#statusText) перезаписывает JS —
-           анимируем элемент целиком, солнышко — первым в очереди */
-        var txtSpan = chip.querySelector('span:not(.dot)');
-        var items = txtSpan ? [].slice.call(splitChars(txtSpan)) : [];
+        /* дробим адрес (вложенный span[data-i18n]) И разделитель « · » в общей
+           обёртке; часы (#statusText) перезаписывает JS — анимируем целиком.
+           Порядок: солнышко → буквы адреса+разделителя → часы. */
+        var addrSpan = chip.querySelector('[data-i18n="addr"]');
+        if (addrSpan) splitChars(addrSpan);
+        var wrapSpan = chip.querySelector('span:not(.dot)');
+        if (wrapSpan) splitChars(wrapSpan);                 /* режет только « · » (span[data-i18n] — элемент, пропущен) */
+        var items = [].slice.call(chip.querySelectorAll('.ch'));
         var b = document.getElementById('statusText');
         if (b) items.push(b);
         var dot = chip.querySelector('.dot');
@@ -1344,8 +1830,6 @@
        ⚠️ Окна НЕ как в React-оригинале ('bottom bottom'): у коротких строк низ
        достигает низа экрана раньше старта — окно выходит отрицательным и всё
        проигрывается мгновенно. Привязка к пути по экрану: 88% → 45% высоты окна. */
-    /* нарезка по БУКВАМ (ScrollFloat): буквы .ch внутри слов-обёрток .chw,
-       чтобы строка не ломалась посреди слова */
     function srSplit(el){
       var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: function(n){
         if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
@@ -1353,7 +1837,7 @@
           if (p.nodeType !== 1) continue;
           if (p instanceof SVGElement) return NodeFilter.FILTER_REJECT;
           var c = p.classList;
-          if (c && (c.contains('chip') || c.contains('ic') || c.contains('btn') || c.contains('chw')))
+          if (c && (c.contains('chip') || c.contains('ic') || c.contains('btn') || c.contains('word')))
             return NodeFilter.FILTER_REJECT;
         }
         return NodeFilter.FILTER_ACCEPT;
@@ -1365,14 +1849,9 @@
         n.nodeValue.split(/(\s+)/).forEach(function(part){
           if (!part) return;
           if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-          var w = document.createElement('span');
-          w.className = 'chw';
-          part.split('').forEach(function(chr){
-            var s = document.createElement('span');
-            s.className = 'ch'; s.textContent = chr;
-            w.appendChild(s);
-          });
-          frag.appendChild(w);
+          var s = document.createElement('span');
+          s.className = 'word'; s.textContent = part;
+          frag.appendChild(s);
         });
         n.parentNode.replaceChild(frag, n);
       });
@@ -1383,20 +1862,19 @@
       if (el.classList.contains('btn') || el.querySelector('iframe')) return; /* кнопки и карта — мягкое проявление ниже */
       srAll.push(el);
     });
-    /* ScrollFloat (порт с React Bits, реш. 22.07, заменил ScrollReveal):
-       буквы всплывают снизу вытянутыми (yPercent 120, scaleY 2.3) и
-       распрямляются с пружинкой back.inOut. Окно прежнее — с кромки к 58%.
-       overflow:hidden на контейнере прячет буквы до всплытия. */
     srAll.forEach(function(el){
       srSplit(el);
-      var items = el.querySelectorAll('.ch, .ic img');
+      var items = el.querySelectorAll('.word, .ic img');
       if (!items.length) return;               /* дробить нечего — останется на старом проявлении */
-      el.classList.remove('reveal');           /* контейнер видим, работают буквы */
-      el.style.overflow = 'hidden';
-      gsap.fromTo(items,
-        {opacity:0, yPercent:120, scaleY:2.3, scaleX:.7, transformOrigin:'50% 0%'},
-        {opacity:1, yPercent:0, scaleY:1, scaleX:1, duration:1, ease:'back.inOut(2)', stagger:.03,
-         scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
+      el.classList.remove('reveal');           /* контейнер видим, работают слова */
+      var tilt = el.classList.contains('sr') ? 4 : 2.5;   /* мелким блокам — наклон тише */
+      /* окно сдвинуто раньше (реш. 22.07): старт у самой кромки, сбор к 58% экрана */
+      gsap.fromTo(el, {transformOrigin:'0% 50%', rotate:tilt}, {rotate:0, ease:'none',
+        scrollTrigger:{trigger:el, start:'top bottom', end:'top 52%', scrub:true}});
+      gsap.fromTo(items, {opacity:0}, {opacity:1, ease:'none', stagger:.05,
+        scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
+      gsap.fromTo(items, {filter:'blur(9px)'}, {filter:'blur(0px)', ease:'none', stagger:.05,
+        scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
     });
 
     /* мягкое проявление — для того, что не дробится (кнопки, карта) */
@@ -1405,6 +1883,116 @@
       gsap.to(el, {opacity:1, y:0, duration:.55, ease:'power2.out',
         scrollTrigger:{trigger:el, start:'top 94%', once:true}});
     });
+
+    /* ТРОПИНКА-СЛЕДЫ «Почему» (23.07 v2, реш. пользователя: «шире через края»
+       + «следы-шаги»): невидимая направляющая-змейка строится по реальным
+       позициям .wstep с размахом до краёв блока; вдоль неё через равные
+       промежутки ставятся пары следов (getPointAtLength + перпендикулярный
+       сдвиг влево/вправо, носок развёрнут по ходу). Следы проявляются по
+       одному скрабом — идёшь по странице, и кто-то «идёт» рядом. */
+    (function(){
+      var box = document.querySelector('.whysteps');
+      var svg = document.getElementById('whyPathSvg');
+      var guide = document.getElementById('whyGuide');
+      var feetG = document.getElementById('whyFeet');
+      if (!box || !svg || !guide || !feetG) return;
+      var tween = null, NS = 'http://www.w3.org/2000/svg';
+      function build(){
+        var W = box.offsetWidth, H = box.offsetHeight;
+        if (!W || !H) return;
+        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+        var steps = box.querySelectorAll('.wstep');
+        /* траектория по эскизу пользователя (23.07): вход и выход по центру,
+           в каждом ряду линия проходит в зазоре между текстом и картинкой
+           (справа от текста / слева от текста попеременно). Якоря с
+           перехлёстом (.74/.18): сглаживание через середины отрезков
+           утягивает кривую внутрь, фактический размах выходит ~.60/.32 */
+        var hi = .74, lo = .18;
+        var pts = [{x: W*.48, y: -14}];
+        steps.forEach(function(s, i){
+          pts.push({x: W * (i % 2 === 0 ? hi : lo), y: s.offsetTop + s.offsetHeight/2});
+        });
+        pts.push({x: W*.48, y: H + 14});
+        var d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+        for (var i = 1; i < pts.length - 1; i++){
+          var mx = (pts[i].x + pts[i+1].x) / 2, my = (pts[i].y + pts[i+1].y) / 2;
+          d += ' Q' + pts[i].x.toFixed(1) + ' ' + pts[i].y.toFixed(1) +
+               ' ' + mx.toFixed(1) + ' ' + my.toFixed(1);
+        }
+        d += ' L' + pts[pts.length-1].x.toFixed(1) + ' ' + pts[pts.length-1].y.toFixed(1);
+        guide.setAttribute('d', d);
+        while (feetG.firstChild) feetG.removeChild(feetG.firstChild);
+        var gl = guide.getTotalLength();
+        var STEPLEN = 46, OFF = 8, k = 0, uses = [];
+        for (var len = 24; len < gl - 12; len += STEPLEN, k++){
+          var p = guide.getPointAtLength(len);
+          var p2 = guide.getPointAtLength(Math.min(len + 8, gl));
+          var dx = p2.x - p.x, dy = p2.y - p.y;
+          var dl = Math.sqrt(dx*dx + dy*dy) || 1;
+          var side = k % 2 ? 1 : -1;              /* левая/правая нога */
+          var x = p.x + (-dy/dl) * OFF * side;
+          var y = p.y + ( dx/dl) * OFF * side;
+          var ang = Math.atan2(dy, dx) * 180/Math.PI + 90 + side * 12;
+          var u = document.createElementNS(NS, 'use');
+          u.setAttribute('href', '#fpShape');
+          u.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) +
+            ') rotate(' + ang.toFixed(1) + ')');
+          u.setAttribute('opacity', '.5');        /* без GSAP следы просто видимы */
+          feetG.appendChild(u);
+          uses.push(u);
+        }
+        if (tween){ if (tween.scrollTrigger) tween.scrollTrigger.kill(); tween.kill(); }
+        tween = gsap.fromTo(uses, {opacity: 0}, {opacity: .5, duration: .3, ease: 'none',
+          stagger: .35,
+          scrollTrigger: {trigger: box, start: 'top 72%', end: 'bottom 62%', scrub: true}});
+      }
+      build();
+      addEventListener('load', function(){ build(); }, {once: true});
+      var rT;
+      addEventListener('resize', function(){ clearTimeout(rT); rT = setTimeout(build, 300); });
+    })();
+
+    /* ПРОЛЁТ В САД (v3, 23.07): камера летит вперёд. Каждый план — слой на
+       весь экран с transform-origin в центре; скраб растит его до data-scale.
+       Ближний растёт быстрее дальнего → зум-сквозь, как в Dreamcore.
+       ease 'power1.in' у всех планов одинаковый — соотношение скоростей
+       сохраняется, а к концу полёт ускоряется. Ближний план, «пройдя мимо
+       камеры», гаснет; в финале кремовый свет поглощает экран → галерея. */
+    (function(){
+      var sec = document.getElementById('burrow');
+      if (!sec) return;
+      sec.classList.add('on');
+      var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top', end: '+=200%',
+        scrub: true, pin: true, anticipatePin: 1, invalidateOnRefresh: true}});
+      window.__bwST = tl.scrollTrigger;   /* для ?debug=1 и якоря #gallery */
+      /* фаза 1: текст сцены тает и чуть летит на камеру */
+      tl.fromTo('#burrow .bw-ui', {opacity: 1, scale: 1},
+        {opacity: 0, scale: 1.22, ease: 'power1.in', duration: .26}, .04);
+      tl.set('#burrow .bw-ui', {pointerEvents: 'none'}, .2);
+      /* фаза 2: полёт — планы растут от центра с разной скоростью */
+      /* ПАРАЛЛАКС (фикс 23.07): скорости планов РАЗНЫЕ по форме, не только
+         по величине — кусты уходят мимо камеры линейно и рано (duration .6),
+         стена почти стоит и «догоняет» рывком в конце (power3.in). Именно
+         разница фаз даёт читаемую глубину; одинаковый ease её убивал. */
+      gsap.utils.toArray('#burrow .bw-plane').forEach(function(pl){
+        var s = parseFloat(pl.getAttribute('data-scale')) || 2;
+        var f = parseFloat(pl.getAttribute('data-from')) || 1;
+        var ez = pl.getAttribute('data-ease') || 'power1.in';
+        var du = parseFloat(pl.getAttribute('data-dur')) || 1;
+        tl.fromTo(pl, {scale: f}, {scale: s, ease: ez, duration: du}, 0);
+      });
+      /* ближние кусты гаснут, пройдя мимо камеры */
+      var near = sec.querySelector('.bw-plane--near');
+      if (near) tl.to(near, {opacity: 0, ease: 'power1.in', duration: .16}, .46);
+      /* дымка между планами — воздух; тает по мере приближения к стене */
+      tl.fromTo('#burrow .bw-haze', {opacity: .42}, {opacity: 0, ease: 'power1.in', duration: .8}, .1);
+      tl.fromTo('#burrow .bw-bg', {scale: 1}, {scale: 1.18, ease: 'power1.in', duration: 1}, 0);
+      /* фаза 3: пролетели дырку — остаёмся в тёмном звёздном пространстве,
+         и НА ЭТОМ ЖЕ месте проявляется галерея */
+      tl.fromTo('#burrow .bw-gal', {opacity: 0, y: 36},
+        {opacity: 1, y: 0, ease: 'power2.out', duration: .24}, .72);
+      tl.set('#burrow .bw-gal', {pointerEvents: 'auto'}, .78);
+    })();
 
     /* ПЕРЕХОД «сквозь тёплую темноту»: кухня выходит из тьмы и «зажигается» */
     var btScene = document.querySelectorAll('.bt-stage picture img, .bt-vid');
@@ -1637,6 +2225,9 @@
       /* ?shot=why — снять секцию «Почему возвращаются»: прячем оба
          полноэкранных блока выше неё, иначе она всегда за краем кадра */
       (qs.get('shot') === 'why' ? '.hero,#bakery{display:none !important}' : '') +
+      /* ?shot=burrow (алиас space) — сцена пролёта сверху страницы */
+      (qs.get('shot') === 'burrow' || qs.get('shot') === 'space'
+        ? '.hero,#bakery,#why{display:none !important}' : '') +
       /* ?shot=inside — состояние «внутри» без анимации: в headless переход
          не доигрывает и оба текста наложены друг на друга */
       (qs.get('shot') === 'inside'
@@ -1758,8 +2349,15 @@
       scrollTo(0, 0);
       lockScroll(true);           // фреш-старт на hero → палец сразу запускает видео
     } else {
-      scrollTo(0, savedY);        // были на другом блоке → остаёмся там, скролл свободный
-      addEventListener('load', function(){ scrollTo(0, savedY); });  // доводка после полного layout
+      /* ⚠️ Восстановление МГНОВЕННОЕ (behavior:'instant', 23.07): обычный
+         scrollTo уважает css scroll-behavior:smooth — страница «плавно
+         ехала» через все скрабы и пин, а отложенный ScrollTrigger.refresh
+         пересчитывал позиции прямо во время глайда → всё разваливалось. */
+      scrollTo({top: savedY, behavior: 'instant'});
+      addEventListener('load', function(){        // доводка после полного layout
+        scrollTo({top: savedY, behavior: 'instant'});
+        if (window.ScrollTrigger) requestAnimationFrame(function(){ ScrollTrigger.refresh(); });
+      });
     }
   }
   resize();
@@ -1768,6 +2366,78 @@
 
 <!-- ===== Круговая галерея кафе (изогнутая, перетаскивание, бесконечная лента) ===== -->
 <script>
+/* ЖИВОЙ ФОН тёмной секции: рассыпаем звёзды и паузим анимации вне экрана */
+(function(){
+  var amb = document.getElementById('amb');
+  if (!amb || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (var i = 0; i < 26; i++){
+    var s = document.createElement('i');
+    s.className = 'amb-star';
+    var sz = Math.random() < .3 ? 3 : 2;
+    s.style.cssText = 'left:' + (2 + Math.random()*96).toFixed(1) + '%;' +
+      'top:' + (3 + Math.random()*55).toFixed(1) + '%;' +
+      'width:' + sz + 'px;height:' + sz + 'px;' +
+      'animation-duration:' + (2.6 + Math.random()*3).toFixed(2) + 's;' +
+      'animation-delay:-' + (Math.random()*6).toFixed(2) + 's';
+    amb.appendChild(s);
+  }
+  var sec = amb.closest('#burrow') || amb.closest('.dark');
+  if ('IntersectionObserver' in window && sec){
+    new IntersectionObserver(function(es){
+      amb.classList.toggle('paused', !es[0].isIntersecting);
+    }, {rootMargin:'80px'}).observe(sec);
+  }
+})();
+/* ?debug=1 — живая диагностика норки (временный бейдж в углу экрана) */
+(function(){
+  if (!/[?&]debug=1/.test(location.search)) return;
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;background:#000c;color:#7CFC93;' +
+    'font:12px/1.55 monospace;padding:8px 10px;border-radius:8px;pointer-events:none;white-space:pre';
+  document.body.appendChild(d);
+  function tick(){
+    var sec = document.getElementById('burrow');
+    var pin = sec && sec.querySelector('.bw-pin');
+    var near = sec && sec.querySelector('.bw-plane--wall');
+    var pr = window.__bwST ? window.__bwST.progress : 0;
+    var sc = '-';
+    if (near){
+      var m = getComputedStyle(near).transform;
+      sc = m === 'none' ? 'none' : parseFloat(m.split(',')[0].split('(')[1]).toFixed(2);
+    }
+    d.textContent =
+      'scrollY   ' + Math.round(scrollY) +
+      '\nburrow.on ' + (sec ? sec.classList.contains('on') : 'СЕКЦИИ НЕТ') +
+      '\nprogress  ' + pr.toFixed(2) +
+      '\npinTop    ' + (pin ? Math.round(pin.getBoundingClientRect().top) : '-') +
+      '\nscale     ' + sc +
+      '\nGSAP      ' + (window.gsap && window.ScrollTrigger ? 'ok' : 'НЕТ');
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+/* Пылинки в тёплом свете — блок «Почему возвращаются» */
+(function(){
+  var host = document.getElementById('whyAmb');
+  if (!host || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (var i = 0; i < 16; i++){
+    var m = document.createElement('i');
+    var sz = 3 + Math.round(Math.random()*4);
+    m.style.cssText = 'left:' + (3 + Math.random()*94).toFixed(1) + '%;' +
+      'top:' + (12 + Math.random()*80).toFixed(1) + '%;' +
+      'width:' + sz + 'px;height:' + sz + 'px;' +
+      '--dx:' + Math.round(Math.random()*44 - 22) + 'px;' +
+      'animation-duration:' + (9 + Math.random()*9).toFixed(1) + 's;' +
+      'animation-delay:-' + (Math.random()*14).toFixed(1) + 's';
+    host.appendChild(m);
+  }
+  var sec = document.getElementById('why');
+  if ('IntersectionObserver' in window && sec){
+    new IntersectionObserver(function(es){
+      host.classList.toggle('paused', !es[0].isIntersecting);
+    }, {rootMargin:'80px'}).observe(sec);
+  }
+})();
 (function(){
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var PHOTOS = [
@@ -1804,12 +2474,15 @@
       if (x > total - iw) x -= total;            // плавный вход слева
       var dx = (x + iw/2) - cw/2;                // смещение центра плитки от центра сцены
       var norm = Math.max(-1.4, Math.min(1.4, dx / (cw*0.5 || 1)));
-      var ry = reduce ? 0 : norm * -22;          // поворот по дуге
-      var tz = reduce ? 0 : -Math.abs(norm) * 160;// удаление к краям (изгиб)
+      var ry = reduce ? 0 : norm * -30;          // поворот по дуге (усилен 23.07)
+      var tz = reduce ? 0 : -Math.abs(norm) * 240;// удаление к краям (изгиб)
+      /* арка: края ленты приподняты — карточки идут дугой, как в референсе */
+      var ay = reduce ? 0 : -(norm*norm) * 46;
       var sc = 1 - Math.min(Math.abs(norm),1) * 0.16;
       var el = items[i];
-      el.style.transform = 'translateX('+x.toFixed(1)+'px) translateY(-50%) translateZ('+
-        tz.toFixed(1)+'px) rotateY('+ry.toFixed(2)+'deg) scale('+sc.toFixed(3)+')';
+      el.style.transform = 'translateX('+x.toFixed(1)+'px) translateY(-50%) translateY('+
+        ay.toFixed(1)+'px) translateZ('+tz.toFixed(1)+'px) rotateY('+ry.toFixed(2)+
+        'deg) scale('+sc.toFixed(3)+')';
       el.style.zIndex = String(500 - Math.round(Math.abs(dx)));
       el.style.opacity = String(Math.max(.28, 1 - Math.abs(norm)*0.42));
     }
@@ -1851,16 +2524,304 @@
 })();
 </script>
 
+<!-- ===== Галерея: WebGL CircularGallery (порт React Bits, 23.07) =====
+     ogl-рендер: карточки на дуге-«колесе», волновой изгиб при прокрутке
+     (шейдер), скруглённые углы SDF-ом, подписи — канвас-текстуры (VAG, крем),
+     снап к ближайшей карточке. Отличия от оригинала:
+     - слушатели колеса/драга на КОНТЕЙНЕРЕ, не на window (оригинал
+       перехватывал прокрутку всей страницы);
+     - touch: без preventDefault + touch-action:pan-y — вертикальный скролл
+       страницы живёт, горизонтальный тянет ленту;
+     - рендер стоит, пока секции нет на экране (IntersectionObserver);
+     - нет WebGL или reduced-motion → остаётся DOM-карусель .cgal.
+     ⚠️ ogl.esm.js теперь ИСПОЛЬЗУЕТСЯ — при деплое класть в репо. -->
+<script type="module">
+import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from './ogl.esm.js';
+
+const ITEMS = [
+  { image: '../assets/gal1.webp',  text: 'Мурал в зале' },
+  { image: '../assets/gal2.webp',  text: 'Синие кресла' },
+  { image: '../assets/gal3.webp',  text: 'Игры и книги' },
+  { image: '../assets/gal4.webp',  text: 'Столик у окна' },
+  { image: '../assets/gal8.webp',  text: 'Веранда во дворе' },
+  { image: '../assets/gal5.webp',  text: 'Диван у окна' },
+  { image: '../assets/gal7.webp',  text: 'Тёплый свет' },
+  { image: '../assets/gal9.webp',  text: 'Капучино на двоих' },
+  { image: '../assets/bar.webp',   text: 'Барная стойка' },
+  { image: '../assets/gal10.webp', text: 'Наш дом с улицы' }
+];
+const TEXT_COLOR = '#F7EFE1', RADIUS = 0.05, SPEED = 2, EASE = 0.08;
+/* изгиб адаптивный (фикс 23.07): на узком экране фиксированный bend=3 давал
+   крошечный радиус дуги — боковые карточки заваливались на ~60°. Считаем от
+   ширины вьюпорта так, чтобы максимальный наклон был ~25° на любом экране */
+let bendCur = 3;
+const FONT = 'bold 30px VAGWorld';
+
+const lerp = (a, b, t) => a + (b - a) * t;
+function debounce(fn, w){ let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), w); }; }
+
+function textTexture(gl, text, font, color){
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.font = font;
+  const w = Math.ceil(ctx.measureText(text).width);
+  const h = Math.ceil(parseInt(font.match(/(\d+)px/)[1], 10) * 1.2);
+  canvas.width = w + 20; canvas.height = h + 20;
+  ctx.font = font; ctx.fillStyle = color;
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  const texture = new Texture(gl, { generateMipmaps: false });
+  texture.image = canvas;
+  return { texture, width: canvas.width, height: canvas.height };
+}
+
+class Title {
+  constructor({ gl, plane, text }){
+    const { texture, width, height } = textTexture(gl, text, FONT, TEXT_COLOR);
+    const program = new Program(gl, {
+      vertex: `attribute vec3 position;attribute vec2 uv;
+        uniform mat4 modelViewMatrix;uniform mat4 projectionMatrix;varying vec2 vUv;
+        void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+      fragment: `precision highp float;uniform sampler2D tMap;varying vec2 vUv;
+        void main(){vec4 c=texture2D(tMap,vUv);if(c.a<0.1)discard;gl_FragColor=c;}`,
+      uniforms: { tMap: { value: texture } },
+      transparent: true
+    });
+    this.mesh = new Mesh(gl, { geometry: new Plane(gl), program });
+    const aspect = width / height;
+    const th = plane.scale.y * 0.15;
+    this.mesh.scale.set(th * aspect, th, 1);
+    this.mesh.position.y = -plane.scale.y * 0.5 - th * 0.5 - 0.05;
+    this.mesh.setParent(plane);
+  }
+}
+
+class Media {
+  constructor(o){
+    Object.assign(this, o);   // geometry, gl, image, index, length, scene, screen, text, viewport
+    this.extra = 0;
+    this.createShader();
+    this.plane = new Mesh(this.gl, { geometry: this.geometry, program: this.program });
+    this.plane.setParent(this.scene);
+    this.title = new Title({ gl: this.gl, plane: this.plane, text: this.text });
+    this.onResize();
+  }
+  createShader(){
+    const texture = new Texture(this.gl, { generateMipmaps: true });
+    this.program = new Program(this.gl, {
+      depthTest: false, depthWrite: false, transparent: true,
+      vertex: `precision highp float;
+        attribute vec3 position;attribute vec2 uv;
+        uniform mat4 modelViewMatrix;uniform mat4 projectionMatrix;
+        uniform float uTime;uniform float uSpeed;varying vec2 vUv;
+        void main(){
+          vUv=uv;vec3 p=position;
+          p.z=(sin(p.x*4.0+uTime)*1.5+cos(p.y*2.0+uTime)*1.5)*(0.1+uSpeed*0.5);
+          gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
+        }`,
+      fragment: `precision highp float;
+        uniform vec2 uImageSizes;uniform vec2 uPlaneSizes;
+        uniform sampler2D tMap;uniform float uBorderRadius;varying vec2 vUv;
+        float roundedBoxSDF(vec2 p,vec2 b,float r){
+          vec2 d=abs(p)-b;return length(max(d,vec2(0.0)))+min(max(d.x,d.y),0.0)-r;
+        }
+        void main(){
+          vec2 ratio=vec2(
+            min((uPlaneSizes.x/uPlaneSizes.y)/(uImageSizes.x/uImageSizes.y),1.0),
+            min((uPlaneSizes.y/uPlaneSizes.x)/(uImageSizes.y/uImageSizes.x),1.0));
+          vec2 uv=vec2(vUv.x*ratio.x+(1.0-ratio.x)*0.5,vUv.y*ratio.y+(1.0-ratio.y)*0.5);
+          vec4 color=texture2D(tMap,uv);
+          float d=roundedBoxSDF(vUv-0.5,vec2(0.5-uBorderRadius),uBorderRadius);
+          float alpha=1.0-smoothstep(-0.002,0.002,d);
+          gl_FragColor=vec4(color.rgb,alpha);
+        }`,
+      uniforms: {
+        tMap: { value: texture },
+        uPlaneSizes: { value: [0, 0] },
+        uImageSizes: { value: [0, 0] },
+        uSpeed: { value: 0 },
+        uTime: { value: 100 * this.index },
+        uBorderRadius: { value: RADIUS }
+      }
+    });
+    const img = new Image();
+    img.src = this.image;
+    img.onload = () => {
+      texture.image = img;
+      this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight];
+    };
+  }
+  update(scroll, direction){
+    this.plane.position.x = this.x - scroll.current - this.extra;
+    const x = this.plane.position.x, H = this.viewport.width / 2;
+    const B = Math.abs(bendCur);
+    const R = (H * H + B * B) / (2 * B);
+    const ex = Math.min(Math.abs(x), H);
+    const arc = R - Math.sqrt(R * R - ex * ex);
+    this.plane.position.y = -arc;
+    this.plane.rotation.z = -Math.sign(x) * Math.asin(ex / R);
+    this.program.uniforms.uTime.value += 0.04;
+    this.program.uniforms.uSpeed.value = scroll.current - scroll.last;
+    const po = this.plane.scale.x / 2, vo = this.viewport.width / 2;
+    if (direction === 'right' && this.plane.position.x + po < -vo) this.extra -= this.widthTotal;
+    if (direction === 'left'  && this.plane.position.x - po >  vo) this.extra += this.widthTotal;
+  }
+  onResize(o){
+    if (o && o.screen) this.screen = o.screen;
+    if (o && o.viewport) this.viewport = o.viewport;
+    const s = this.screen.height / 1500;
+    this.plane.scale.y = (this.viewport.height * (900 * s)) / this.screen.height;
+    this.plane.scale.x = (this.viewport.width  * (700 * s)) / this.screen.width;
+    this.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
+    /* зазор между карточками: на узких экранах чуть больше (реш. 23.07) */
+    this.width = this.plane.scale.x + (this.screen.width < 720 ? 2.9 : 2);
+    this.widthTotal = this.width * this.length;
+    this.x = this.width * this.index;
+  }
+}
+
+function boot(){
+  const box = document.getElementById('wgal');
+  const galWrap = document.querySelector('.bw-gal');
+  if (!box || !galWrap) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let renderer;
+  try {
+    renderer = new Renderer({ alpha: true, antialias: true, dpr: Math.min(devicePixelRatio || 1, 2) });
+  } catch(e){ return; }
+  const gl = renderer.gl;
+  if (!gl) return;
+  gl.clearColor(0, 0, 0, 0);
+  galWrap.classList.add('webgl');   /* канвас вместо DOM-фолбэка */
+  box.appendChild(gl.canvas);
+
+  const camera = new Camera(gl);
+  camera.fov = 45; camera.position.z = 20;
+  const scene = new Transform();
+  const scroll = { ease: EASE, current: 0, target: 0, last: 0, position: 0 };
+  let screen, viewport, medias;
+
+  function onResize(){
+    screen = { width: box.clientWidth || 1, height: box.clientHeight || 1 };
+    renderer.setSize(screen.width, screen.height);
+    camera.perspective({ aspect: screen.width / screen.height });
+    const fov = camera.fov * Math.PI / 180;
+    const h = 2 * Math.tan(fov / 2) * camera.position.z;
+    viewport = { width: h * camera.aspect, height: h };
+    bendCur = Math.max(.8, viewport.width * 0.11);   /* ~25° наклона на любом экране */
+    if (medias) medias.forEach(m => m.onResize({ screen, viewport }));
+  }
+  onResize();
+
+  const geometry = new Plane(gl, { heightSegments: 50, widthSegments: 100 });
+  const doubled = ITEMS.concat(ITEMS);          /* ×2 — бесшовный круг */
+  medias = doubled.map((d, index) => new Media({
+    geometry, gl, image: d.image, index, length: doubled.length,
+    scene, screen, text: d.text, viewport
+  }));
+
+  /* снап к ближайшей карточке после жеста */
+  function onCheck(){
+    if (!medias || !medias[0]) return;
+    const w = medias[0].width;
+    const i = Math.round(Math.abs(scroll.target) / w);
+    scroll.target = scroll.target < 0 ? -w * i : w * i;
+  }
+  const onCheckDebounce = debounce(onCheck, 200);
+
+  /* лайтбокс: клик (не драг) по карточке открывает фото целиком */
+  const lb = (function(){
+    const el = document.createElement('div');
+    el.className = 'glb';
+    el.innerHTML = '<figure><img alt=""><figcaption></figcaption></figure>' +
+      '<button class="glb-x" aria-label="Закрыть">×</button>';
+    document.body.appendChild(el);
+    const img = el.querySelector('img'), cap = el.querySelector('figcaption');
+    const close = () => el.classList.remove('on');
+    el.addEventListener('click', e => { if (e.target === el || e.target.closest('.glb-x')) close(); });
+    addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    return { open(src, text){ img.src = src; img.alt = text; cap.textContent = text; el.classList.add('on'); } };
+  })();
+  function openAt(cx){
+    const rect = box.getBoundingClientRect();
+    const lx = cx - rect.left;
+    let best = null, bestD = 1e9;
+    medias.forEach(m => {
+      const sx = (m.plane.position.x / (viewport.width / 2)) * (screen.width / 2) + screen.width / 2;
+      const d = Math.abs(sx - lx);
+      if (d < bestD){ bestD = d; best = m; }
+    });
+    if (!best) return;
+    const halfPx = (best.plane.scale.x / viewport.width) * screen.width / 2;
+    if (bestD <= halfPx * 1.15) lb.open(best.image, best.text);
+  }
+
+  /* колесо галерею НЕ листает (реш. пользователя 23.07) — страница скроллится
+     как обычно; лента только драгом/свайпом/стрелками */
+  let down = false, startX = 0, startPos = 0, movedPx = 0;
+  const dStart = x => { down = true; startX = x; startPos = scroll.current; movedPx = 0; };
+  const dMove = x => {
+    if (!down) return;
+    movedPx = Math.max(movedPx, Math.abs(startX - x));
+    scroll.target = startPos + (startX - x) * (SPEED * 0.025);
+  };
+  const dEnd = x => {
+    if (!down) return;
+    down = false; onCheck();
+    if (movedPx < 6 && typeof x === 'number') openAt(x);   /* это был клик, не драг */
+  };
+  box.addEventListener('mousedown', e => dStart(e.clientX));
+  addEventListener('mousemove', e => dMove(e.clientX));
+  addEventListener('mouseup', e => dEnd(e.clientX));
+  box.addEventListener('touchstart', e => dStart(e.touches[0].clientX), { passive: true });
+  box.addEventListener('touchmove', e => dMove(e.touches[0].clientX), { passive: true });
+  box.addEventListener('touchend', e => dEnd((e.changedTouches[0] || {}).clientX));
+  box.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight'){ e.preventDefault(); scroll.target += SPEED * 5; onCheckDebounce(); }
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); scroll.target -= SPEED * 5; onCheckDebounce(); }
+  });
+  addEventListener('resize', onResize);
+
+  /* рендер стоит, пока секции нет на экране */
+  let visible = true;
+  if ('IntersectionObserver' in window)
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; }, { rootMargin: '60px' })
+      .observe(box);
+
+  (function update(){
+    if (visible){
+      scroll.current = lerp(scroll.current, scroll.target, scroll.ease);
+      const dir = scroll.current > scroll.last ? 'right' : 'left';
+      medias.forEach(m => m.update(scroll, dir));
+      renderer.render({ scene, camera });
+      scroll.last = scroll.current;
+    }
+    requestAnimationFrame(update);
+  })();
+}
+
+try { await document.fonts.load(FONT); } catch(e){}
+boot();
+</script>
+
 <!-- ===== Выпечка: свайп-колода крафт-бирок ===== -->
 <script>
 (function(){
   /* scale — размер бирки (классик чуть меньше остальных) */
+  /* base — имя без языка: русский = base.webp, остальные = base-<lang>.webp
+     (листы бирок на EN/中/ع нарезаны из макетов пользователя 23.07) */
   var ITEMS = [
-    {img:'tag-almond.webp',  alt:'Миндальный круассан — 320 ₽, хит недели'},
-    {img:'tag-classic.webp', alt:'Классический круассан — 220 ₽', scale:0.9},
-    {img:'tag-tube.webp',    alt:'Трубочка со сгущёнкой — 180 ₽'},
-    {img:'tag-bun.webp',     alt:'Булочка карамель-пекан — 360 ₽'}
+    {base:'tag-almond',  alt:'Миндальный круассан — 320 ₽, хит недели'},
+    {base:'tag-classic', alt:'Классический круассан — 220 ₽', scale:0.9},
+    {base:'tag-tube',    alt:'Трубочка со сгущёнкой — 180 ₽'},
+    {base:'tag-bun',     alt:'Булочка карамель-пекан — 360 ₽'}
   ];
+  function curLangCode(){
+    var l = document.documentElement.getAttribute('lang') || 'ru';
+    if (l.indexOf('zh') === 0) return 'zh';
+    return (['ru','en','ar'].indexOf(l) >= 0) ? l : 'ru';
+  }
+  function tagSrc(base, l){ return l === 'ru' ? base + '.webp' : base + '-' + l + '.webp'; }
   var deck = document.getElementById('btDeck');
   var wrap = document.getElementById('btDeckwrap');
   var dotsEl = document.getElementById('btDots');
@@ -1869,11 +2830,20 @@
   var tags = ITEMS.map(function(it){
     var el = document.createElement('div');
     el.className = 'bt-tag';
-    el.innerHTML = '<img src="'+it.img+'" alt="'+it.alt+'" loading="lazy" draggable="false">';
+    el.innerHTML = '<img src="'+tagSrc(it.base, curLangCode())+'" alt="'+it.alt+'" loading="lazy" draggable="false">';
     deck.appendChild(el);
     var d = document.createElement('i'); dotsEl.appendChild(d);
     return el;
   });
+  /* мост для переключателя языков: меняем картинки бирок на лету */
+  window.__setTagLang = function(l){
+    var code = (l && l.indexOf('zh') === 0) ? 'zh' : l;
+    tags.forEach(function(el, i){
+      var im = el.querySelector('img');
+      if (im) im.src = tagSrc(ITEMS[i].base, code);
+    });
+  };
+
   var N = tags.length, top = 0, hintHidden = false;
   var _tp = parseInt(new URLSearchParams(location.search).get('tag')||'0',10);
   if (_tp > 0 && _tp < N) top = _tp;   // тест: ?tag=N — какая бирка сверху
@@ -1904,55 +2874,71 @@
   layout();
 
   var busy = false;
-  function flyNext(dir){
+  /* Уход «ЗА другую» (порт механики Stack с React Bits, реш. 23.07):
+     карточка не улетает за экран, а из точки под пальцем с пружинкой
+     (bezier с перелётом) ныряет в ЗАДНИЙ слот колоды. z-index падает
+     сразу — весь полёт она видна ПОЗАДИ остальных. Клик без свайпа
+     получает короткий «пинок» вбок, чтобы нырок было видно. */
+  function tuckBack(dir, fromDrag){
     if (busy) return; busy = true;
     var el = tags[top];
-    el.style.zIndex = 15;                 // выше карт (z1-5), но ПОД булавкой (z20)
-    el.classList.add('flyout');           // opacity→0 + transition полёта
-    el.style.transform = 'translateX('+(dir*145)+'%) rotate('+(dir*20)+'deg)';
     if (!hintHidden){ hintHidden = true; document.getElementById('btHint').style.opacity = 0; }
-    top = (top + 1) % N;
-    layout();                             // СРАЗУ: следующая карта плавно едет вперёд
-    setTimeout(function(){                // после полёта — тихо вернуть улетевшую в самый низ
-      el.classList.remove('flyout');
-      el.style.transition = 'none';
-      el.style.transform = '';
-      el.style.zIndex = '';
-      void el.offsetWidth;                // применить мгновенно, без анимации
-      el.style.transition = '';
-      busy = false;
-    }, 470);
+    var doTuck = function(){
+      top = (top + 1) % N;
+      layout();                            // остальные сразу едут вперёд
+      el.style.zIndex = 0;                 // позади всех — «уходит за другую»
+      el.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)';
+      el.style.transform = '';             // цель = стили заднего слота (data-pos)
+      setTimeout(function(){
+        el.style.transition = '';
+        el.style.zIndex = '';
+        busy = false;
+      }, 520);
+    };
+    if (fromDrag){ doTuck(); }
+    else {
+      el.style.transition = 'transform .16s ease-out';
+      el.style.transform = 'translateX(' + (dir * 46) + '%) rotate(' + (dir * 12) + 'deg)';
+      setTimeout(doTuck, 160);
+    }
   }
 
-  var startX = null, curX = 0, active = null;
+  /* драг СВОБОДНЫЙ, в любую сторону (как в Stack, 23.07): бирка едет за
+     пальцем по обеим осям с 3D-наклоном (rotateX/rotateY от смещения),
+     порог ухода за колоду — по любой оси */
+  var startX = null, startY = null, curX = 0, curY = 0, active = null;
   wrap.addEventListener('pointerdown', function(e){
     active = tags[top];
-    startX = e.clientX; curX = 0;
+    startX = e.clientX; startY = e.clientY; curX = 0; curY = 0;
     active.classList.add('dragging');
     try{ wrap.setPointerCapture(e.pointerId); }catch(err){}
   });
   wrap.addEventListener('pointermove', function(e){
     if (startX === null || !active) return;
     curX = e.clientX - startX;
-    var rot = Math.max(-28, Math.min(28, curX * 0.12));
-    active.style.transform = 'translateX('+curX+'px) rotate('+rot+'deg)';
+    curY = e.clientY - startY;
+    var rz = Math.max(-28, Math.min(28, curX * 0.12));
+    var rx = Math.max(-20, Math.min(20, -curY * 0.12));
+    var ry = Math.max(-20, Math.min(20, curX * 0.08));
+    active.style.transform = 'perspective(700px) translate(' + curX + 'px,' + curY + 'px) ' +
+      'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) rotate(' + rz + 'deg)';
   });
   function release(){
     if (startX === null || !active) return;
-    var el = active, dx = curX;
-    startX = null; active = null;
+    var el = active, dx = curX, dy = curY;
+    startX = null; startY = null; active = null;
     el.classList.remove('dragging');
-    if (Math.abs(dx) > 70){
-      flyNext(dx > 0 ? 1 : -1);   // улетает прямо из-под пальца
+    if (Math.max(Math.abs(dx), Math.abs(dy)) > 70){
+      tuckBack(dx >= 0 ? 1 : -1, true);  // ныряет за колоду прямо из-под пальца
     } else {
-      el.style.transform = '';    // пружиной назад
+      el.style.transform = '';           // пружиной назад
     }
   }
   wrap.addEventListener('pointerup', release);
   wrap.addEventListener('pointercancel', release);
   wrap.addEventListener('click', function(){
-    if (Math.abs(curX) > 8) return;
-    flyNext(-1);
+    if (Math.abs(curX) > 8 || Math.abs(curY) > 8) return;
+    tuckBack(-1, false);
   });
 })();
 </script>

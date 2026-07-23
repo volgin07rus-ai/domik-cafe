@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Меню — кофейня «Домик» на Бахрушина</title>
+<meta name="description" content="Полное меню кофейни «Домик»: спешелти-кофе, рафы, матча, чай, выпечка, десерты и бар. Москва, Бахрушина, 12.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 4 4 14h3v14h18V14h3z' fill='%23CE9A45'/><rect x='13' y='19' width='6' height='9' fill='%23261F1A'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#1B3159">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#213D6B;--cream:#F7EFE1;--gold:#B98A3C;--night:#1B3159;--paper:#F7EFE1;--ease:cubic-bezier(.22,.7,.3,1)}
+  @font-face{font-family:'VAGWorld';src:url('vag-world.woff2') format('woff2');font-display:swap;
+    ascent-override:80%;descent-override:20%;line-gap-override:0%}
+  html{scroll-behavior:smooth;scrollbar-gutter:stable}
+  body{background:var(--paper);color:var(--ink);overflow-x:clip;
+    font-family:'VAGWorld','Nunito Sans',system-ui,sans-serif;letter-spacing:.035em}
+  /* арабский шрифт цепляем к lang (dir больше не переключаем) */
+  html[lang="ar"] body{font-family:'Cairo','Nunito Sans',system-ui,sans-serif;letter-spacing:0}
+  .cav{font-family:'Caveat',cursive;letter-spacing:normal}
+  img{max-width:100%}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important}
+    html{scroll-behavior:auto}
+    /* без анимаций .pop/.reveal должны быть просто видимы (иначе останутся скрытыми) */
+    .pop,.reveal,.sr{opacity:1 !important;transform:none !important}
+  }
+
+  /* ============ ШАПКА — стеклянная капсула (как на главной) ============ */
+  .header{position:fixed;top:14px;left:0;right:0;z-index:60;display:flex;justify-content:center;pointer-events:none;padding:0 12px}
+  .navpill{pointer-events:auto;display:flex;align-items:center;gap:clamp(10px,2vw,20px);
+    padding:8px 14px 8px 20px;border-radius:999px;background:rgba(20,30,54,.38);
+    border:1px solid rgba(247,239,225,.16);box-shadow:0 10px 34px rgba(10,16,32,.3);
+    -webkit-backdrop-filter:blur(16px) saturate(155%);backdrop-filter:blur(16px) saturate(155%)}
+  .navpill{position:relative}
+  .hlogo img{height:30px;width:auto;display:block;filter:drop-shadow(0 0 8px rgba(247,239,225,.28))}
+  /* ширина капсулы ФИКСИРОВАНА (реш. 23.07): иначе при смене языка (особенно
+     арабского) пункты меняют ширину и шапка «дышит». Пункты растягиваются
+     внутри, капсула остаётся статичной. */
+  @media (min-width:821px){ .navpill{width:min(94vw,720px)} }
+  .hnav{display:flex;gap:clamp(8px,1.6vw,18px);flex:1;justify-content:center;min-width:0}
+  .hnav a{color:var(--cream);text-decoration:none;font-size:14px;opacity:.85;white-space:nowrap;
+    padding:4px 2px;transition:opacity .2s}
+  .hnav a:hover{opacity:1}
+  /* ЖИДКИЙ переключатель языков (порт с главной): каретка перетекает каплями */
+  .langs{position:relative;display:flex;gap:1px;align-items:center;padding:2px;border-radius:999px;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+  /* сегменты РАВНОЙ фиксированной ширины: иначе при смене языка/шрифта
+     (арабский тянет Cairo) кнопки меняют ширину и капсула «дышит» */
+  .langs button{position:relative;background:none;border:0;cursor:pointer;font:inherit;font-size:12px;
+    letter-spacing:.03em;color:rgba(247,239,225,.72);width:34px;padding:5px 0;text-align:center;
+    border-radius:999px;transition:color .2s;font-family:'VAGWorld','Nunito Sans',sans-serif}
+  .langs button:hover{color:#fff}
+  .langs button[aria-pressed="true"]{color:var(--gold);font-weight:700;transition:color .22s .3s}
+  .lang-goo{position:absolute;inset:0;pointer-events:none;filter:url(#gnGoo2)}
+  .lang-pill{position:absolute;top:2px;bottom:2px;left:2px;width:34px;border-radius:999px;
+    background:var(--cream);pointer-events:none}
+  .lang-drop{position:absolute;border-radius:50%;background:var(--cream);pointer-events:none}
+  /* бургер: три полоски, морф в крестик (тот же приём, что на главной) */
+  .burger{display:none;position:relative;width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:var(--cream);cursor:pointer}
+  .burger:active{background:rgba(255,255,255,.26)}
+  .burger .bl{position:absolute;left:50%;top:50%;width:15px;height:2px;margin:-1px 0 0 -7.5px;
+    border-radius:2px;background:currentColor;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .18s linear}
+  .burger .bl1{transform:translateY(-5px) rotate(0deg)}
+  .burger .bl2{transform:translateY(0)}
+  .burger .bl3{transform:translateY(5px) rotate(0deg)}
+  .burger[aria-expanded="true"] .bl1{transform:translateY(0) rotate(45deg)}
+  .burger[aria-expanded="true"] .bl2{opacity:0}
+  .burger[aria-expanded="true"] .bl3{transform:translateY(0) rotate(-45deg)}
+  /* мобилка: нав прячется в бургер-дропдаун (стеклянная панель под капсулой) */
+  @media (max-width:820px){
+    .hnav{position:absolute;top:calc(100% + 10px);left:0;right:0;min-width:230px;flex-direction:column;gap:3px;
+      background:rgba(20,30,54,.62);border:1px solid rgba(247,239,225,.16);border-radius:20px;padding:10px;
+      box-shadow:0 18px 44px rgba(10,16,32,.4);
+      -webkit-backdrop-filter:blur(16px) saturate(155%);backdrop-filter:blur(16px) saturate(155%);
+      opacity:0;transform:translateY(-8px) scale(.98);pointer-events:none;
+      transition:opacity .28s var(--ease),transform .28s var(--ease)}
+    .hnav a{padding:12px 16px;border-radius:12px;font-size:16px;opacity:0;transform:translateY(-6px);
+      transition:opacity .3s var(--ease),transform .3s var(--ease),background .2s}
+    .hnav a:hover{background:rgba(247,239,225,.1)}
+    .navpill.open .hnav{opacity:1;transform:none;pointer-events:auto}
+    .navpill.open .hnav a{opacity:1;transform:none}
+    .navpill.open .hnav a:nth-child(1){transition-delay:.04s}
+    .navpill.open .hnav a:nth-child(2){transition-delay:.09s}
+    .navpill.open .hnav a:nth-child(3){transition-delay:.14s}
+    .navpill.open .hnav a:nth-child(4){transition-delay:.19s}
+    .navpill.open .hnav a:nth-child(5){transition-delay:.24s}
+    .burger{display:grid;place-items:center}
+    .hlogo img{height:26px}
+  }
+  /* анимация смены языка: текст мягко выцветает в размытие и плавно проявляется */
+  [data-en]{transition:opacity .5s var(--ease), filter .5s var(--ease), transform .5s var(--ease)}
+  html.lang-swap [data-en]{opacity:0;filter:blur(6px);transform:translateY(6px);transition-duration:.22s}
+  /* ===== BubbleMenu (как на главной): бургер надувает полноэкранные пилюли ===== */
+  .bubm{position:fixed;inset:0;z-index:55;display:none;padding:104px 18px 24px;
+    background:rgba(14,22,40,.5);
+    -webkit-backdrop-filter:blur(12px) saturate(140%);backdrop-filter:blur(12px) saturate(140%)}
+  .bubm.on{display:block}
+  .bubm-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+  .bubm-pill{display:flex;align-items:center;justify-content:center;min-height:62px;
+    border-radius:999px;background:var(--cream);color:var(--ink);text-decoration:none;
+    font-family:'VAGWorld','Nunito Sans',sans-serif;font-weight:700;font-size:clamp(20px,5.5vw,28px);
+    box-shadow:0 8px 26px rgba(10,16,30,.25);will-change:transform}
+  html[lang="ar"] .bubm-pill{font-family:'Cairo',sans-serif}
+  .bubm-pill:active{background:var(--hb,#B98A3C);color:#fff}
+  .bubm-label{display:inline-block;line-height:1.2}
+  /* ===== ScrollReveal (как на главной): текст собирается из слов по скроллу ===== */
+  .sr .word,.reveal .word{display:inline-block;will-change:opacity,filter}
+
+  /* ============ HERO: ночное небо ============ */
+  .mhero{position:relative;min-height:clamp(390px,58svh,560px);overflow:hidden;background:var(--night);
+    display:grid;align-content:end;justify-items:center;text-align:center;color:var(--cream);
+    padding:110px 18px clamp(74px,10vh,110px)}
+  .mhero picture,.mhero .sky{position:absolute;inset:0}
+  .mhero .sky img{width:100%;height:100%;object-fit:cover;display:block}
+  .mhero > *{position:relative}
+  .st{position:absolute;border-radius:50%;background:#FFEBC2;animation:tw 3.2s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.1}50%{opacity:.85}}
+  .mh-kick{font-size:clamp(9.5px,2.7vw,11px);letter-spacing:.24em;text-transform:uppercase;color:#E3A434;
+    max-width:94vw;text-shadow:0 1px 12px rgba(10,20,40,.8)}
+  .mh-title{font-family:'VAGWorld','Nunito Sans',sans-serif;font-weight:700;
+    font-size:clamp(64px,17vw,120px);line-height:1;margin-top:6px;
+    text-shadow:0 4px 34px rgba(10,20,40,.55)}
+  html[lang="ar"] .mh-title{font-family:'Cairo',sans-serif}
+  /* заголовок и спутники всплывают с пружинкой при загрузке */
+  .pop{opacity:0;transform:translateY(26px) scale(.92);
+    animation:pop .8s cubic-bezier(.34,1.56,.64,1) forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .mh-sub{font-size:clamp(22px,6vw,30px);color:#FFD98F;margin-top:8px;
+    text-shadow:0 2px 14px rgba(10,20,40,.7)}
+  /* ============ ТЕЛО МЕНЮ ============ */
+  .mbody{max-width:940px;margin:0 auto;padding:clamp(28px,5vw,48px) clamp(16px,4vw,40px) 40px}
+  .mnote{font-size:13px;opacity:.6;line-height:1.6;max-width:60ch;margin:6px auto 0;text-align:center}
+  .mgroup{padding-top:clamp(40px,7vh,72px)}
+  .mg-head{display:flex;align-items:flex-start;gap:14px;position:relative}
+  .mg-num{font-family:'Caveat',cursive;font-weight:600;font-size:clamp(46px,9vw,72px);line-height:.8;
+    color:var(--gold);transform:rotate(-4deg);flex:0 0 auto;margin-top:4px}
+  .mg-tt h2{font-family:'VAGWorld','Nunito Sans',sans-serif;font-weight:700;
+    font-size:clamp(27px,6.4vw,44px);line-height:1.08}
+  html[lang="ar"] .mg-tt h2{font-family:'Cairo',sans-serif}
+  .uline{display:block;margin-top:8px;width:min(200px,46vw);height:8px;color:var(--gold)}
+  .age{display:inline-block;margin-inline-start:10px;font-size:12px;font-weight:700;color:var(--gold);
+    border:1.6px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle;transform:rotate(3deg)}
+  .gv{margin-inline-start:auto;align-self:center;transform:rotate(3deg);
+    animation:sway 5.5s ease-in-out infinite alternate}
+  @media (max-width:560px){.gv{width:78px}}
+  @keyframes sway{from{transform:rotate(2.2deg) translateY(0)}to{transform:rotate(-2.2deg) translateY(-6px)}}
+
+  .mg-grid{display:grid;gap:clamp(20px,4vw,36px);margin-top:clamp(18px,3vh,30px)}
+  @media (min-width:760px){
+    .mg-grid{grid-template-columns:1fr 1fr}
+    .mcat--wide{grid-column:1/-1}
+    .mcat--wide .mlist{columns:2;column-gap:44px}
+    .mcat--wide .mi{break-inside:avoid}
+  }
+  .mg-grid--2{grid-template-columns:1fr}
+  @media (min-width:760px){.mg-grid--2{grid-template-columns:1fr 1fr}}
+
+  .mcat-t{font-family:'Caveat',cursive;font-weight:700;font-size:clamp(23px,5.6vw,30px);color:var(--gold)}
+  .mcat-note{font-size:12.5px;opacity:.6;margin-top:2px}
+  .mlist{list-style:none;margin-top:10px}
+  /* строка позиции: имя сжимается и переносится, цена — жёсткая, лидер ≥14px;
+     сумма никогда не шире контейнера (раньше max-width:70% + цена давали перелив) */
+  .mi{display:flex;align-items:baseline;gap:10px;padding:7px 0}
+  .mi-name{flex:0 1 auto;min-width:0}
+  .mi-lead{flex:1 1 14px;min-width:14px}
+  .mi-price{flex:0 0 auto}
+  .mi-name b{font-weight:600;font-size:clamp(15px,3.9vw,16.5px)}
+  .mi-vol{display:block;font-size:12px;opacity:.55;font-weight:400;margin-top:1px}
+  .hit{font-family:'Caveat',cursive;font-style:normal;font-weight:700;color:#C2563B;font-size:15px;
+    display:inline-block;transform:rotate(-6deg);margin-inline-start:6px}
+  /* карандашный лидер-пунктир */
+  .mi-lead{flex:1;height:2px;margin-bottom:4px;opacity:.35;
+    background:repeating-linear-gradient(90deg,var(--ink) 0 5px,transparent 5px 11px)}
+  .mi-price{font-family:'Caveat',cursive;font-weight:700;font-size:clamp(19px,4.7vw,22px);
+    white-space:nowrap;color:var(--ink)}
+  .mi-price i{font-style:normal;font-size:.72em;color:var(--gold);margin-inline-start:2px}
+
+  /* появление по скроллу: элементы стартуют скрытыми, слова проявляет GSAP
+     (см. ScrollReveal в скрипте). Если GSAP не загрузился — скрипт снимет скрытие. */
+  .reveal{opacity:0;transform:translateY(10px)}
+
+  /* ============ ФИНАЛ ============ */
+  .mfoot{text-align:center;padding:26px 18px 120px;position:relative}
+  .mfoot .note{font-size:13px;opacity:.6;max-width:52ch;margin:0 auto}
+  .mcta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;
+    text-decoration:none;font-weight:700;font-size:14.5px;transition:transform .2s,box-shadow .2s}
+  .btn:active{transform:scale(.96)}
+  .btn--gold{background:linear-gradient(180deg,#CA9B4B,#B08036);color:#fff;
+    box-shadow:0 8px 22px rgba(176,128,54,.35)}
+  .btn--line{color:var(--ink);border:1.6px solid rgba(33,61,107,.35)}
+  .btn--line:hover{border-color:var(--ink)}
+  /* ночная полоска-финал */
+  .nightband{position:absolute;left:0;right:0;bottom:0;height:86px;background:var(--night);overflow:hidden;
+    display:grid;place-items:center;color:var(--cream)}
+  .nightband .cav{font-size:19px;opacity:.9}
+</style>
+</head>
+<body>
+
+<!-- гуи-фильтр для жидкого переключателя языков (как на главной) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="gnGoo2"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
+    <feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="g"/>
+    <feComposite in="SourceGraphic" in2="g" operator="atop"/></filter>
+</defs></svg>
+
+<header class="header">
+  <div class="navpill">
+    <a class="hlogo" href="home.html" aria-label="Домик — на главную"><img src="logo-hand-white.webp" alt="Домик" width="445" height="120"></a>
+    <nav class="hnav" id="nav" aria-label="Основная навигация">
+      <a href="#top" data-ru="Меню" data-en="Menu" data-zh="菜单" data-ar="القائمة">Меню</a>
+      <a href="home.html#bakery" data-ru="Выпечка" data-en="Bakery" data-zh="烘焙" data-ar="المخبوزات">Выпечка</a>
+      <a href="home.html#about" data-ru="О нас" data-en="About" data-zh="关于我们" data-ar="من نحن">О нас</a>
+      <a href="home.html#gallery" data-ru="Галерея" data-en="Gallery" data-zh="相册" data-ar="المعرض">Галерея</a>
+      <a href="home.html#contacts" data-ru="Контакты" data-en="Contacts" data-zh="联系我们" data-ar="التواصل">Контакты</a>
+    </nav>
+    <div class="langs" role="group" aria-label="Язык / Language / 语言 / اللغة">
+      <button data-lang="ru" aria-pressed="true">RU</button>
+      <button data-lang="en" aria-pressed="false">EN</button>
+      <button data-lang="zh" aria-pressed="false" lang="zh">中</button>
+      <button data-lang="ar" aria-pressed="false" lang="ar">ع</button>
+    </div>
+    <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav">
+      <span class="bl bl1"></span><span class="bl bl2"></span><span class="bl bl3"></span>
+    </button>
+  </div>
+</header>
+
+<section class="mhero" id="top">
+  <div class="sky" aria-hidden="true">
+    <picture>
+      <source media="(max-aspect-ratio: 4/5)" srcset="night-sky-m.webp">
+      <img src="night-sky.webp" alt="">
+    </picture>
+    <span class="st" style="left:12%;top:24%;width:3px;height:3px"></span>
+    <span class="st" style="left:28%;top:12%;width:2px;height:2px;animation-delay:-1.2s"></span>
+    <span class="st" style="left:64%;top:18%;width:3px;height:3px;animation-delay:-2s"></span>
+    <span class="st" style="left:82%;top:30%;width:2px;height:2px;animation-delay:-.6s"></span>
+    <span class="st" style="left:45%;top:8%;width:2px;height:2px;animation-delay:-1.7s"></span>
+  </div>
+  <p class="mh-kick pop" data-ru="Кофейня «Домик» · Бахрушина, 12" data-en="Domik coffee house · Bakhrushina 12" data-zh="Domik 咖啡馆 · 巴赫鲁申街 12 号" data-ar="مقهى دوميك · باخروشينا 12">Кофейня «Домик» · Бахрушина, 12</p>
+  <h1 class="mh-title pop" style="animation-delay:.08s" data-ru="Меню" data-en="Menu" data-zh="菜单" data-ar="القائمة">Меню</h1>
+  <p class="mh-sub cav pop" style="animation-delay:.2s" data-ru="выбирай — мы уже варим ☕" data-en="take your pick — we're already brewing ☕" data-zh="慢慢选——我们已经在冲煮了 ☕" data-ar="اختر ما يحلو لك — نحن نحضّر قهوتك ☕">выбирай — мы уже варим ☕</p>
+</section>
+
+<main class="mbody">
+  <p class="mnote reveal" data-ru="Где указано несколько цен — это разные объёмы (S / M / L). Полное меню всегда есть в кофейне, цены могут меняться." data-en="Where several prices are shown, they are different sizes (S / M / L). The full menu is always available in the café; prices may change." data-zh="标有多个价格表示不同规格 (S / M / L)。店内备有完整菜单，价格可能有所变动。" data-ar="عند وجود عدة أسعار فهي أحجام مختلفة (S / M / L). القائمة الكاملة متوفرة دائمًا في المقهى، وقد تتغير الأسعار.">Где указано несколько цен — это разные объёмы (S / M / L). Полное меню всегда есть в кофейне, цены могут меняться.</p>
+
+<section class="mgroup" id="g-coffee">
+  <header class="mg-head">
+    <span class="mg-num">01</span>
+    <div class="mg-tt">
+      <h2 class="sr" data-ru="Кофе" data-en="Coffee" data-zh="咖啡" data-ar="القهوة">Кофе</h2>
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </div>
+    <img class="gv" src="why-coffee.webp" alt="" width="96" loading="lazy">
+  </header>
+  <div class="mg-grid">
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Чёрный кофе" data-en="Black coffee" data-zh="黑咖啡" data-ar="قهوة سوداء">Чёрный кофе</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Двойной эспрессо" data-en="Double espresso" data-zh="双份浓缩" data-ar="إسبريسو مزدوج">Двойной эспрессо</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Американо" data-en="Americano" data-zh="美式咖啡" data-ar="أمريكانو">Американо</b><small class="mi-vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升" data-ar="200 / 300 / 400 مل">200 / 300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280 / 330 / 380<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Австралийский лунго" data-en="Australian lungo" data-zh="澳式长黑" data-ar="لونجو أسترالي">Австралийский лунго</b><small class="mi-vol" data-ru="250 мл" data-en="250 ml" data-zh="250 毫升" data-ar="250 مل">250 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Фильтр" data-en="Filter" data-zh="滤泡咖啡" data-ar="قهوة مفلترة">Фильтр</b><small class="mi-vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升" data-ar="200 / 300 / 400 مل">200 / 300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350 / 400<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Кофе с молоком" data-en="Coffee with milk" data-zh="牛奶咖啡" data-ar="قهوة بالحليب">Кофе с молоком</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Кортадо" data-en="Cortado" data-zh="可塔朵" data-ar="كورتادو">Кортадо</b><small class="mi-vol" data-ru="150 мл" data-en="150 ml" data-zh="150 毫升" data-ar="150 مل">150 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">320<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Флэт уайт" data-en="Flat white" data-zh="馥芮白" data-ar="فلات وايت">Флэт уайт</b><small class="mi-vol" data-ru="200 мл" data-en="200 ml" data-zh="200 毫升" data-ar="200 مل">200 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Капучино" data-en="Cappuccino" data-zh="卡布奇诺" data-ar="كابتشينو">Капучино</b><small class="mi-vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升" data-ar="200 / 300 / 400 مل">200 / 300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">320 / 370 / 400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Латте" data-en="Latte" data-zh="拿铁" data-ar="لاتيه">Латте</b><small class="mi-vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升" data-ar="300 / 400 مل">300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">370 / 400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Латте с солёной карамелью" data-en="Salted caramel latte" data-zh="海盐焦糖拿铁" data-ar="لاتيه بالكراميل المملح">Латте с солёной карамелью</b><small class="mi-vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升" data-ar="300 / 400 مل">300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400 / 450<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Рафы" data-en="Raf coffees" data-zh="拉夫咖啡" data-ar="قهوة راف">Рафы</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Лавандовый раф" data-en="Lavender raf" data-zh="薰衣草拉夫" data-ar="راف بالخزامى">Лавандовый раф</b> <i class="hit" data-ru="хит!" data-en="hit!" data-zh="热门" data-ar="الأكثر طلبًا">хит!</i><small class="mi-vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升" data-ar="300 / 400 مل">300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400 / 450<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Цитрусовый раф" data-en="Citrus raf" data-zh="柑橘拉夫" data-ar="راف بالحمضيات">Цитрусовый раф</b><small class="mi-vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升" data-ar="300 / 400 مل">300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400 / 450<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Ванильный раф" data-en="Vanilla raf" data-zh="香草拉夫" data-ar="راف بالفانيليا">Ванильный раф</b><small class="mi-vol" data-ru="300 / 400 мл" data-en="300 / 400 ml" data-zh="300 / 400 毫升" data-ar="300 / 400 مل">300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400 / 450<i>₽</i></span></li>
+</ul></section>
+  </div>
+</section>
+
+<section class="mgroup" id="g-signature">
+  <header class="mg-head">
+    <span class="mg-num">02</span>
+    <div class="mg-tt">
+      <h2 class="sr" data-ru="Матча, какао и авторское" data-en="Matcha, cocoa &amp; signature" data-zh="抹茶、可可与招牌" data-ar="ماتشا وكاكاو ونكهات مميّزة">Матча, какао и авторское</h2>
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </div>
+    
+  </header>
+  <div class="mg-grid">
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Какао и матча" data-en="Cocoa &amp; matcha" data-zh="可可与抹茶" data-ar="كاكاو وماتشا">Какао и матча</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Какао" data-en="Cocoa" data-zh="可可" data-ar="كاكاو">Какао</b><small class="mi-vol" data-ru="200 / 300 / 400 мл" data-en="200 / 300 / 400 ml" data-zh="200 / 300 / 400 毫升" data-ar="200 / 300 / 400 مل">200 / 300 / 400 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">320 / 370 / 420<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Матча-латте" data-en="Matcha latte" data-zh="抹茶拿铁" data-ar="ماتشا لاتيه">Матча-латте</b><small class="mi-vol" data-ru="200 / 300 мл" data-en="200 / 300 ml" data-zh="200 / 300 毫升" data-ar="200 / 300 مل">200 / 300 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">350 / 400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Горячий шоколад" data-en="Hot chocolate" data-zh="热巧克力" data-ar="شوكولاتة ساخنة">Горячий шоколад</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">450<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Авторские напитки" data-en="Signature drinks" data-zh="招牌饮品" data-ar="مشروبات مميّزة">Авторские напитки</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Чай юдзу с имбирём и мёдом" data-en="Yuzu tea with ginger &amp; honey" data-zh="柚子姜蜜茶" data-ar="شاي اليوزو بالزنجبيل والعسل">Чай юдзу с имбирём и мёдом</b><small class="mi-vol" data-ru="500 мл" data-en="500 ml" data-zh="500 毫升" data-ar="500 مل">500 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">450<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Чай манго-маракуйя" data-en="Mango–passion fruit tea" data-zh="芒果百香果茶" data-ar="شاي المانجو والباشن فروت">Чай манго-маракуйя</b><small class="mi-vol" data-ru="500 мл" data-en="500 ml" data-zh="500 毫升" data-ar="500 مل">500 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">450<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Пряный какао со сгущёнкой" data-en="Spiced cocoa with condensed milk" data-zh="香料炼乳可可" data-ar="كاكاو بالتوابل والحليب المكثف">Пряный какао со сгущёнкой</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Апельсиновый какао" data-en="Orange cocoa" data-zh="香橙可可" data-ar="كاكاو بالبرتقال">Апельсиновый какао</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Арахисовый раф" data-en="Peanut raf" data-zh="花生拉夫" data-ar="راف بالفول السوداني">Арахисовый раф</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Spanish latte" data-en="Spanish latte" data-zh="西班牙拿铁" data-ar="سبانيش لاتيه">Spanish latte</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Бэйлис латте" data-en="Baileys latte" data-zh="百利甜拿铁" data-ar="بيليز لاتيه">Бэйлис латте</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">550<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Раф с тёмным ромом и ванилью" data-en="Raf with dark rum &amp; vanilla" data-zh="黑朗姆香草拉夫" data-ar="راف بالروم الداكن والفانيليا">Раф с тёмным ромом и ванилью</b><small class="mi-vol" data-ru="350 мл" data-en="350 ml" data-zh="350 毫升" data-ar="350 مل">350 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">650<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Холодное" data-en="Cold" data-zh="冷饮" data-ar="مشروبات باردة">Холодное</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Айс-американо" data-en="Iced americano" data-zh="冰美式" data-ar="آيس أمريكانو">Айс-американо</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Айс-латте" data-en="Iced latte" data-zh="冰拿铁" data-ar="آيس لاتيه">Айс-латте</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">370<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Бамбл-кофе" data-en="Bumble coffee" data-zh="缤纷冰咖啡" data-ar="قهوة بامبل">Бамбл-кофе</b> <i class="hit" data-ru="хит!" data-en="hit!" data-zh="热门" data-ar="الأكثر طلبًا">хит!</i><small class="mi-vol" data-ru="350 мл · апельсин / гранат" data-en="350 ml · orange / pomegranate" data-zh="350 毫升 · 橙子 / 石榴" data-ar="350 مل · برتقال / رمان">350 мл · апельсин / гранат</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">490<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Фреш" data-en="Fresh juice" data-zh="鲜榨果汁" data-ar="عصير طازج">Фреш</b><small class="mi-vol" data-ru="300 мл · апельсин / грейпфрут" data-en="300 ml · orange / grapefruit" data-zh="300 毫升 · 橙子 / 西柚" data-ar="300 مل · برتقال / جريب فروت">300 мл · апельсин / грейпфрут</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Эспрессо-тоник" data-en="Espresso tonic" data-zh="浓缩汤力" data-ar="إسبريسو تونيك">Эспрессо-тоник</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">490<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Матча-тоник" data-en="Matcha tonic" data-zh="抹茶汤力" data-ar="ماتشا تونيك">Матча-тоник</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">450<i>₽</i></span></li>
+</ul></section>
+  </div>
+</section>
+
+<section class="mgroup" id="g-tea">
+  <header class="mg-head">
+    <span class="mg-num">03</span>
+    <div class="mg-tt">
+      <h2 class="sr" data-ru="Чай" data-en="Tea" data-zh="茶" data-ar="الشاي">Чай</h2>
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </div>
+    
+  </header>
+  <div class="mg-grid">
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Листовые чаи" data-en="Loose-leaf teas" data-zh="原叶茶" data-ar="شاي سائب">Листовые чаи</h3>
+<p class="mcat-note reveal" data-ru="300 мл / 500 мл" data-en="300 ml / 500 ml" data-zh="300 毫升 / 500 毫升" data-ar="300 مل / 500 مل">300 мл / 500 мл</p>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Сенча" data-en="Sencha" data-zh="煎茶" data-ar="سينشا">Сенча</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Те гуань инь" data-en="Tie Guan Yin" data-zh="铁观音" data-ar="تيه غوان يين">Те гуань инь</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Зелёный с жасмином" data-en="Jasmine green" data-zh="茉莉绿茶" data-ar="أخضر بالياسمين">Зелёный с жасмином</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Молочный улун" data-en="Milk oolong" data-zh="奶香乌龙" data-ar="أولونغ حليبي">Молочный улун</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Ассам" data-en="Assam" data-zh="阿萨姆红茶" data-ar="أسام">Ассам</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Чёрный копчёный" data-en="Smoked black" data-zh="烟熏红茶" data-ar="أسود مدخّن">Чёрный копчёный</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Чёрный с чабрецом" data-en="Black with thyme" data-zh="百里香红茶" data-ar="أسود بالزعتر">Чёрный с чабрецом</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Эрл грей" data-en="Earl Grey" data-zh="伯爵红茶" data-ar="إيرل غراي">Эрл грей</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Шу пуэр" data-en="Ripe pu-erh" data-zh="熟普洱" data-ar="بوإر ناضج">Шу пуэр</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Тизаны" data-en="Tisanes" data-zh="花草茶饮" data-ar="منقوعات عشبية">Тизаны</h3>
+<p class="mcat-note reveal" data-ru="300 мл / 500 мл" data-en="300 ml / 500 ml" data-zh="300 毫升 / 500 毫升" data-ar="300 مل / 500 مل">300 мл / 500 мл</p>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Ромашка" data-en="Chamomile" data-zh="洋甘菊" data-ar="بابونج">Ромашка</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Гречиха" data-en="Buckwheat" data-zh="荞麦茶" data-ar="حنطة سوداء">Гречиха</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Гибискус" data-en="Hibiscus" data-zh="洛神花" data-ar="كركديه">Гибискус</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Айва" data-en="Quince" data-zh="榅桲" data-ar="سفرجل">Айва</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Листья черники" data-en="Blueberry leaf" data-zh="蓝莓叶" data-ar="أوراق التوت الأزرق">Листья черники</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Чабрец" data-en="Thyme" data-zh="百里香" data-ar="زعتر">Чабрец</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Травяной сбор" data-en="Herbal blend" data-zh="草本茶" data-ar="خلطة أعشاب">Травяной сбор</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Цветочный сбор" data-en="Floral blend" data-zh="花草茶" data-ar="خلطة زهور">Цветочный сбор</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300 / 350<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Дополнительно" data-en="Add-ons" data-zh="额外选项" data-ar="إضافات">Дополнительно</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Декаф" data-en="Decaf" data-zh="低因" data-ar="منزوع الكافيين">Декаф</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">+90<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Альтернативное молоко" data-en="Alternative milk" data-zh="植物奶" data-ar="حليب نباتي">Альтернативное молоко</b><small class="mi-vol" data-ru="безлактозное, кокосовое, миндальное, овсяное, банановое" data-en="lactose-free, coconut, almond, oat, banana" data-zh="无乳糖、椰奶、杏仁奶、燕麦奶、香蕉奶" data-ar="خالٍ من اللاكتوز، جوز الهند، لوز، شوفان، موز">безлактозное, кокосовое, миндальное, овсяное, банановое</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">+90<i>₽</i></span></li>
+</ul></section>
+  </div>
+</section>
+
+<section class="mgroup" id="g-food">
+  <header class="mg-head">
+    <span class="mg-num">04</span>
+    <div class="mg-tt">
+      <h2 class="sr" data-ru="Выпечка, десерты и еда" data-en="Bakery, desserts &amp; food" data-zh="烘焙、甜点与轻食" data-ar="مخبوزات وحلويات ومأكولات">Выпечка, десерты и еда</h2>
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </div>
+    <img class="gv" src="why-bakery.webp" alt="" width="150" loading="lazy">
+  </header>
+  <div class="mg-grid">
+<section class="mcat mcat--wide">
+<h3 class="mcat-t sr" data-ru="Выпечка и десерты" data-en="Bakery &amp; desserts" data-zh="烘焙与甜点" data-ar="مخبوزات وحلويات">Выпечка и десерты</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Круассан ветчина-сыр" data-en="Ham &amp; cheese croissant" data-zh="火腿芝士可颂" data-ar="كرواسون هام وجبن">Круассан ветчина-сыр</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Круассан классический" data-en="Classic croissant" data-zh="经典可颂" data-ar="كرواسون كلاسيكي">Круассан классический</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">220<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Круассан миндальный" data-en="Almond croissant" data-zh="杏仁可颂" data-ar="كرواسون باللوز">Круассан миндальный</b> <i class="hit" data-ru="хит!" data-en="hit!" data-zh="热门" data-ar="الأكثر طلبًا">хит!</i></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">320<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Круассан сырный" data-en="Cheese croissant" data-zh="芝士可颂" data-ar="كرواسون بالجبن">Круассан сырный</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Трубочка со сгущёнкой" data-en="Cream horn with condensed milk" data-zh="炼乳奶油卷" data-ar="لفافة بالحليب المكثف">Трубочка со сгущёнкой</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">180<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Слойка с яблоком" data-en="Apple puff" data-zh="苹果酥" data-ar="فطيرة بالتفاح">Слойка с яблоком</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Слойка сыр-оливки" data-en="Cheese &amp; olive puff" data-zh="芝士橄榄酥" data-ar="فطيرة بالجبن والزيتون">Слойка сыр-оливки</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Пан-о-шоколя" data-en="Pain au chocolat" data-zh="巧克力可颂" data-ar="بان أو شوكولا">Пан-о-шоколя</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">360<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Булочка карамель-пекан" data-en="Caramel-pecan bun" data-zh="焦糖山核桃面包" data-ar="كعكة الكراميل والبيكان">Булочка карамель-пекан</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">360<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Булочка с творожным кремом" data-en="Curd-cream bun" data-zh="奶酪奶油面包" data-ar="كعكة بكريمة الجبن">Булочка с творожным кремом</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">360<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Вишнёвый пирог" data-en="Cherry pie" data-zh="樱桃派" data-ar="فطيرة الكرز">Вишнёвый пирог</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">450<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Фермерский пирог с грушей" data-en="Farmhouse pear pie" data-zh="乡村梨子派" data-ar="فطيرة الكمثرى الريفية">Фермерский пирог с грушей</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">350<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Кекс апельсиновый" data-en="Orange loaf cake" data-zh="香橙磅蛋糕" data-ar="كيك البرتقال">Кекс апельсиновый</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">270<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Кекс фисташковый" data-en="Pistachio loaf cake" data-zh="开心果磅蛋糕" data-ar="كيك الفستق">Кекс фисташковый</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">370<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Чизкейк" data-en="Cheesecake" data-zh="芝士蛋糕" data-ar="تشيز كيك">Чизкейк</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">400<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Еда" data-en="Food" data-zh="轻食" data-ar="مأكولات">Еда</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Сэндвич" data-en="Sandwich" data-zh="三明治" data-ar="ساندويتش">Сэндвич</b><small class="mi-vol" data-ru="в ассортименте" data-en="assorted" data-zh="多种口味" data-ar="تشكيلة">в ассортименте</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">550<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Салат" data-en="Salad" data-zh="沙拉" data-ar="سلطة">Салат</b><small class="mi-vol" data-ru="в ассортименте" data-en="assorted" data-zh="多种口味" data-ar="تشكيلة">в ассортименте</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">550<i>₽</i></span></li>
+</ul></section>
+  </div>
+</section>
+
+<section class="mgroup" id="g-bar">
+  <header class="mg-head">
+    <span class="mg-num">05</span>
+    <div class="mg-tt">
+      <h2 class="sr" data-ru="Бар" data-en="Bar" data-zh="酒吧" data-ar="البار">Бар</h2><span class="age">18+</span>
+      <svg class="uline" viewBox="0 0 220 8" fill="none" aria-hidden="true"><path d="M2 5.5c30-4 60-4 90 0s60 4 128-1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </div>
+    
+  </header>
+  <div class="mg-grid mg-grid--2">
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Крепкое" data-en="Spirits" data-zh="烈酒" data-ar="مشروبات روحية">Крепкое</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Aperol" data-en="Aperol" data-zh="Aperol" data-ar="Aperol">Aperol</b><small class="mi-vol" data-ru="40 мл" data-en="40 ml" data-zh="40 毫升" data-ar="40 مل">40 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">280<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Baileys" data-en="Baileys" data-zh="Baileys" data-ar="Baileys">Baileys</b><small class="mi-vol" data-ru="40 мл" data-en="40 ml" data-zh="40 毫升" data-ar="40 مل">40 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">300<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Legendario Elixir de Cuba" data-en="Legendario Elixir de Cuba" data-zh="Legendario Elixir de Cuba" data-ar="Legendario Elixir de Cuba">Legendario Elixir de Cuba</b><small class="mi-vol" data-ru="40 мл" data-en="40 ml" data-zh="40 毫升" data-ar="40 مل">40 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">450<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Pierre Debect XO" data-en="Pierre Debect XO" data-zh="Pierre Debect XO" data-ar="Pierre Debect XO">Pierre Debect XO</b><small class="mi-vol" data-ru="50 мл" data-en="50 ml" data-zh="50 毫升" data-ar="50 مل">50 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">700<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Macallan 12" data-en="Macallan 12" data-zh="Macallan 12" data-ar="Macallan 12">Macallan 12</b><small class="mi-vol" data-ru="50 мл" data-en="50 ml" data-zh="50 毫升" data-ar="50 مل">50 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">1000<i>₽</i></span></li>
+</ul></section>
+<section class="mcat">
+<h3 class="mcat-t sr" data-ru="Коктейли" data-en="Cocktails" data-zh="鸡尾酒" data-ar="كوكتيلات">Коктейли</h3>
+<ul class="mlist">
+<li class="mi reveal"><span class="mi-name"><b data-ru="Aperol Spritz" data-en="Aperol Spritz" data-zh="Aperol Spritz" data-ar="Aperol Spritz">Aperol Spritz</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">850<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Джин-тоник" data-en="Gin &amp; tonic" data-zh="金汤力" data-ar="جن تونيك">Джин-тоник</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">650<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Игристое-тоник" data-en="Sparkling &amp; tonic" data-zh="气泡酒汤力" data-ar="نبيذ فوّار وتونيك">Игристое-тоник</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">750<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Эспрессо мартини" data-en="Espresso martini" data-zh="浓缩马提尼" data-ar="إسبريسو مارتيني">Эспрессо мартини</b></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">850<i>₽</i></span></li>
+<li class="mi reveal"><span class="mi-name"><b data-ru="Cavatina Prosecco Brut" data-en="Cavatina Prosecco Brut" data-zh="Cavatina Prosecco Brut" data-ar="Cavatina Prosecco Brut">Cavatina Prosecco Brut</b><small class="mi-vol" data-ru="150 мл" data-en="150 ml" data-zh="150 毫升" data-ar="150 مل">150 мл</small></span><span class="mi-lead" aria-hidden="true"></span><span class="mi-price">700<i>₽</i></span></li>
+</ul></section>
+  </div>
+</section>
+</main>
+
+<footer class="mfoot">
+  <p class="note" data-ru="Цены указаны в рублях и могут меняться. Актуальное меню — у бариста." data-en="Prices are in rubles and may change. Ask the barista for the current menu." data-zh="价格以卢布计，可能有所变动。最新菜单请咨询咖啡师。" data-ar="الأسعار بالروبل وقد تتغير. اسألوا الباريستا عن القائمة الحالية.">Цены указаны в рублях и могут меняться. Актуальное меню — у бариста.</p>
+  <div class="mcta">
+    <a class="btn btn--line" href="home.html" data-ru="← На сайт" data-en="← Back to site" data-zh="← 返回网站" data-ar="→ العودة للموقع">← На сайт</a>
+    <a class="btn btn--gold" href="https://yandex.ru/maps/-/CPtBIB1H" target="_blank" rel="noopener" data-ru="Построить маршрут" data-en="Get directions" data-zh="导航路线" data-ar="احصل على الاتجاهات">Построить маршрут</a>
+  </div>
+  <div class="nightband" aria-hidden="true">
+    <span class="cav" data-ru="Сделано с теплом ☕" data-en="Made with warmth ☕" data-zh="用心制作 ☕" data-ar="صُنع بدفء ☕">Сделано с теплом ☕</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  var TITLES = {"ru": "Меню — кофейня «Домик» на Бахрушина", "en": "Menu — Domik coffee house on Bakhrushina", "zh": "菜单 — 巴赫鲁申街 Domik 咖啡馆", "ar": "القائمة — مقهى دوميك في باخروشينا"};
+  var langs = ['ru','en','zh','ar'];
+  var saved = null;
+  try { saved = localStorage.getItem('domik_lang'); } catch(e){}
+  var urlLang = new URLSearchParams(location.search).get('lang');
+  function detectLang(){
+    var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < prefs.length; i++){
+      var c = String(prefs[i]).toLowerCase();
+      if (c.indexOf('ru') === 0) return 'ru';
+      if (c.indexOf('zh') === 0) return 'zh';
+      if (c.indexOf('ar') === 0) return 'ar';
+      if (c.indexOf('en') === 0) return 'en';
+    }
+    return 'ru';
+  }
+  var fromUrl = langs.indexOf(urlLang) >= 0;
+  var fromUser = langs.indexOf(saved) >= 0;
+  var lang = fromUrl ? urlLang : (fromUser ? saved : detectLang());
+  var btns = [].slice.call(document.querySelectorAll('.langs button'));
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var root = document.documentElement;
+
+  /* собственно смена текста */
+  function applyText(l){
+    root.setAttribute('lang', l === 'zh' ? 'zh-Hans' : l);
+    /* dir НЕ переключаем (реш. 23.07): арабский переводим, но раскладку меню
+       не переворачиваем — сам арабский рисуется справа налево внутри строк */
+    root.setAttribute('dir', 'ltr');
+    /* без кэша: пилюли бургер-меню создаются позже и тоже должны переводиться */
+    var nodes = document.querySelectorAll('[data-en]');
+    for (var i = 0; i < nodes.length; i++){
+      var v = nodes[i].getAttribute('data-' + l);
+      if (v !== null) nodes[i].textContent = v;
+    }
+    if (TITLES[l]) document.title = TITLES[l];
+    for (var j = 0; j < btns.length; j++)
+      btns[j].setAttribute('aria-pressed', String(btns[j].getAttribute('data-lang') === l));
+  }
+  function activeBtn(){
+    for (var i = 0; i < btns.length; i++) if (btns[i].getAttribute('aria-pressed') === 'true') return btns[i];
+    return btns[0];
+  }
+  /* стартовый язык применяем СРАЗУ — до нарезки слов, чтобы reveal шёл на нём */
+  applyText(lang);
+  /* смена языка: плавный блюр-переход текста + пересадка каретки */
+  function switchLang(l, persist){
+    if (reduce){ applyText(l); place(activeBtn()); }
+    else {
+      root.classList.add('lang-swap');
+      setTimeout(function(){ applyText(l); root.classList.remove('lang-swap'); place(activeBtn()); }, 200);
+    }
+    if (persist) try { localStorage.setItem('domik_lang', l); } catch(e){}
+  }
+
+  /* ---------- ЖИДКАЯ каретка языков (GSAP, как на главной) ---------- */
+  var wrap = document.querySelector('.langs');
+  var goo = document.createElement('span'); goo.className = 'lang-goo';
+  wrap.insertBefore(goo, wrap.firstChild);
+  var pill = document.createElement('span'); pill.className = 'lang-pill'; goo.appendChild(pill);
+  function place(btn){ if (!btn) return; pill.style.left = btn.offsetLeft + 'px'; pill.style.width = btn.offsetWidth + 'px'; }
+  function flow(btn){
+    if (reduce || !window.gsap){ place(btn); return; }
+    var newL = btn.offsetLeft, newW = btn.offsetWidth;
+    var curL = parseFloat(pill.style.left) || 2, curW = parseFloat(pill.style.width) || 34;
+    if (Math.abs(newL - curL) < 1){ place(btn); return; }
+    var h = wrap.clientHeight, startCx = curL + curW / 2, endCx = newL + newW / 2;
+    gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.16, ease:'power2.in',
+      onComplete:function(){
+        gsap.set(pill, {left:newL, width:newW, scaleX:0, scaleY:0});
+        gsap.to(pill, {scaleX:1, scaleY:1, duration:.38, delay:.16, ease:'back.out(1.7)'});
+      }});
+    for (var i = 0; i < 5; i++){
+      var d = document.createElement('span'); d.className = 'lang-drop';
+      var size = 5 + Math.random() * 6;
+      d.style.width = d.style.height = size.toFixed(1) + 'px';
+      d.style.left = (startCx - size / 2 + (Math.random() * 10 - 5)).toFixed(1) + 'px';
+      d.style.top = (h / 2 - size / 2).toFixed(1) + 'px';
+      goo.appendChild(d);
+      (function(el, i){
+        var dx = endCx - startCx, arc = (Math.random() * 16 - 8), t = .28 + Math.random() * .14, dl = .04 + i * .035;
+        gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'power1.inOut'});
+        gsap.to(el, {y:arc, duration:t/2, delay:dl, ease:'sine.out'});
+        gsap.to(el, {y:0, duration:t/2, delay:dl + t/2, ease:'sine.in'});
+        gsap.to(el, {scale:0, duration:.14, delay:dl + t, ease:'power2.in',
+          onComplete:function(){ try { goo.removeChild(el); } catch(e){} }});
+      })(d, i);
+    }
+  }
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var l = b.getAttribute('data-lang');
+      btns.forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      flow(b);   /* раскладка не переворачивается — перелёт работает для всех языков */
+      switchLang(l, true);
+    });
+  });
+  addEventListener('resize', function(){ place(activeBtn()); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ place(activeBtn()); });
+
+  /* ---------- BubbleMenu (как на главной): бургер надувает полноэкранные пилюли ---------- */
+  var burger = document.getElementById('burger'), nav = document.getElementById('nav');
+  var BUB_COLORS = ['#B98A3C','#2F8A86','#C77B8F','#4A6FA5','#7B8F5A'];
+  var bub = null, bubOpen = false;
+  function buildBub(){
+    bub = document.createElement('div'); bub.className = 'bubm'; bub.setAttribute('aria-hidden','true');
+    var ul = document.createElement('ul'); ul.className = 'bubm-list'; ul.setAttribute('role','menu');
+    nav.querySelectorAll('a').forEach(function(a, i){
+      var li = document.createElement('li'); li.setAttribute('role','none');
+      var p = document.createElement('a'); p.className = 'bubm-pill'; p.href = a.getAttribute('href');
+      p.setAttribute('role','menuitem'); p.style.setProperty('--hb', BUB_COLORS[i % BUB_COLORS.length]);
+      /* переносим переводы с пункта шапки, иначе ярлык застревает на старом языке */
+      var lab = document.createElement('span'); lab.className = 'bubm-label';
+      ['ru','en','zh','ar'].forEach(function(k){
+        var v = a.getAttribute('data-' + k); if (v !== null) lab.setAttribute('data-' + k, v);
+      });
+      lab.textContent = a.textContent;
+      p.appendChild(lab);
+      p.addEventListener('click', function(ev){ ev.preventDefault(); toggleBub(false); setTimeout(function(){ location.href = a.href; }, 60); });
+      li.appendChild(p); ul.appendChild(li);
+    });
+    bub.appendChild(ul); document.body.appendChild(bub);
+  }
+  function toggleBub(want){
+    if (!bub) buildBub();
+    var open = (typeof want === 'boolean') ? want : !bubOpen;
+    if (!window.gsap){ bubOpen = open; bub.classList.toggle('on', open); burger.setAttribute('aria-expanded', String(open)); return; }
+    if (open === bubOpen) return;
+    bubOpen = open;
+    burger.setAttribute('aria-expanded', open);
+    burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+    bub.setAttribute('aria-hidden', !open);
+    var pills = bub.querySelectorAll('.bubm-pill'), labels = bub.querySelectorAll('.bubm-label');
+    gsap.killTweensOf(pills); gsap.killTweensOf(labels); gsap.killTweensOf(bub);
+    if (open){
+      bub.classList.add('on');
+      gsap.fromTo(bub, {opacity:0}, {opacity:1, duration:.25, ease:'power1.out'});
+      gsap.set(pills, {scale:0, transformOrigin:'50% 50%'});
+      gsap.set(labels, {y:24, autoAlpha:0});
+      pills.forEach(function(p, i){
+        var tl = gsap.timeline({delay: Math.max(0, i * .12 + gsap.utils.random(-.05, .05))});
+        tl.to(p, {scale:1, duration:.5, ease:'back.out(1.5)'});
+        if (labels[i]) tl.to(labels[i], {y:0, autoAlpha:1, duration:.5, ease:'power3.out'}, '-=.45');
+      });
+    } else {
+      gsap.to(labels, {y:24, autoAlpha:0, duration:.2, ease:'power3.in'});
+      gsap.to(pills, {scale:0, duration:.2, ease:'power3.in'});
+      gsap.to(bub, {opacity:0, duration:.28, ease:'power1.in',
+        onComplete:function(){ bub.classList.remove('on'); gsap.set(bub, {opacity:1}); }});
+    }
+  }
+  if (burger && nav){
+    burger.addEventListener('click', function(){ toggleBub(); });
+    addEventListener('keydown', function(e){ if (e.key === 'Escape' && bubOpen) toggleBub(false); });
+  }
+
+  /* ---------- ScrollReveal (как на главной): слова проявляются из размытия по скроллу ---------- */
+  if (window.gsap && window.ScrollTrigger && !reduce){
+    var srSplit = function(el){
+      var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: function(n){
+        if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        for (var p = n.parentNode; p && p !== el; p = p.parentNode){
+          if (p.nodeType !== 1) continue;
+          if (p instanceof SVGElement) return NodeFilter.FILTER_REJECT;
+          var c = p.classList;
+          if (c && (c.contains('word') || c.contains('mi-lead'))) return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }});
+      var texts = []; while (tw.nextNode()) texts.push(tw.currentNode);
+      texts.forEach(function(n){
+        var frag = document.createDocumentFragment();
+        n.nodeValue.split(/(\s+)/).forEach(function(part){
+          if (!part) return;
+          if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
+          var s = document.createElement('span'); s.className = 'word'; s.textContent = part;
+          frag.appendChild(s);
+        });
+        n.parentNode.replaceChild(frag, n);
+      });
+    };
+    var srAll = gsap.utils.toArray('.sr').concat(gsap.utils.toArray('.reveal'));
+    srAll.forEach(function(el){
+      srSplit(el);
+      var items = el.querySelectorAll('.word');
+      el.classList.remove('reveal');
+      if (!items.length) return;
+      var tilt = el.classList.contains('sr') ? 4 : (el.classList.contains('mi') ? 0 : 2.5);
+      if (tilt) gsap.fromTo(el, {transformOrigin:'0% 50%', rotate:tilt}, {rotate:0, ease:'none',
+        scrollTrigger:{trigger:el, start:'top bottom', end:'top 55%', scrub:true}});
+      /* прозрачность+блюр одним твином — вдвое меньше ScrollTrigger'ов на длинном меню */
+      gsap.fromTo(items, {opacity:0, filter:'blur(9px)'},
+        {opacity:1, filter:'blur(0px)', ease:'none', stagger:.05,
+          scrollTrigger:{trigger:el, start:'top 95%', end:'top 60%', scrub:true}});
+    });
+    addEventListener('load', function(){ ScrollTrigger.refresh(); });
+  } else {
+    [].forEach.call(document.querySelectorAll('.reveal,.sr'), function(el){ el.style.opacity=1; el.style.transform='none'; });
+  }
+
+  place(activeBtn());
+  if (fromUrl || fromUser) try { localStorage.setItem('domik_lang', lang); } catch(e){}
+})();
+</script>
+</body>
+</html>
