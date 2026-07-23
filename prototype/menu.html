@@ -27,6 +27,7 @@
     html{scroll-behavior:auto}
     /* без анимаций .pop/.reveal должны быть просто видимы (иначе останутся скрытыми) */
     .pop,.reveal,.sr{opacity:1 !important;transform:none !important}
+    .sr,.rv{-webkit-mask-image:none !important;mask-image:none !important}
   }
 
   /* ============ ШАПКА — стеклянная капсула (как на главной) ============ */
@@ -110,8 +111,14 @@
   html[lang="ar"] .bubm-pill{font-family:'Cairo',sans-serif}
   .bubm-pill:active{background:var(--hb,#B98A3C);color:#fff}
   .bubm-label{display:inline-block;line-height:1.2}
-  /* ===== ScrollReveal (как на главной): текст собирается из слов по скроллу ===== */
-  .sr .word,.reveal .word{display:inline-block;will-change:opacity,filter}
+  /* ===== ПРОЯВЛЕНИЕ ТЕКСТА v3 «световая шторка» (как на главной, 24.07) =====
+     Пословный blur-скраб убран: на длинном меню он держал под сотню
+     скраб-триггеров и пересчитывал filter у каждого слова на каждом кадре.
+     Теперь блок проявляется целиком и один раз мягкой градиентной шторкой. */
+  .sr,.rv{--rvp:-28%;
+    -webkit-mask-image:linear-gradient(180deg,#000 var(--rvp),rgba(0,0,0,0) calc(var(--rvp) + 30%));
+            mask-image:linear-gradient(180deg,#000 var(--rvp),rgba(0,0,0,0) calc(var(--rvp) + 30%))}
+  .rv-done{-webkit-mask-image:none !important;mask-image:none !important}
 
   /* ============ HERO: ночное небо ============ */
   .mhero{position:relative;min-height:clamp(390px,58svh,560px);overflow:hidden;background:var(--night);
@@ -622,48 +629,40 @@
     addEventListener('keydown', function(e){ if (e.key === 'Escape' && bubOpen) toggleBub(false); });
   }
 
-  /* ---------- ScrollReveal (как на главной): слова проявляются из размытия по скроллу ---------- */
+  /* ---------- ПРОЯВЛЕНИЕ ТЕКСТА v3 (как на главной) ----------
+     Один ScrollTrigger.batch на всю страницу вместо ~сотни скраб-триггеров:
+     что вошло в кадр вместе — тем каскадом и проявляется. По блоку проходит
+     мягкая шторка (маска-градиент сверху вниз), блок чуть поднимается.
+     Слова НЕ режем: applyText() переписывает textContent по data-ru/en/zh/ar,
+     и любые внутренние спаны пропали бы при смене языка. */
   if (window.gsap && window.ScrollTrigger && !reduce){
-    var srSplit = function(el){
-      var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: function(n){
-        if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        for (var p = n.parentNode; p && p !== el; p = p.parentNode){
-          if (p.nodeType !== 1) continue;
-          if (p instanceof SVGElement) return NodeFilter.FILTER_REJECT;
-          var c = p.classList;
-          if (c && (c.contains('word') || c.contains('mi-lead'))) return NodeFilter.FILTER_REJECT;
-        }
-        return NodeFilter.FILTER_ACCEPT;
-      }});
-      var texts = []; while (tw.nextNode()) texts.push(tw.currentNode);
-      texts.forEach(function(n){
-        var frag = document.createDocumentFragment();
-        n.nodeValue.split(/(\s+)/).forEach(function(part){
-          if (!part) return;
-          if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-          var s = document.createElement('span'); s.className = 'word'; s.textContent = part;
-          frag.appendChild(s);
-        });
-        n.parentNode.replaceChild(frag, n);
-      });
-    };
-    var srAll = gsap.utils.toArray('.sr').concat(gsap.utils.toArray('.reveal'));
-    srAll.forEach(function(el){
-      srSplit(el);
-      var items = el.querySelectorAll('.word');
-      el.classList.remove('reveal');
-      if (!items.length) return;
-      var tilt = el.classList.contains('sr') ? 4 : (el.classList.contains('mi') ? 0 : 2.5);
-      if (tilt) gsap.fromTo(el, {transformOrigin:'0% 50%', rotate:tilt}, {rotate:0, ease:'none',
-        scrollTrigger:{trigger:el, start:'top bottom', end:'top 55%', scrub:true}});
-      /* прозрачность+блюр одним твином — вдвое меньше ScrollTrigger'ов на длинном меню */
-      gsap.fromTo(items, {opacity:0, filter:'blur(9px)'},
-        {opacity:1, filter:'blur(0px)', ease:'none', stagger:.05,
-          scrollTrigger:{trigger:el, start:'top 95%', end:'top 60%', scrub:true}});
+    var rvEls = [];
+    gsap.utils.toArray('.sr, .reveal').forEach(function(el){
+      el.classList.remove('reveal'); el.classList.add('rv'); rvEls.push(el);
     });
+    if (rvEls.length){
+      gsap.set(rvEls, {opacity:1, y:22, '--rvp':'-28%'});
+      ScrollTrigger.batch(rvEls, {
+        start:'top 92%', once:true,
+        onEnter: function(batch){
+          /* ⚠️ каскад ограничен по СУММЕ (24.07): в меню под сотню позиций, и
+             при фиксированном шаге хвост партии ждал бы своей очереди секундами
+             (на длинном экране это выглядело как «половина меню не появилась»). */
+          gsap.to(batch, {y:0, '--rvp':'128%', duration:.95, ease:'expo.out',
+            stagger: Math.min(.07, .5 / batch.length), overwrite:true,
+            onComplete: function(){
+              this.targets().forEach(function(t){
+                t.classList.add('rv-done'); t.classList.remove('rv');
+                t.style.removeProperty('--rvp');
+              });
+            }});
+        }
+      });
+    }
     addEventListener('load', function(){ ScrollTrigger.refresh(); });
   } else {
-    [].forEach.call(document.querySelectorAll('.reveal,.sr'), function(el){ el.style.opacity=1; el.style.transform='none'; });
+    [].forEach.call(document.querySelectorAll('.reveal,.sr,.rv'), function(el){
+      el.style.opacity=1; el.style.transform='none'; el.classList.add('rv-done'); });
   }
 
   place(activeBtn());

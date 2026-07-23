@@ -418,11 +418,19 @@
   /* 22px→10px (реш. 22.07): крупный подъём при ступенчатом скролле колёсиком
      читался как «дёргание» — оставляем лёгкий сдвиг, почти чистое проявление */
   .reveal{opacity:0;transform:translateY(10px)}
-  /* ScrollReveal (порт с React Bits, реш. 22.07; возврат 23.07 — ScrollFloat
-     откатили по решению пользователя): заголовки и лиды собираются из слов
-     по мере прокрутки — прозрачность+блюр на слово, скраб. Без GSAP
-     или с reduced-motion элементы просто видимы (класс ничего не прячет). */
-  .sr .word{display:inline-block;will-change:opacity,filter}
+  /* ===== ПРОЯВЛЕНИЕ ТЕКСТА v3 «световая шторка» (24.07) ==================
+     Пословный blur-скраб убран: он держал ~70 скраб-триггеров и пересчитывал
+     filter у каждого слова на КАЖДОМ кадре прокрутки (отсюда рывки — особенно
+     вместе с пином сада), а applyText() при смене языка затирал сами слова.
+     Теперь блок проявляется целиком и один раз: мягкая градиентная шторка
+     идёт сверху вниз — будто на текст ложится свет, — блок чуть поднимается,
+     золотая линия под заголовком дорисовывается от руки.
+     Маска стоит уже в CSS, поэтому до JS блок не мигает; после проигрыша
+     снимается (.rv-done), чтобы текст рисовался с обычным сглаживанием. */
+  .sr,.rv{--rvp:-28%;
+    -webkit-mask-image:linear-gradient(180deg,#000 var(--rvp),rgba(0,0,0,0) calc(var(--rvp) + 30%));
+            mask-image:linear-gradient(180deg,#000 var(--rvp),rgba(0,0,0,0) calc(var(--rvp) + 30%))}
+  .rv-done{-webkit-mask-image:none !important;mask-image:none !important}
   /* SplitText: буквы (ch) внутри слов-обёрток (chw) — обёртка не даёт
      строке ломаться посреди слова */
   .chw{display:inline-block;white-space:nowrap}
@@ -581,19 +589,22 @@
   .bw-pin{position:relative;height:100%;overflow:hidden}
   .bw-bg{position:absolute;inset:0;transform-origin:50% 50%;
     background:linear-gradient(180deg,#1B3159 0%,#1F3D48 42%,#24503F 100%)}
+  /* ⚠️ БЕЗ will-change/backface-visibility (24.07): с ними план, растянутый до
+     7×, получал собственный слой размером в десяток тысяч пикселей, и при
+     прокрутке НАЗАД Chrome отрисовывал устаревший кусок текстуры — картинка
+     вставала посреди экрана огрызком. filter при этом оставляем на вложенных
+     картинках (см. ниже): так он считается один раз, а не на каждом кадре. */
   .bw-plane{position:absolute;inset:0;transform-origin:50% 50%;pointer-events:none}
   .bw-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-  /* венок — НЕ фуллскрин-кавер (при scale<1 торчали прямые срезы файла):
-     цельная картинка по центру + радиальная растушёвка прячет края,
-     где листва обрезана границей изображения */
-  .bw-img--hole{inset:auto;left:50%;top:50%;width:max(92vw,118vh);height:auto;
-    transform:translate(-50%,-50%);
-    -webkit-mask-image:radial-gradient(50% 50% at 50% 50%, #000 58%, rgba(0,0,0,0) 87%);
-            mask-image:radial-gradient(50% 50% at 50% 50%, #000 58%, rgba(0,0,0,0) 87%)}
   /* стена в глубине — вечерний свет; ближние кусты почти в силуэт и в
      лёгком расфокусе (глубина резкости — как у камеры) */
-  .bw-plane--wall{filter:brightness(.82) saturate(.95)}
-  .bw-plane--near{filter:brightness(.4) saturate(.75) blur(2.5px)}
+  .bw-plane--wall .bw-img{filter:brightness(.82) saturate(.95)}
+  /* ⚠️ кусты СПЕЦИАЛЬНО крупнее экрана (24.07): у вырезанной листвы края
+     сходят на нет полупрозрачной каймой (~15 px по бокам и ~25 строк снизу),
+     и по левому краю и низу проступала полоска светлой стены. Растим план
+     на 8% в каждую сторону — мягкие края уезжают за кадр. */
+  .bw-plane--near{inset:-8%}
+  .bw-plane--near .bw-img{filter:brightness(.4) saturate(.75) blur(2.5px)}
   /* жёлтое свечение в дырке убрано (реш. пользователя 23.07) */
   /* дымка-воздух между стеной и кустами */
   .bw-haze{position:absolute;inset:0;pointer-events:none;background:#1B3159}
@@ -607,6 +618,11 @@
     background:radial-gradient(circle, #FFE9A8 0%, rgba(255,214,110,0) 70%);
     animation:ffTw 2.8s ease-in-out infinite}
   @keyframes ffTw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+  /* ⚠️ мерцание глушим на время пролёта (24.07): светлячок живёт ВНУТРИ плана,
+     а план в этот момент растянут до 7×. Пока внутри что-то анимируется,
+     видеокарта не может держать слой готовым и перерисовывает его целиком
+     в увеличенном размере на каждом кадре — это и был главный тормоз. */
+  #burrow.flying .ff{animation:none;opacity:.6}
   /* кремовый «выход» убран (реш. пользователя 23.07): после пролёта остаёмся
      в тёмном пространстве — рисованное небо (night-sky) с луной и облаками,
      CSS-полумесяц стал не нужен */
@@ -616,11 +632,15 @@
   /* лёгкая виньетка под текстовой зоной (основной контраст несёт стекло) */
   .bw-ui::before{content:'';position:absolute;inset:-10%;z-index:-1;
     background:radial-gradient(52% 60% at 32% 48%, rgba(8,14,26,.3), transparent 72%)}
-  /* стекло (Liquid Glass, как шапка): панель заголовка и карточки */
-  .bw-glass{background:rgba(12,20,36,.44);border:1px solid rgba(247,239,225,.2);
+  /* стекло: панель заголовка и карточки.
+     ⚠️ backdrop-filter здесь убран (24.07): панель ЕДЕТ на камеру (scale 1→1.22),
+     а размытие фона пересчитывается заново на каждом кадре и в новом масштабе —
+     самая дорогая операция всей сцены. На тёмном саду разница почти не видна,
+     поэтому плотность фона просто чуть подняли. */
+  .bw-glass{background:linear-gradient(180deg,rgba(14,24,42,.62),rgba(10,18,32,.55));
+    border:1px solid rgba(247,239,225,.2);
     border-radius:20px;box-shadow:0 12px 38px rgba(8,14,26,.35),
-    inset 0 1px 0 rgba(247,239,225,.14);
-    -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+    inset 0 1px 0 rgba(247,239,225,.14)}
   .bw-glass--head{display:inline-block;padding:18px 26px 20px;max-width:560px}
   .bw-glass--head h2{max-width:15ch}
   .bw-uiw{max-width:var(--maxw);margin:0 auto;width:100%}
@@ -629,10 +649,10 @@
     line-height:1.15;max-width:17ch;text-shadow:0 2px 22px rgba(10,20,16,.45)}
   .bw-ui .uline{color:#E3A434}
   .bw-cards{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap;max-width:920px}
-  .bw-cards article{flex:1 1 240px;background:rgba(12,20,36,.44);border:1px solid rgba(247,239,225,.2);
+  .bw-cards article{flex:1 1 240px;border:1px solid rgba(247,239,225,.2);
+    background:linear-gradient(180deg,rgba(14,24,42,.62),rgba(10,18,32,.55));
     border-radius:16px;padding:14px 16px;
-    box-shadow:0 10px 30px rgba(8,14,26,.3), inset 0 1px 0 rgba(247,239,225,.12);
-    -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+    box-shadow:0 10px 30px rgba(8,14,26,.3), inset 0 1px 0 rgba(247,239,225,.12)}
   .bw-cards h3{font-family:'Yeseva One',serif;font-weight:400;font-size:17px;margin-bottom:6px}
   .bw-cards p{font-size:13.5px;line-height:1.55;opacity:.85}
   @media (max-width:719px){
@@ -800,6 +820,7 @@
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto}
     .reveal{opacity:1;transform:none}
+    .sr,.rv{-webkit-mask-image:none !important;mask-image:none !important}
     .scrollhint,.winGlow{animation:none}
     .chev{animation:none}
   }
@@ -1828,65 +1849,52 @@
           {opacity:1, y:0, duration:.45, ease:'power3.out', stagger:.006, delay:.6, overwrite:true});
       };
     });
-    /* ================== ScrollReveal ДЛЯ ВСЕХ (реш. 22.07) ==================
-       Текст всех блоков собирается из слов по мере прокрутки (скраб), картинки
-       карточек проявляются из размытия в той же очереди. НЕ дробим: кнопки
-       (нельзя рассыпать), плашку статуса (текст перезаписывает JS), svg.
-       ⚠️ Окна НЕ как в React-оригинале ('bottom bottom'): у коротких строк низ
-       достигает низа экрана раньше старта — окно выходит отрицательным и всё
-       проигрывается мгновенно. Привязка к пути по экрану: 88% → 45% высоты окна. */
-    function srSplit(el){
-      var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: function(n){
-        if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        for (var p = n.parentNode; p && p !== el; p = p.parentNode){
-          if (p.nodeType !== 1) continue;
-          if (p instanceof SVGElement) return NodeFilter.FILTER_REJECT;
-          var c = p.classList;
-          if (c && (c.contains('chip') || c.contains('ic') || c.contains('btn') || c.contains('word')))
-            return NodeFilter.FILTER_REJECT;
+    /* ============ ПРОЯВЛЕНИЕ ТЕКСТА v3 «световая шторка» (24.07) ==========
+       Было: каждое слово — отдельный спан, прозрачность+blur на скраб-скролле.
+       Три беды: (1) ~70 скраб-триггеров пересчитывали filter у сотен спанов
+       на каждом кадре — страница дёргалась, а вместе с пином сада особенно;
+       (2) applyText() переписывает textContent у [data-i18n], и после смены
+       языка спаны исчезали вместе с анимацией; (3) скраб «отыгрывал назад»
+       от любого движения колёсика.
+       Стало: ОДИН ScrollTrigger.batch на всю страницу — что вошло в кадр
+       вместе, тем каскадом и проявляется. По блоку идёт мягкая шторка
+       (маска-градиент сверху вниз), блок чуть поднимается. Анимируются две
+       величины на элемент, ничего не пересчитывается во время прокрутки.
+       По завершении маску снимаем — текст остаётся резким. */
+    var rvEls = [];
+    gsap.utils.toArray('.sr, .reveal').forEach(function(el){
+      if (el.closest('.hero')) return;          /* у hero своя секвенция (SplitText) */
+      el.classList.remove('reveal');            /* прячет маска, а не opacity */
+      el.classList.add('rv');
+      rvEls.push(el);
+    });
+    if (rvEls.length){
+      gsap.set(rvEls, {opacity:1, y:26, '--rvp':'-28%'});
+      ScrollTrigger.batch(rvEls, {
+        start:'top 88%', once:true,
+        onEnter: function(batch){
+          /* ⚠️ каскад ограничен по СУММЕ: при фиксированном шаге на высоком
+             экране хвост партии ждал бы очереди секундами */
+          gsap.to(batch, {y:0, '--rvp':'128%', duration:1.05, ease:'expo.out',
+            stagger: Math.min(.09, .5 / batch.length), overwrite:true,
+            onComplete: function(){
+              this.targets().forEach(function(t){
+                t.classList.add('rv-done'); t.classList.remove('rv');
+                t.style.removeProperty('--rvp');
+              });
+            }});
         }
-        return NodeFilter.FILTER_ACCEPT;
-      }});
-      var texts = [];
-      while (tw.nextNode()) texts.push(tw.currentNode);
-      texts.forEach(function(n){
-        var frag = document.createDocumentFragment();
-        n.nodeValue.split(/(\s+)/).forEach(function(part){
-          if (!part) return;
-          if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-          var s = document.createElement('span');
-          s.className = 'word'; s.textContent = part;
-          frag.appendChild(s);
-        });
-        n.parentNode.replaceChild(frag, n);
       });
     }
-    var srAll = gsap.utils.toArray('.sr');
-    gsap.utils.toArray('.reveal').forEach(function(el){
-      if (el.closest('.hero')) return;
-      if (el.classList.contains('btn') || el.querySelector('iframe')) return; /* кнопки и карта — мягкое проявление ниже */
-      srAll.push(el);
-    });
-    srAll.forEach(function(el){
-      srSplit(el);
-      var items = el.querySelectorAll('.word, .ic img');
-      if (!items.length) return;               /* дробить нечего — останется на старом проявлении */
-      el.classList.remove('reveal');           /* контейнер видим, работают слова */
-      var tilt = el.classList.contains('sr') ? 4 : 2.5;   /* мелким блокам — наклон тише */
-      /* окно сдвинуто раньше (реш. 22.07): старт у самой кромки, сбор к 58% экрана */
-      gsap.fromTo(el, {transformOrigin:'0% 50%', rotate:tilt}, {rotate:0, ease:'none',
-        scrollTrigger:{trigger:el, start:'top bottom', end:'top 52%', scrub:true}});
-      gsap.fromTo(items, {opacity:0}, {opacity:1, ease:'none', stagger:.05,
-        scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
-      gsap.fromTo(items, {filter:'blur(9px)'}, {filter:'blur(0px)', ease:'none', stagger:.05,
-        scrollTrigger:{trigger:el, start:'top 97%', end:'top 58%', scrub:true}});
-    });
-
-    /* мягкое проявление — для того, что не дробится (кнопки, карта) */
-    gsap.utils.toArray('.reveal').forEach(function(el){
-      if (el.closest('.hero')) return;
-      gsap.to(el, {opacity:1, y:0, duration:.55, ease:'power2.out',
-        scrollTrigger:{trigger:el, start:'top 94%', once:true}});
+    /* золотая линия под заголовком дорисовывается «от руки» — вслед за шторкой */
+    gsap.utils.toArray('.uline path').forEach(function(p){
+      var L = 0;
+      try { L = p.getTotalLength(); } catch(e){}
+      if (!L) return;
+      gsap.fromTo(p, {strokeDasharray:L, strokeDashoffset:L},
+        {strokeDashoffset:0, duration:.9, ease:'power2.out', delay:.35,
+         scrollTrigger:{trigger:p.closest('h2') || p, start:'top 88%', once:true},
+         onComplete: function(){ p.style.strokeDasharray = 'none'; }});
     });
 
     /* ТРОПИНКА-СЛЕДЫ «Почему» (23.07 v2, реш. пользователя: «шире через края»
@@ -1967,8 +1975,18 @@
       var sec = document.getElementById('burrow');
       if (!sec) return;
       sec.classList.add('on');
+      /* класс .flying гасит мерцание светлячков на время полёта (см. CSS) —
+         ставим один раз на входе в полёт, а не на каждом кадре */
+      var flying = false;
+      /* scrub с числом, а не true (24.07): полёт догоняет прокрутку за ~.6 с.
+         Колёсико даёт скролл ступеньками, и жёсткая привязка 1:1 читалась как
+         рывки; со сглаживанием камера идёт непрерывно и с инерцией. */
       var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top', end: '+=240%',
-        scrub: true, pin: true, invalidateOnRefresh: true}});
+        scrub: .6, pin: true, invalidateOnRefresh: true,
+        onUpdate: function(self){
+          var f = self.progress > .2;
+          if (f !== flying){ flying = f; sec.classList.toggle('flying', f); }
+        }}});
       window.__bwST = tl.scrollTrigger;   /* для ?debug=1 и якоря #gallery */
       /* ⚠️ ВЫДЕРЖКА в начале (реш. 23.07): раньше полёт стартовал с первого же
          пикселя прокрутки и текст «Зерно, десерты…» таял, не успев прочитаться.
@@ -1977,10 +1995,19 @@
       var HOLD = .22, SPAN = 1 - HOLD;
       var at = function(p){ return HOLD + p * SPAN; };   /* позиция на таймлайне */
       var du = function(d){ return d * SPAN; };          /* длительность */
+      /* фаза 0 (24.07): выдержка не должна быть мёртвой. Пока секция въезжала,
+         текст был приглушён и приспущен — за время выдержки он ДОезжает на
+         место. Прокрутка всё время даёт отклик, но полёт всё ещё не начат. */
+      tl.fromTo('#burrow .bw-uiw', {y: 42, opacity: .3},
+        {y: 0, opacity: 1, ease: 'power2.out', duration: HOLD * .85}, 0);
       /* фаза 1: текст сцены тает и чуть летит на камеру */
       tl.fromTo('#burrow .bw-ui', {opacity: 1, scale: 1},
         {opacity: 0, scale: 1.22, ease: 'power1.in', duration: du(.26)}, at(.04));
       tl.set('#burrow .bw-ui', {pointerEvents: 'none'}, at(.2));
+      /* текст догорел — убираем его из отрисовки совсем (visibility, а не opacity:0:
+         прозрачный слой всё равно продолжает рисоваться поверх летящих планов).
+         tl.set в скрабе честно отыгрывает назад при прокрутке вверх. */
+      tl.set('#burrow .bw-ui', {visibility: 'hidden'}, at(.32));
       /* фаза 2: полёт — планы растут от центра с разной скоростью */
       /* ПАРАЛЛАКС (фикс 23.07): скорости планов РАЗНЫЕ по форме, не только
          по величине — кусты уходят мимо камеры линейно и рано (duration .6),
@@ -2030,6 +2057,8 @@
     }
   } else {
     document.querySelectorAll('.reveal').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
+    /* шторка стоит в CSS — без GSAP её надо снять, иначе .sr останется скрытым */
+    document.querySelectorAll('.sr,.rv').forEach(function(el){ el.classList.add('rv-done'); });
   }
   /* Страховка «если анимации не завелись». ⚠️ Только когда GSAP реально не загрузился:
      раньше таймер срабатывал и при живом GSAP — элемент, начавший плавное появление,
@@ -2039,6 +2068,7 @@
     document.querySelectorAll('.reveal').forEach(function(el){
       if (getComputedStyle(el).opacity === '0') { el.style.opacity=1; el.style.transform='none'; }
     });
+    document.querySelectorAll('.sr,.rv').forEach(function(el){ el.classList.add('rv-done'); });
   }, 3000);
 
   /* ================= ВЛЁТ (по кнопке, не барьер) ================= */
@@ -2239,7 +2269,10 @@
       (qs.get('shot') === 'why' ? '.hero,#bakery{display:none !important}' : '') +
       /* ?shot=burrow (алиас space) — сцена пролёта сверху страницы */
       (qs.get('shot') === 'burrow' || qs.get('shot') === 'space'
-        ? '.hero,#bakery,#why{display:none !important}' : '') +
+        /* .bw-uiw форсим: в headless нет прокрутки, а текст доезжает на место
+           за первые 18% скраба — иначе на снимке он всегда полупрозрачный */
+        ? '.hero,#bakery,#why{display:none !important}' +
+          '.bw-uiw{opacity:1 !important;transform:none !important}' : '') +
       /* ?shot=inside — состояние «внутри» без анимации: в headless переход
          не доигрывает и оба текста наложены друг на друга */
       (qs.get('shot') === 'inside'
@@ -2601,7 +2634,9 @@ class Title {
     });
     this.mesh = new Mesh(gl, { geometry: new Plane(gl), program });
     const aspect = width / height;
-    const th = plane.scale.y * 0.15;
+    /* 0.15→0.13 (24.07): длинная подпись у крайней, наклонённой карточки
+       вылезала за нижний край канваса и обрезалась */
+    const th = plane.scale.y * 0.13;
     this.mesh.scale.set(th * aspect, th, 1);
     this.mesh.position.y = -plane.scale.y * 0.5 - th * 0.5 - 0.05;
     this.mesh.setParent(plane);
@@ -2628,7 +2663,8 @@ class Media {
         uniform float uTime;uniform float uSpeed;varying vec2 vUv;
         void main(){
           vUv=uv;vec3 p=position;
-          p.z=(sin(p.x*4.0+uTime)*1.5+cos(p.y*2.0+uTime)*1.5)*(0.1+uSpeed*0.5);
+          /* амплитуда ряби снижена (24.07): карточки «волновались» слишком сильно */
+          p.z=(sin(p.x*4.0+uTime)*1.0+cos(p.y*2.0+uTime)*1.0)*(0.07+uSpeed*0.32);
           gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
         }`,
       fragment: `precision highp float;
@@ -2681,9 +2717,11 @@ class Media {
   onResize(o){
     if (o && o.screen) this.screen = o.screen;
     if (o && o.viewport) this.viewport = o.viewport;
+    /* 900→820 (24.07): вместе с дугой и подписью карточка должна помещаться
+       в канвас по высоте — раньше нижний ряд срезало */
     const s = this.screen.height / 1500;
-    this.plane.scale.y = (this.viewport.height * (900 * s)) / this.screen.height;
-    this.plane.scale.x = (this.viewport.width  * (700 * s)) / this.screen.width;
+    this.plane.scale.y = (this.viewport.height * (820 * s)) / this.screen.height;
+    this.plane.scale.x = (this.viewport.width  * (640 * s)) / this.screen.width;
     this.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
     /* зазор между карточками: на узких экранах чуть больше (реш. 23.07) */
     this.width = this.plane.scale.x + (this.screen.width < 720 ? 2.9 : 2);
@@ -2720,7 +2758,13 @@ function boot(){
     const fov = camera.fov * Math.PI / 180;
     const h = 2 * Math.tan(fov / 2) * camera.position.z;
     viewport = { width: h * camera.aspect, height: h };
-    bendCur = Math.max(.8, viewport.width * 0.11);   /* ~25° наклона на любом экране */
+    /* ⚠️ bend в этих формулах = РОВНО максимальный «провал» крайней карточки
+       в мировых единицах (R=(H²+B²)/2B даёт arc(H)=B). Поэтому сверху нужен
+       предел от ВЫСОТЫ вьюпорта: на широком экране 0.11·ширины уводило
+       крайние карточки вместе с подписями за нижний край канваса — их резало
+       (замечание 24.07). Заодно дуга стала спокойнее: ~8° на десктопе,
+       ~13° на телефоне вместо прежних 25°. */
+    bendCur = Math.max(.8, Math.min(viewport.width * 0.055, viewport.height * 0.105));
     if (medias) medias.forEach(m => m.onResize({ screen, viewport }));
   }
   onResize();
