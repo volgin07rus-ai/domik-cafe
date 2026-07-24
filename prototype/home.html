@@ -584,7 +584,12 @@
      поглощает экран → галерея «Загляните внутрь». Ветви — ЗАГЛУШКИ
      (SVG-силуэты), под замену на иллюстрации. Прилипание = GSAP pin
      (CSS-sticky на живом экране не липнул). Без GSAP секции нет (.on из JS). */
-  #burrow{display:none;position:relative;height:100svh;overflow:hidden;background:#1B3159}
+  /* ⚠️ НЕ svh (фикс 24.07): svh — это высота экрана С показанной адресной
+     строкой. Как только при прокрутке она прячется, экран становится выше
+     секции, и снизу вылезала полоса кремового фона следующего блока.
+     lvh — высота при спрятанной строке, она не меняется по ходу прокрутки. */
+  #burrow{display:none;position:relative;height:100vh;height:100lvh;
+    overflow:hidden;background:#1B3159}
   #burrow.on{display:block}
   .bw-pin{position:relative;height:100%;overflow:hidden}
   .bw-bg{position:absolute;inset:0;transform-origin:50% 50%;
@@ -605,6 +610,12 @@
      на 8% в каждую сторону — мягкие края уезжают за кадр. */
   .bw-plane--near{inset:-8%}
   .bw-plane--near .bw-img{filter:brightness(.4) saturate(.75) blur(2.5px)}
+  /* ⚠️ на телефоне блюр снимаем (24.07): куст разрастается до 4.8×, и размытие
+     пересчитывается по всей увеличенной площади — на мобильной видеокарте это
+     главный источник рывков. Кусты и так почти силуэт, разницы не видно. */
+  @media (max-aspect-ratio: 4/5){
+    .bw-plane--near .bw-img{filter:brightness(.4) saturate(.75)}
+  }
   /* жёлтое свечение в дырке убрано (реш. пользователя 23.07) */
   /* дымка-воздух между стеной и кустами */
   .bw-haze{position:absolute;inset:0;pointer-events:none;background:#1B3159}
@@ -624,6 +635,9 @@
      перерисовывает весь этот слой каждый кадр; плюс к финалу зума светлячок
      стены уезжал в угол экрана и висел жёлтой точкой над галереей. */
   #burrow.flying .ff{animation:none;opacity:0}
+  /* облака дрейфуют бесконечно — на время полёта тоже глушим: лишняя
+     перерисовка полупрозрачных пятен во весь экран там ни к чему */
+  #burrow.flying .amb-cloud{animation-play-state:paused}
   /* кремовый «выход» убран (реш. пользователя 23.07): после пролёта остаёмся
      в тёмном пространстве — рисованное небо (night-sky) с луной и облаками,
      CSS-полумесяц стал не нужен */
@@ -1507,25 +1521,45 @@
     }
     /* Распад и сборка (реш. 22.07, v2): каретка схлопывается в капли,
        капли дугами перелетают к целевой кнопке и там собираются в пилюлю. */
+    var flowTl = null, flowTo = null;
     function flow(btn){
       if (reduce || !window.gsap){ place(btn); return; }
+      /* быстрый повторный клик: доигрывать старое незачем — ставим каретку
+         туда, куда она ехала, и стартуем новый перелёт с чистого места */
+      if (flowTl){
+        flowTl.kill(); flowTl = null;
+        if (flowTo) place(flowTo);
+        gsap.set(pill, {x:0, scaleX:1, scaleY:1});
+      }
       var newL = btn.offsetLeft, newW = btn.offsetWidth;
       var curL = parseFloat(pill.style.left) || 2, curW = parseFloat(pill.style.width) || 34;
       if (Math.abs(newL - curL) < 1){ place(btn); return; }
+      flowTo = btn;
       var h = wrap.clientHeight;
       var startCx = curL + curW/2, endCx = newL + newW/2;
 
-      /* Тайминги ускорены (реш. 23.07: каретка казалась заторможенной) —
-         весь цикл ~0.45с вместо 0.7с, паузы между фазами короче. */
-      /* 1) старая пилюля схлопывается в точку */
-      gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.12, ease:'power2.in',
-        onComplete:function(){
-          /* 3) …и собирается на новом месте, когда капли долетают */
-          gsap.set(pill, {left:newL, width:newW, scaleX:0, scaleY:0});
-          gsap.to(pill, {scaleX:1, scaleY:1, duration:.3, delay:.08, ease:'back.out(1.7)'});
-        }});
+      /* ⚠️ Каретка ЕДЕТ, а не телепортируется (реш. 24.07). Раньше она
+         схлопывалась на старой кнопке и возникала уже на новой — между этими
+         двумя событиями движения не было вовсе, и глаз читал перелёт как
+         рывок; ускорение тайминга проблему только обострило. Теперь одна
+         непрерывная фраза: сплющилась → перетекла → разжалась на месте.
+         Фазы перекрываются, отскок мягкий (back.out 1.15 вместо 1.7),
+         весь цикл ~0.8 с. Позицию меняем через x, а left переписываем в
+         самом конце — на глаз это тот же самый пиксель, без скачка. */
+      flowTl = gsap.timeline({onComplete:function(){ flowTl = null; place(btn); }});
+      flowTl.to(pill, {scaleX:.42, scaleY:.62, transformOrigin:'50% 50%',
+        duration:.2, ease:'sine.in'}, 0);
+      /* width тоже анимируем: кнопки языков РАЗНОЙ ширины (32/31/28/22 px),
+         и без этого пилюля ехала старым размером, а в конце скачком меняла его */
+      flowTl.to(pill, {x:newL - curL, width:newW, duration:.5, ease:'power2.inOut'}, .08);
+      flowTl.to(pill, {scaleX:1, scaleY:1, duration:.36, ease:'back.out(1.15)'}, .4);
+      /* ⚠️ immediateRender:false обязателен: .set() внутри таймлайна по
+         умолчанию отрабатывает СРАЗУ при создании — left прыгал на новое
+         место в тот же кадр, и весь перелёт пропадал */
+      flowTl.set(pill, {left:newL, width:newW, x:0, immediateRender:false}, .78);
 
-      /* 2) капли: вылетают из старого места, дугами летят к цели и тонут в новой пилюле */
+      /* капли сопровождают перелёт: вылетают из старого места, дугами летят
+         к цели и тонут в собравшейся пилюле */
       for (var i = 0; i < 5; i++){
         var d = document.createElement('span');
         d.className = 'lang-drop';
@@ -1536,19 +1570,22 @@
         goo.appendChild(d);
         (function(el, i){
           var dx = endCx - startCx;
-          var arc = (Math.random()*16 - 8);            // у каждой капли своя дуга
-          var t = .2 + Math.random()*.1;
-          var dl = .02 + i*.022;
-          gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'power1.inOut'});
+          var arc = (Math.random()*22 - 11);           // у каждой капли своя дуга
+          var t = .36 + Math.random()*.12;
+          var dl = .06 + i*.032;
+          gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'sine.inOut'});
           gsap.to(el, {y:arc, duration:t/2, delay:dl, ease:'sine.out'});
           gsap.to(el, {y:0, duration:t/2, delay:dl + t/2, ease:'sine.in'});
-          gsap.to(el, {scale:0, duration:.1, delay:dl + t, ease:'power2.in',
+          gsap.to(el, {scale:0, duration:.16, delay:dl + t, ease:'power2.in',
             onComplete:function(){ try { goo.removeChild(el); } catch(e){} }});
         })(d, i);
       }
     }
     place(activeBtn());
-    window.__langReplace = function(){ place(activeBtn()); };
+    /* ⚠️ во время перелёта не трогаем: place() переписал бы left, пока каретку
+       везёт x, и она улетела бы на двойное расстояние. Финальную посадку
+       делает сам таймлайн в onComplete. */
+    window.__langReplace = function(){ if (!flowTl) place(activeBtn()); };
     btns.forEach(function(b){
       b.addEventListener('click', function(){
         var l = b.getAttribute('data-lang');
@@ -1561,9 +1598,11 @@
     });
     /* при старте каретка садится на активный язык (его мог выставить applyText) */
     place(activeBtn());
-    addEventListener('resize', function(){ place(activeBtn()); });
+    /* ⚠️ мимо летящей каретки: пока её везёт x, переписывать left нельзя */
+    addEventListener('resize', function(){ if (!flowTl) place(activeBtn()); });
     /* после догрузки шрифтов ширины кнопок меняются — пересадить каретку */
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ place(activeBtn()); });
+    if (document.fonts && document.fonts.ready)
+      document.fonts.ready.then(function(){ if (!flowTl) place(activeBtn()); });
   })();
 
   /* ---------- GooeyNav (порт с React Bits, реш. 22.07) ----------
@@ -1783,6 +1822,11 @@
   var playPullChars = null;   // побуквенный вход «Я в Домике», зовётся из showInside
   if (!reduce && window.gsap && window.ScrollTrigger){
     gsap.registerPlugin(ScrollTrigger);
+    /* ⚠️ ignoreMobileResize (24.07): на телефоне адресная строка прячется и
+       появляется прямо во время прокрутки. Каждое такое «изменение размера
+       окна» заставляло ScrollTrigger пересчитывать всё на лету — отсюда
+       подвисания, скачки шапки и уползающая закреплённая секция. */
+    ScrollTrigger.config({ignoreMobileResize: true});
 
     gsap.utils.toArray('.hero .reveal').forEach(function(el,i){
       /* заголовок, адрес и кнопка идут своей секвенцией (SplitText ниже) */
@@ -1978,7 +2022,9 @@
         if (tween){ if (tween.scrollTrigger) tween.scrollTrigger.kill(); tween.kill(); }
         tween = gsap.fromTo(uses, {opacity: 0}, {opacity: .5, duration: .3, ease: 'none',
           stagger: .35,
-          scrollTrigger: {trigger: box, start: 'top 72%', end: 'bottom 62%', scrub: true}});
+          /* scrub числом, а не true (24.07): на телефоне прокрутка приходит
+             рывками, и следы при жёсткой привязке проступали ступеньками */
+          scrollTrigger: {trigger: box, start: 'top 72%', end: 'bottom 62%', scrub: .6}});
       }
       build();
       addEventListener('load', function(){ build(); }, {once: true});
@@ -2032,11 +2078,15 @@
       /* класс .flying гасит мерцание светлячков на время полёта (см. CSS) —
          ставим один раз на входе в полёт, а не на каждом кадре */
       var flying = false;
-      /* scrub с числом, а не true (24.07): полёт догоняет прокрутку за ~.6 с.
-         Колёсико даёт скролл ступеньками, и жёсткая привязка 1:1 читалась как
-         рывки; со сглаживанием камера идёт непрерывно и с инерцией. */
-      var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top', end: '+=240%',
-        scrub: .6, pin: true, invalidateOnRefresh: true,
+      /* scrub числом, а не true: полёт догоняет прокрутку с инерцией — палец и
+         колёсико дают прокрутку ступеньками, жёсткая привязка 1:1 читается как
+         рывки. На телефоне сглаживание сильнее и дистанция длиннее: инерция
+         свайпа там пролетает несколько экранов за раз, и короткий пин
+         проскакивался целиком вместе с галереей (жалоба 24.07). */
+      var touch = matchMedia('(hover: none), (max-aspect-ratio: 4/5)').matches;
+      var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top',
+        end: touch ? '+=360%' : '+=260%',
+        scrub: touch ? 1 : .7, pin: true, invalidateOnRefresh: true,
         onUpdate: function(self){
           var f = self.progress > .2;
           if (f !== flying){ flying = f; sec.classList.toggle('flying', f); }
@@ -2046,22 +2096,26 @@
          пикселя прокрутки и текст «Зерно, десерты…» таял, не успев прочитаться.
          Первые HOLD прокрутки блок просто стоит; вся хореография сжата в SPAN,
          поэтому взаимные скорости планов сохранены. */
-      var HOLD = .22, SPAN = 1 - HOLD;
+      /* ⚠️ Проявление текста при въезде УБРАНО (реш. пользователя 24.07):
+         «пусть сразу будет виден и статичен, чтобы до него не долистывать».
+         Теперь блок читается с того момента, как показался край секции.
+         TAIL — стоянка в конце: галерея уже собрана и просто стоит, пока
+         не долистаешь. Без неё резкий свайп на телефоне пролетал её насквозь. */
+      var HOLD = .18, TAIL = .18, SPAN = 1 - HOLD - TAIL;
       var at = function(p){ return HOLD + p * SPAN; };   /* позиция на таймлайне */
       var du = function(d){ return d * SPAN; };          /* длительность */
-      /* фаза 0 (24.07): выдержка не должна быть мёртвой. Пока секция въезжала,
-         текст был приглушён и приспущен — за время выдержки он ДОезжает на
-         место. Прокрутка всё время даёт отклик, но полёт всё ещё не начат. */
-      tl.fromTo('#burrow .bw-uiw', {y: 42, opacity: .3},
-        {y: 0, opacity: 1, ease: 'power2.out', duration: HOLD * .85}, 0);
+      /* ⚠️ пустышка на всю длину: GSAP считает длительность таймлайна по
+         последнему твину, а он заканчивается на HOLD+SPAN — хвостовую стоянку
+         шкала бы просто съела, и галерея опять доезжала бы к самому концу */
+      tl.to({}, {duration: 1}, 0);
       /* фаза 1: текст сцены тает и чуть летит на камеру */
       tl.fromTo('#burrow .bw-ui', {opacity: 1, scale: 1},
         {opacity: 0, scale: 1.22, ease: 'power1.in', duration: du(.26)}, at(.04));
-      tl.set('#burrow .bw-ui', {pointerEvents: 'none'}, at(.2));
+      tl.set('#burrow .bw-ui', {pointerEvents: 'none', immediateRender: false}, at(.2));
       /* текст догорел — убираем его из отрисовки совсем (visibility, а не opacity:0:
          прозрачный слой всё равно продолжает рисоваться поверх летящих планов).
          tl.set в скрабе честно отыгрывает назад при прокрутке вверх. */
-      tl.set('#burrow .bw-ui', {visibility: 'hidden'}, at(.32));
+      tl.set('#burrow .bw-ui', {visibility: 'hidden', immediateRender: false}, at(.32));
       /* фаза 2: полёт — планы растут от центра с разной скоростью */
       /* ПАРАЛЛАКС (фикс 23.07): скорости планов РАЗНЫЕ по форме, не только
          по величине — кусты уходят мимо камеры линейно и рано (duration .6),
@@ -2089,8 +2143,8 @@
       /* фаза 3: пролетели дырку — остаёмся в тёмном звёздном пространстве,
          и НА ЭТОМ ЖЕ месте проявляется галерея */
       tl.fromTo('#burrow .bw-gal', {opacity: 0, y: 36},
-        {opacity: 1, y: 0, ease: 'power2.out', duration: du(.24)}, at(.72));
-      tl.set('#burrow .bw-gal', {pointerEvents: 'auto'}, at(.78));
+        {opacity: 1, y: 0, ease: 'power2.out', duration: du(.26)}, at(.74));
+      tl.set('#burrow .bw-gal', {pointerEvents: 'auto', immediateRender: false}, at(.8));
 
       /* ?bw=0.5 — поставить пролёт на заданную фазу и замереть.
          Нужен для снимков в headless: там нет прокрутки, а скраб со
@@ -2344,10 +2398,7 @@
       (qs.get('shot') === 'why' ? '.hero,#bakery{display:none !important}' : '') +
       /* ?shot=burrow (алиас space) — сцена пролёта сверху страницы */
       (qs.get('shot') === 'burrow' || qs.get('shot') === 'space'
-        /* .bw-uiw форсим: в headless нет прокрутки, а текст доезжает на место
-           за первые 18% скраба — иначе на снимке он всегда полупрозрачный */
-        ? '.hero,#bakery,#why{display:none !important}' +
-          '.bw-uiw{opacity:1 !important;transform:none !important}' : '') +
+        ? '.hero,#bakery,#why{display:none !important}' : '') +
       /* ?shot=gallery — финал пролёта: галерея и искры над ночным небом */
       (qs.get('shot') === 'gallery'
         ? '.hero,#bakery,#why{display:none !important}' +
@@ -2943,8 +2994,18 @@ function boot(){
     new IntersectionObserver(es => { visible = es[0].isIntersecting; }, { rootMargin: '60px' })
       .observe(box);
 
+  /* ⚠️ Секция закреплена на весь пролёт, поэтому одного «блок на экране» мало
+     (фикс 24.07): галерея прозрачна почти весь полёт, а WebGL всё это время
+     честно рисовал 60 кадров в секунду — ровно там, где кадры нужнее всего.
+     Прозрачность .bw-gal ставит GSAP инлайном, читаем её напрямую (без
+     getComputedStyle, чтобы не дёргать пересчёт стилей каждый кадр). */
+  const galAwake = () => {
+    const o = parseFloat(galWrap.style.opacity);
+    return isNaN(o) || o > .02;
+  };
+
   (function update(){
-    if (visible){
+    if (visible && galAwake()){
       scroll.current = lerp(scroll.current, scroll.target, scroll.ease);
       const dir = scroll.current > scroll.last ? 'right' : 'left';
       medias.forEach(m => m.update(scroll, dir));

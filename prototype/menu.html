@@ -519,10 +519,10 @@
   applyText(lang);
   /* смена языка: плавный блюр-переход текста + пересадка каретки */
   function switchLang(l, persist){
-    if (reduce){ applyText(l); place(activeBtn()); }
+    if (reduce){ applyText(l); placeSafe(activeBtn()); }
     else {
       root.classList.add('lang-swap');
-      setTimeout(function(){ applyText(l); root.classList.remove('lang-swap'); place(activeBtn()); }, 200);
+      setTimeout(function(){ applyText(l); root.classList.remove('lang-swap'); placeSafe(activeBtn()); }, 200);
     }
     if (persist) try { localStorage.setItem('domik_lang', l); } catch(e){}
   }
@@ -533,18 +533,33 @@
   wrap.insertBefore(goo, wrap.firstChild);
   var pill = document.createElement('span'); pill.className = 'lang-pill'; goo.appendChild(pill);
   function place(btn){ if (!btn) return; pill.style.left = btn.offsetLeft + 'px'; pill.style.width = btn.offsetWidth + 'px'; }
+  var flowTl = null, flowTo = null;
+  /* ⚠️ пока каретку везёт x, left трогать нельзя — иначе улетит на двойное
+     расстояние. Все внешние вызовы (смена языка, ресайз, загрузка шрифтов)
+     идут через placeSafe, а финальную посадку делает сам таймлайн. */
+  function placeSafe(btn){ if (!flowTl) place(btn); }
   function flow(btn){
     if (reduce || !window.gsap){ place(btn); return; }
+    if (flowTl){ flowTl.kill(); flowTl = null;
+      if (flowTo) place(flowTo);
+      gsap.set(pill, {x:0, scaleX:1, scaleY:1}); }
     var newL = btn.offsetLeft, newW = btn.offsetWidth;
     var curL = parseFloat(pill.style.left) || 2, curW = parseFloat(pill.style.width) || 34;
     if (Math.abs(newL - curL) < 1){ place(btn); return; }
+    flowTo = btn;
     var h = wrap.clientHeight, startCx = curL + curW / 2, endCx = newL + newW / 2;
-    /* тайминги ускорены (реш. 23.07) — весь цикл ~0.45с вместо 0.7с */
-    gsap.to(pill, {scaleX:.15, scaleY:.15, transformOrigin:'50% 50%', duration:.12, ease:'power2.in',
-      onComplete:function(){
-        gsap.set(pill, {left:newL, width:newW, scaleX:0, scaleY:0});
-        gsap.to(pill, {scaleX:1, scaleY:1, duration:.3, delay:.08, ease:'back.out(1.7)'});
-      }});
+    /* ⚠️ Каретка ЕДЕТ, а не телепортируется (реш. 24.07, как на главной):
+       раньше она схлопывалась на старой кнопке и возникала на новой —
+       движения между этими событиями не было, и перелёт читался рывком.
+       Теперь одна непрерывная фраза, мягкий отскок, весь цикл ~0.8 с. */
+    flowTl = gsap.timeline({onComplete:function(){ flowTl = null; place(btn); }});
+    flowTl.to(pill, {scaleX:.42, scaleY:.62, transformOrigin:'50% 50%', duration:.2, ease:'sine.in'}, 0);
+    flowTl.to(pill, {x:newL - curL, width:newW, duration:.5, ease:'power2.inOut'}, .08);
+    flowTl.to(pill, {scaleX:1, scaleY:1, duration:.36, ease:'back.out(1.15)'}, .4);
+    /* ⚠️ immediateRender:false обязателен: .set() внутри таймлайна по умолчанию
+       отрабатывает СРАЗУ при создании — left прыгал бы на новое место в тот же
+       кадр, и весь перелёт пропадал */
+    flowTl.set(pill, {left:newL, width:newW, x:0, immediateRender:false}, .78);
     for (var i = 0; i < 5; i++){
       var d = document.createElement('span'); d.className = 'lang-drop';
       var size = 5 + Math.random() * 6;
@@ -553,11 +568,11 @@
       d.style.top = (h / 2 - size / 2).toFixed(1) + 'px';
       goo.appendChild(d);
       (function(el, i){
-        var dx = endCx - startCx, arc = (Math.random() * 16 - 8), t = .2 + Math.random() * .1, dl = .02 + i * .022;
-        gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'power1.inOut'});
+        var dx = endCx - startCx, arc = (Math.random() * 22 - 11), t = .36 + Math.random() * .12, dl = .06 + i * .032;
+        gsap.fromTo(el, {x:0, scale:.4}, {x:dx, scale:1, duration:t, delay:dl, ease:'sine.inOut'});
         gsap.to(el, {y:arc, duration:t/2, delay:dl, ease:'sine.out'});
         gsap.to(el, {y:0, duration:t/2, delay:dl + t/2, ease:'sine.in'});
-        gsap.to(el, {scale:0, duration:.1, delay:dl + t, ease:'power2.in',
+        gsap.to(el, {scale:0, duration:.16, delay:dl + t, ease:'power2.in',
           onComplete:function(){ try { goo.removeChild(el); } catch(e){} }});
       })(d, i);
     }
@@ -570,8 +585,8 @@
       switchLang(l, true);
     });
   });
-  addEventListener('resize', function(){ place(activeBtn()); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ place(activeBtn()); });
+  addEventListener('resize', function(){ placeSafe(activeBtn()); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ placeSafe(activeBtn()); });
 
   /* ---------- BubbleMenu (как на главной): бургер надувает полноэкранные пилюли ---------- */
   var burger = document.getElementById('burger'), nav = document.getElementById('nav');
