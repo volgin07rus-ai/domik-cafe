@@ -593,16 +593,24 @@
      строкой. Как только при прокрутке она прячется, экран становится выше
      секции, и снизу вылезала полоса кремового фона следующего блока.
      lvh — высота при спрятанной строке, она не меняется по ходу прокрутки. */
-  #burrow{display:none;position:relative;height:100vh;height:100lvh;
-    overflow:hidden;background:#1B3159}
-  /* ⚠️ страховка от «белой вспышки» (24.07): прокладку под закреплённую секцию
-     создаёт сам ScrollTrigger, и в момент, когда адресная строка телефона
-     прячется, экран на кадр оказывается выше секции — снизу мелькала кремовая
-     страница. Красим прокладку в тот же ночной цвет: даже если щель мелькнёт,
-     она будет цвета сада. Пин на странице один, так что селектор безопасен. */
-  .pin-spacer{background:#1B3159}
+  /* ⚠️ ЗАКРЕПЛЕНИЕ — БРАУЗЕРНОЕ (position:sticky), НЕ программное (реш. 24.07).
+     GSAP-пин переключал блок в position:fixed и вёл его из скрипта. На
+     телефоне инерционная прокрутка идёт мимо основного потока, поэтому сцена
+     то отставала, то подпрыгивала, а на стыке мелькала кремовая щель; попытка
+     лечить это через pinType:'transform' сделала только хуже. Sticky двигает
+     сам компоновщик браузера — тем же механизмом, что и саму страницу, так что
+     расхождению взяться неоткуда. Прокладки и position:fixed больше нет вовсе.
+     ⚠️ #burrow БЕЗ overflow: любой overflow сделал бы его скролл-контейнером
+     и sticky перестал бы липнуть к экрану (обжигались 18.07).
+     Высота = экран + дистанция прокрутки сцены; на телефоне длиннее, потому
+     что инерция свайпа пролетает несколько экранов разом. */
+  #burrow{display:none;position:relative;height:360vh;height:360lvh;
+    background:#1B3159}
+  @media (hover:none),(max-aspect-ratio:4/5){
+    #burrow{height:460vh;height:460lvh}
+  }
   #burrow.on{display:block}
-  .bw-pin{position:relative;height:100%;overflow:hidden}
+  .bw-pin{position:sticky;top:0;height:100vh;height:100lvh;overflow:hidden}
   .bw-bg{position:absolute;inset:0;transform-origin:50% 50%;
     background:linear-gradient(180deg,#1B3159 0%,#1F3D48 42%,#24503F 100%)}
   /* ⚠️ БЕЗ will-change/backface-visibility (24.07): с ними план, растянутый до
@@ -703,6 +711,9 @@
      искры видно в промежутках. */
   .gal-sparks{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
   .bw-gal > section{position:relative;z-index:1}
+  /* мерцают только когда галерея на подходе — в тяжёлой части полёта 28 живых
+     элементов ни к чему (класс ставит скраб сцены) */
+  #burrow:not(.gal-on) .gal-sparks i{animation-play-state:paused}
   .gal-sparks.paused i{animation-play-state:paused}
   .gal-sparks i{position:absolute;display:block;background:#FFF3D2;
     clip-path:polygon(50% 0,57% 43%,100% 50%,57% 57%,50% 100%,43% 57%,0 50%,43% 43%);
@@ -1101,7 +1112,11 @@
     <!-- data-hole: центр прозрачной дырки в процентах от самой картинки
          (замерено по альфе: десктоп 50.8/48.6, мобилка 50/35.7) — по нему JS
          наводит зум и доводит дырку к центру кадра -->
-    <div class="bw-plane bw-plane--wall" data-scale="7" data-dur=".85" data-ease="power3.in"
+    <!-- data-scale-m: на телефоне хватает 5× — дырка к этому моменту уже шире
+         экрана, а каждый лишний шаг увеличения заставляет видеокарту заново
+         пересобирать огромный слой (главный источник рывков на мобилке) -->
+    <div class="bw-plane bw-plane--wall" data-scale="7" data-scale-m="5"
+      data-dur=".85" data-ease="power3.in"
       data-hole="50.8 48.6" data-hole-m="50 35.7">
       <picture>
         <source media="(max-aspect-ratio: 4/5)" srcset="garden-wall-m.webp">
@@ -1112,7 +1127,7 @@
     </div>
     <!-- дымка-воздух между стеной и кустами -->
     <div class="bw-haze"></div>
-    <div class="bw-plane bw-plane--near" data-scale="4.8" data-dur=".6">
+    <div class="bw-plane bw-plane--near" data-scale="4.8" data-scale-m="3.6" data-dur=".6">
       <i class="ff" style="left:24%;top:52%;width:7px;height:7px"></i>
       <i class="ff" style="left:74%;top:34%;animation-delay:-.8s"></i>
       <picture>
@@ -2098,27 +2113,27 @@
 
       /* класс .flying гасит мерцание светлячков на время полёта (см. CSS) —
          ставим один раз на входе в полёт, а не на каждом кадре */
-      var flying = false;
+      var flying = false, galOn = false;
       /* scrub числом, а не true: полёт догоняет прокрутку с инерцией — палец и
          колёсико дают прокрутку ступеньками, жёсткая привязка 1:1 читается как
          рывки. На телефоне сглаживание сильнее и дистанция длиннее: инерция
          свайпа там пролетает несколько экранов за раз, и короткий пин
          проскакивался целиком вместе с галереей (жалоба 24.07). */
       var touch = matchMedia('(hover: none), (max-aspect-ratio: 4/5)').matches;
-      /* ⚠️ pinType — ТОЛЬКО 'fixed' (проверено 24.07). Пробовал 'transform' на
-         телефоне, чтобы закрытая секция не могла оставить щель: щель ушла, но
-         блок стало двигать скриптом на каждом кадре, а инерционная прокрутка
-         на телефоне идёт мимо основного потока — картинка отставала и
-         «подпрыгивала» весь пролёт. Щель лечим покраской .pin-spacer.
-         anticipatePin — закрепляет чуть заранее, иначе на резком свайпе
-         прокрутка перескакивает границу пина рывком. */
-      var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top',
-        end: touch ? '+=360%' : '+=260%',
-        scrub: touch ? 1 : .7, pin: true, invalidateOnRefresh: true,
-        anticipatePin: 1,
+      /* ⚠️ БЕЗ pin: закрепление делает CSS-sticky (см. стили #burrow/.bw-pin).
+         ScrollTrigger теперь только КРУТИТ сцену по прокрутке и ничего не
+         двигает сам — ни fixed, ни прокладок, ни anticipatePin. Дистанция
+         задана высотой секции, поэтому конец — просто её низ. */
+      var tl = gsap.timeline({scrollTrigger: {trigger: sec,
+        start: 'top top', end: 'bottom bottom',
+        scrub: touch ? 1 : .7, invalidateOnRefresh: true,
         onUpdate: function(self){
           var f = self.progress > .2;
           if (f !== flying){ flying = f; sec.classList.toggle('flying', f); }
+          /* искры галереи мерцают только когда галерея на подходе: 28 живых
+             элементов в самой тяжёлой части полёта нам не нужны */
+          var g = self.progress > .65;
+          if (g !== galOn){ galOn = g; sec.classList.toggle('gal-on', g); }
         }}});
       window.__bwST = tl.scrollTrigger;   /* для ?debug=1 и якоря #gallery */
       /* ⚠️ ВЫДЕРЖКА в начале (реш. 23.07): раньше полёт стартовал с первого же
@@ -2157,7 +2172,8 @@
          стена почти стоит и «догоняет» рывком в конце (power3.in). Именно
          разница фаз даёт читаемую глубину; одинаковый ease её убивал. */
       gsap.utils.toArray('#burrow .bw-plane').forEach(function(pl){
-        var s = parseFloat(pl.getAttribute('data-scale')) || 2;
+        var sm = touch && pl.getAttribute('data-scale-m');
+        var s = parseFloat(sm || pl.getAttribute('data-scale')) || 2;
         var f = parseFloat(pl.getAttribute('data-from')) || 1;
         var ez = pl.getAttribute('data-ease') || 'power1.in';
         var d = parseFloat(pl.getAttribute('data-dur')) || 1;
