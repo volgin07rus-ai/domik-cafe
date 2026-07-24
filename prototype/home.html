@@ -2105,16 +2105,17 @@
          свайпа там пролетает несколько экранов за раз, и короткий пин
          проскакивался целиком вместе с галереей (жалоба 24.07). */
       var touch = matchMedia('(hover: none), (max-aspect-ratio: 4/5)').matches;
-      /* ⚠️ pinType 'transform' на телефоне (24.07): по умолчанию закреплённый
-         блок переводится в position:fixed, и во время инерционного свайпа
-         браузер успевает показать кадр, где его уже нет на месте — та самая
-         белая вспышка. С transform блок остаётся в потоке и просто сдвигается.
+      /* ⚠️ pinType — ТОЛЬКО 'fixed' (проверено 24.07). Пробовал 'transform' на
+         телефоне, чтобы закрытая секция не могла оставить щель: щель ушла, но
+         блок стало двигать скриптом на каждом кадре, а инерционная прокрутка
+         на телефоне идёт мимо основного потока — картинка отставала и
+         «подпрыгивала» весь пролёт. Щель лечим покраской .pin-spacer.
          anticipatePin — закрепляет чуть заранее, иначе на резком свайпе
          прокрутка перескакивает границу пина рывком. */
       var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top',
         end: touch ? '+=360%' : '+=260%',
         scrub: touch ? 1 : .7, pin: true, invalidateOnRefresh: true,
-        pinType: touch ? 'transform' : 'fixed', anticipatePin: 1,
+        anticipatePin: 1,
         onUpdate: function(self){
           var f = self.progress > .2;
           if (f !== flying){ flying = f; sec.classList.toggle('flying', f); }
