@@ -32,6 +32,11 @@
   /* scrollbar-gutter: во время полёта прокрутка блокируется, скроллбар исчезал
      и центрированная шапка съезжала на полширины скроллбара; жёлоб резервируем всегда */
   html{scrollbar-gutter:stable}
+  /* ⚠️ overflow-anchor:none (24.07): браузер сам «якорит» прокрутку, когда
+     содержимое выше меняет высоту. У закреплённой секции прокладка меняет
+     размер при каждом входе-выходе, и на резком свайпе назад якорь добавлял
+     свою поправку к инерции — страницу уносило далеко вверх. */
+  html{overflow-anchor:none}
   /* разрядка .035em — воздух для VAG; рукописным Caveat-элементам ниже возвращается normal */
   /* overflow-x: clip, НЕ hidden — hidden делает body скролл-контейнером и
      молча ломает position:sticky (норка не липла, 23.07). clip режет так же,
@@ -590,6 +595,12 @@
      lvh — высота при спрятанной строке, она не меняется по ходу прокрутки. */
   #burrow{display:none;position:relative;height:100vh;height:100lvh;
     overflow:hidden;background:#1B3159}
+  /* ⚠️ страховка от «белой вспышки» (24.07): прокладку под закреплённую секцию
+     создаёт сам ScrollTrigger, и в момент, когда адресная строка телефона
+     прячется, экран на кадр оказывается выше секции — снизу мелькала кремовая
+     страница. Красим прокладку в тот же ночной цвет: даже если щель мелькнёт,
+     она будет цвета сада. Пин на странице один, так что селектор безопасен. */
+  .pin-spacer{background:#1B3159}
   #burrow.on{display:block}
   .bw-pin{position:relative;height:100%;overflow:hidden}
   .bw-bg{position:absolute;inset:0;transform-origin:50% 50%;
@@ -685,11 +696,13 @@
   .bw-gal .lead{opacity:.8}
   .bw-gal .cgal{margin:20px 0 6px}
   .bw-gal .cgal-hint{color:var(--cream);opacity:.55}
-  /* ЖИВЫЕ ЗВЁЗДЫ ПОВЕРХ ГАЛЕРЕИ (24.07): те же четырёхлучевые звёздочки, что
-     нарисованы в небе, но дышащие — искры мерцают прямо по фотографиям.
-     Слой лежит ВНУТРИ .bw-gal, поэтому проявляется вместе с ней; клики и
-     перетаскивание карусели сквозь него проходят (pointer-events:none). */
-  .gal-sparks{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+  /* ЖИВЫЕ ЗВЁЗДЫ ПОД ГАЛЕРЕЕЙ (24.07): те же четырёхлучевые звёздочки, что
+     нарисованы в небе, но дышащие. Лежат ВНУТРИ .bw-gal, поэтому проявляются
+     вместе с ней, и ПОД фотографиями (реш. пользователя): это часть неба, а не
+     наклейки на снимках. Канвас карусели прозрачен между карточками, так что
+     искры видно в промежутках. */
+  .gal-sparks{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .bw-gal > section{position:relative;z-index:1}
   .gal-sparks.paused i{animation-play-state:paused}
   .gal-sparks i{position:absolute;display:block;background:#FFF3D2;
     clip-path:polygon(50% 0,57% 43%,100% 50%,57% 57%,50% 100%,43% 57%,0 50%,43% 43%);
@@ -1137,6 +1150,9 @@
     <!-- галерея появляется НА ЭТОМ ЖЕ экране в конце полёта, в тёмном
          пространстве со звёздами и луной, не отдельным блоком -->
     <div class="bw-gal">
+      <!-- мерцающие звёзды (наполняются из JS) — ПЕРЕД галереей, значит под
+           фотографиями: они часть неба, а не наклейки на снимках -->
+      <div class="gal-sparks" id="galSparks" aria-hidden="true"></div>
       <section id="gallery">
         <div class="wrap">
           <div class="eyebrow" data-i18n="look_inside">Загляните внутрь</div>
@@ -1153,8 +1169,6 @@
         <div class="wgal" id="wgal" tabindex="0" role="region"
           aria-label="Круговая галерея фотографий — тяните вбок или стрелками"></div>
       </section>
-      <!-- мерцающие звёзды поверх фотографий (наполняются из JS) -->
-      <div class="gal-sparks" id="galSparks" aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -2070,6 +2084,13 @@
         aim.x = bw / 2 - px;
         aim.y = bh / 2 - py;
       }
+      /* ⚠️ раскодировать картинки сцены ЗАРАНЕЕ (24.07): секция стартует
+         в display:none и до первого показа Chrome не разворачивает webp
+         в битмап — первые кадры полёта уходили на распаковку двух картинок
+         по полмегабайта, и начало смотрелось подтормаживающим. */
+      [].forEach.call(sec.querySelectorAll('.bw-img'), function(im){
+        if (im.decode) im.decode().catch(function(){});
+      });
       aimHole();
       if (wimg && !wimg.complete)
         wimg.addEventListener('load', function(){ aimHole(); ScrollTrigger.refresh(); }, {once: true});
@@ -2084,9 +2105,16 @@
          свайпа там пролетает несколько экранов за раз, и короткий пин
          проскакивался целиком вместе с галереей (жалоба 24.07). */
       var touch = matchMedia('(hover: none), (max-aspect-ratio: 4/5)').matches;
+      /* ⚠️ pinType 'transform' на телефоне (24.07): по умолчанию закреплённый
+         блок переводится в position:fixed, и во время инерционного свайпа
+         браузер успевает показать кадр, где его уже нет на месте — та самая
+         белая вспышка. С transform блок остаётся в потоке и просто сдвигается.
+         anticipatePin — закрепляет чуть заранее, иначе на резком свайпе
+         прокрутка перескакивает границу пина рывком. */
       var tl = gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top',
         end: touch ? '+=360%' : '+=260%',
         scrub: touch ? 1 : .7, pin: true, invalidateOnRefresh: true,
+        pinType: touch ? 'transform' : 'fixed', anticipatePin: 1,
         onUpdate: function(self){
           var f = self.progress > .2;
           if (f !== flying){ flying = f; sec.classList.toggle('flying', f); }
@@ -2101,7 +2129,13 @@
          Теперь блок читается с того момента, как показался край секции.
          TAIL — стоянка в конце: галерея уже собрана и просто стоит, пока
          не долистаешь. Без неё резкий свайп на телефоне пролетал её насквозь. */
-      var HOLD = .18, TAIL = .18, SPAN = 1 - HOLD - TAIL;
+      /* ⚠️ выдержку считаем в ЭКРАНАХ, а не в процентах таймлайна (24.07):
+         дистанция пина на телефоне длиннее, и те же 18% превращались там в
+         две трети экрана прокрутки, где не двигается ничего — это и читалось
+         как «первые цветы листаются заторможенно». Держим ~0.36 экрана на
+         обеих раскладках. Хвост оставляем длинным: он и не даёт пролистать
+         галерею свайпом. */
+      var HOLD = touch ? .10 : .14, TAIL = .18, SPAN = 1 - HOLD - TAIL;
       var at = function(p){ return HOLD + p * SPAN; };   /* позиция на таймлайне */
       var du = function(d){ return d * SPAN; };          /* длительность */
       /* ⚠️ пустышка на всю длину: GSAP считает длительность таймлайна по
@@ -2413,6 +2447,12 @@
           '#roomLoop{opacity:1 !important;z-index:2}#cv{opacity:0 !important}'
         : '');
     document.head.appendChild(shotCss);
+    /* ⚠️ галерее мало CSS-переопределения: рендер WebGL включается по ИНЛАЙНОВОЙ
+       прозрачности .bw-gal (её ставит GSAP), иначе карусель осталась бы пустой */
+    if (qs.get('shot') === 'gallery') addEventListener('load', function(){
+      var g = document.querySelector('.bw-gal');
+      if (g) g.style.opacity = 1;
+    }, {once: true});
   }
   /* Примерка шрифтов (файлы в fonts-preview/):
        ?font=amb|igr|vag|bups — текстовый шрифт (Yeseva/Caveat у своих элементов остаются);
